@@ -1,192 +1,121 @@
-### Backend
+# Backend
 
-## Commandes utiles
-*Pour les commandes Gradle et Docker, il faut être dans la racine du backend.*
+## Sommaire
 
-<br>
+- [Backend](#backend)
+  - [Sommaire](#sommaire)
+  - [Commandes utiles (Cheatsheet)](#commandes-utiles-cheatsheet)
+    - [Gradle](#gradle)
+    - [Docker](#docker)
+  - [Procedure de lancement en local](#procedure-de-lancement-en-local)
+    - [Etapes](#etapes)
 
-**Supprimer le répertoire build**
-```sh
-./gradlew clean
-```
-*Peut-être utile lorsque les changements ne semblent pas être reconnus.*
-
-**Nettoyer et construire l'application en ignorant les tests**
-```sh
-./gradlew clean build -x test
-```
-
-**Build l'application**
-```sh
-./gradlew build
-```
-
-**Lancer l'application**
-```sh
-./gradlew bootRun
-```
-
-**Lancer les tests**
-```sh
-./gradlew test
-```
-<br>
-
-## Commandes Docker & Procédure de lancement en local
-Vous pourrez vous référez aux étapes numérotées ci-dessous.
 
 <br>
 
-**Construire l'image Docker**
-```sh
-docker build -t image-name .
-```
-1. Étape :
-```sh
-docker build -t image-cinetour-backend .
-```
-<br>
+## Commandes utiles (Cheatsheet)
+Ces commandes sont utiles pour des opérations courantes liées au backend. Elles doivent être exécutées depuis la racine du backend.
 
-**Créer les conteneurs et construire les images à partir de Docker Compose**
-```sh
-docker compose up --build
-```
+### Gradle
 
- 2. Étape :
-```sh
-docker compose -p cinetour up --build
-```
-<br>
+- **Supprimer le répertoire `build`**  
+  Utile lorsque les changements ne semblent pas être reconnus.
+  ```sh
+  ./gradlew clean
+  ```
 
-**Lister les conteneurs Docker Compose**
-```sh
-docker compose ps
-```
+- **Nettoyer et construire le backend en ignorant les tests**  
+  ```sh
+  ./gradlew clean build -x test
+  ```
 
- 3. Étape :
-```sh
-docker compose -p cinetour ps
-```
-<br>
+- **Construire le backend**  
+  ```sh
+  ./gradlew build
+  ```
 
-**Note : La base de données plante souvent la première fois, je ne sais pas encore pourquoi, il faut donc forcer le redémarrage :**
+- **Lancer le backend**  
+  ```sh
+  ./gradlew bootRun
+  ```
 
-**Redémarrer le conteneur MySQL**
- 
- 4. Étape :
-```sh
-docker compose -p cinetour up --force-recreate mysql
-```
+- **Lancer les tests**  
+  ```sh
+  ./gradlew test
+  ```
 
-<br>
+### Docker
 
-**Entrer dans le conteneur MySQL**
-```sh
-docker exec -it container_name bash
-```
- 5. Étape
-```sh
-> Récupérer le nom du conteneur MySQL
-docker compose -p cinetour ps
+- **Lister les conteneurs Docker Compose**  
+  ```sh
+  docker compose ps
+  ```
 
-> Rentrer dans le conteneur MySQL
-docker exec -it cinetour-mysql-1 bash
-```
+- **Supprimer une image Docker**  
+  Exemple :
+  ```sh
+  docker image rm -f image-cinetour-backend
+  ```
 
-<br>
+- **Arrêter et supprimer les conteneurs, réseaux, volumes et images**  
+  Exemple :
+  ```sh
+  docker compose -p cinetour down --volumes --rmi all
+  ```
 
-*Autres commandes Docker*
+- **Voir les logs d'un conteneur**  
+  ```sh
+  docker compose logs cinetour-mysql-1
+  ```
 
-**Supprimer l'image Docker**
-```sh
-docker image rm -f image-name .
-```
-Exemple :
-```shd
-docker image rm -f image-cinetour-backend
-```
+- **Démarrer et arrêter les conteneurs tout en conservant l'état de la base de données**  
+  ```sh
+  docker compose -p cinetour start
+  docker compose -p cinetour stop
+  ```
 
 <br>
 
-**Arrêter et supprimer les conteneurs, réseaux, volumes et images**
-```sh
-docker compose down --volumes --rmi all
-```
+## Procedure de lancement en local
 
-Exemple :
-```sh
-docker compose -p cinetour down --volumes --rmi all
-```
+Suivez les étapes numérotées ci-dessous pour lancer le backend localement avec Docker.
 
-<br>
+### Etapes
 
-**Voir logs d'un conteneur**
-```sh
-docker compose logs cinetour-mysql-1 
-```
+1. **Nettoyer et construire le backend**  
+   ```sh
+   ./gradlew clean build
+   ```
 
-<br>
+2. **Construire l'image Docker**  
+   Exemple :
+   ```sh
+   docker build -t image-cinetour-backend .
+   ```
 
-**Démarrer et arrêter les conteneurs (conserve l'état de la BD)**
-```sh
-docker compose -p cinetour start
-docker compose -p cinetour stop
-```
+3. **Créer les conteneurs et construire les images à partir de Docker Compose**  
+   Exemple :
+   ```sh
+   docker compose -p cinetour up --build
+   ```
 
-<br>
+   > Note : La base de données peut planter la première fois. Si c'est le cas, passez à l'étape 4, sinon passez directement à l'étape 5.
 
-## Commandes MySQL
+4. **Redémarrer le conteneur MySQL (facultatif)**  
+   ```sh
+   docker compose -p cinetour up --force-recreate mysql
+   ```
 
-**Créer un utilisateur dans la base de données**
+   > Note : Si vous souhaitez accéder à la base de données avec un client plutôt qu'en lignes de commandes, suivez les étapes suivantes.
 
- 6. Étape :
-```sql
-CREATE USER 'dbuser'@'%' IDENTIFIED BY 'dbpassword';
-GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@'%' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-```
+5. **Récupérer l'IP du conteneur MySQL**  
+   ```sh
+   docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cinetour-mysql-1
+   ```
 
-<br>
+6. **Configurer la connexion avec un client lourd**  
+    Utilisez les informations d'utilisateur et de mot de passe définies dans le `docker-compose.yml`.
 
-**Redémarrer les services Docker Compose**
+    ![configbd](readme_files/db_config.png)
 
- 7. Étape :
-```sh
-docker compose restart
-```
-
-<br>
-
-**Lister les utilisateurs MySQL**
-
- 8. Étape :
-```sql
-SELECT User FROM mysql.user;
-```
-
-<br>
-
-**Note : La base de données peut prendre du temps à démarrer. Si vous voyez cette erreur, ne vous inquiétez pas :**
-```
-ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
-```
-
-<br>
-
-# Se connecter avec un client lourd
-**Récupérer l'ip du conteneur MySQL**
-
- 9. Étape :
-```sh
-docker inspect \\n  -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' backend-mysql-1
-```
-
-<br>
-
-**Configurer la connexion**
-
-*User et password dans le docker-compose*
-
- 10. Étape :
-
-![configbd](readme_files/db_config.png)
+---
