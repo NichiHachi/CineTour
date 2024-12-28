@@ -80,41 +80,41 @@ Ces commandes sont utiles pour des opérations courantes liées au backend. Elle
 
 Suivez les étapes numérotées ci-dessous pour lancer le backend localement avec Docker.
 
+> Pré-requis :
+Avant toute modification ou redémarrage, si des conteneurs, réseaux ou volumes existent déjà, il est recommandé de les nettoyer pour éviter les conflits. Utilisez la commande suivante :
+   
+```sh
+docker compose -p cinetour down --volumes --rmi all
+```
+
 ### Etapes
 
 1. **Nettoyer et construire le backend**  
-   ```sh
-   ./gradlew clean build
-   ```
+  
+    Cette étape génère les fichiers nécessaires à l'exécution du backend en nettoyant d'abord les artefacts existants.
+    
+    ```sh
+    ./gradlew clean build
+    ```
 
-2. **Construire l'image Docker**  
-   Exemple :
-   ```sh
-   docker build -t image-cinetour-backend .
-   ```
+2. **Créer les conteneurs et construire les images avec Docker Compose**
 
-3. **Créer les conteneurs et construire les images à partir de Docker Compose**  
-   Exemple :
-   ```sh
-   docker compose -p cinetour up --build
-   ```
+    Cette commande crée les conteneurs nécessaires à l'exécution du backend et de la base de données, en générant les images Docker si besoin.
 
-   > Note : La base de données peut planter la première fois. Si c'est le cas, passez à l'étape 4, sinon passez directement à l'étape 5.
+    Exemple :
+    ```sh
+    docker compose -p cinetour up --build
+    ```
 
-4. **Redémarrer le conteneur MySQL (facultatif)**  
-   ```sh
-   docker compose -p cinetour up --force-recreate mysql
-   ```
+    > Note : Si vous souhaitez accéder à la base de données avec un client plutôt qu'en lignes de commandes, suivez les étapes suivantes.
 
-   > Note : Si vous souhaitez accéder à la base de données avec un client plutôt qu'en lignes de commandes, suivez les étapes suivantes.
-
-5. **Récupérer l'IP du conteneur MySQL**  
+3. **Récupérer l'IP du conteneur MySQL**  
    ```sh
    docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cinetour-mysql-1
    ```
 
-6. **Configurer la connexion avec un client lourd**  
-    Utilisez les informations d'utilisateur et de mot de passe définies dans le `docker-compose.yml`.
+4. **Configurer la connexion avec un client lourd**  
+    Utilisez les informations d'utilisateur et de mot de passe définies dans le `docker-compose.yml` ainsi que l'IP récupérée à l'étape 3.
 
     ![configbd](readme_files/db_config.png)
 
