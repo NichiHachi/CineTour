@@ -1,21 +1,4 @@
 services:
-  mysql:
-    image: mysql:5.7
-    ports:
-      - "3307:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: reviewmate
-      MYSQL_USER: dbuser
-      MYSQL_PASSWORD: dbpassword
-    volumes:
-      - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend:
     build:
       context: .
@@ -23,11 +6,28 @@ services:
     ports:
       - "9001:8080"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/reviewmate
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cinetour
       SPRING_DATASOURCE_USERNAME: dbuser
       SPRING_DATASOURCE_PASSWORD: dbpassword
+  mysql:
+    image: mysql:8.0
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cinetour
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: dbpassword
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
 
 volumes:
   mysql-data:
