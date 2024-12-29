@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9001:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cinetour
+      SPRING_DATASOURCE_USERNAME: dbuser
+      SPRING_DATASOURCE_PASSWORD: dbpassword
+  mysql:
+    image: mysql:8.0
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cinetour
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: dbpassword
+    healthcheck:
+      test: ["CMD", "mysql", "-u", "dbuser", "-pdbpassword", "-e", "USE cinetour;"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+volumes:
+  mysql-data:
