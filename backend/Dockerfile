@@ -2,8 +2,14 @@ FROM eclipse-temurin:23-jdk
 
 WORKDIR /my-project
 
-# Copy the project files
-COPY . .
+# Copy the Gradle wrapper and build files
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+
+# Copy the source code
+COPY src src
 
 # Run Gradle commands to build the project
 RUN chmod +x ./gradlew && ./gradlew clean build -x test
@@ -11,8 +17,9 @@ RUN chmod +x ./gradlew && ./gradlew clean build -x test
 # Copy the generated JAR file
 COPY build/libs/*.jar app.jar
 
-# Expose the application port (uncomment if needed)
-# EXPOSE 8080
+# Copy the entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Set the entry point to run the JAR file
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Set the entry point to run the entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]
