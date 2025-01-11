@@ -1,4 +1,12 @@
 services:
+  selenium-chrome:
+    image: selenium/standalone-chrome:latest
+    container_name: selenium-chrome
+    ports:
+      - "4444:4444"
+    shm_size: 2gb
+    environment:
+      - SE_ENABLE_TRACING=false
   backend:
     build:
       context: .
@@ -8,11 +16,14 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      selenium-chrome: 
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-default}
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cinetour
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=dbpassword
+      - SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub
   mysql:
     image: mysql:8.0
     restart: always
