@@ -24,7 +24,7 @@ public class ImdbMoviesService {
     @Autowired
     private MovieRepository movieRepository;
 
-    public void downloadFile(String filePath) throws Exception {
+    private void downloadFile(String filePath) throws Exception {
         System.out.println("Downloading file from " + imdbTitleBasicsUrl + " to " + filePath);
         URL url = new URI(imdbTitleBasicsUrl).toURL();
         try (InputStream in = url.openStream();
@@ -37,7 +37,7 @@ public class ImdbMoviesService {
         }
     }
 
-    public void extractGzFile(String gzFilePath, String tsvFilePath) throws IOException {
+    private void extractGzFile(String gzFilePath, String tsvFilePath) throws IOException {
         try (GZIPInputStream gzipIn = new GZIPInputStream(new FileInputStream(gzFilePath));
                 OutputStream out = new FileOutputStream(tsvFilePath)) {
             byte[] buffer = new byte[1024];
@@ -48,7 +48,7 @@ public class ImdbMoviesService {
         }
     }
 
-    public List<Movie> parseTsvFile(String tsvFilePath) throws IOException {
+    private List<Movie> parseTsvFile(String tsvFilePath) throws IOException {
         List<Movie> movies = new ArrayList<>();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(tsvFilePath))) {
             // Skip header
@@ -73,20 +73,25 @@ public class ImdbMoviesService {
         return movies;
     }
 
-    public void importMovies(String gzFilePath, String tsvFilePath) throws IOException {
-        // File operations without transaction
+    public List<Movie> getMovies(String gzFilePath, String tsvFilePath) throws IOException {
         try {
             downloadFile(gzFilePath);
         } catch (Exception e) {
             System.out.println("Failed to download file: " + e.getMessage());
-            return;
+            return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
         extractGzFile(gzFilePath, tsvFilePath);
         System.out.println("Parsing IMDb dataset");
-        List<Movie> movies = parseTsvFile(tsvFilePath);
+        return parseTsvFile(tsvFilePath);
+    }
 
-        // Database operation with transaction
+    @Transactional(readOnly = true)
+    public List<Movie> getAllMovies() {
+        return movieRepository.findAll();
+    }
+
+    public void importMovies(List<Movie> movies) {
         saveMovies(movies);
     }
 

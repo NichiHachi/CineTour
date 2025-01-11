@@ -29,7 +29,11 @@ public class MovieService {
         return repository.findById(id).orElse(null);
     }
 
-    public Movie getMovieByTitle(String name) {
+    public Movie getMovieByImdbId(String id) {
+        return repository.findByIdImdb(id);
+    }
+
+    public List<Movie> getMoviesByTitle(String name) {
         return repository.findByTitle(name);
     }
 

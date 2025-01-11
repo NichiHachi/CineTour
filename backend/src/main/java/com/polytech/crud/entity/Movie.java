@@ -16,7 +16,6 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "movies")
 public class Movie {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
