@@ -63,6 +63,21 @@ public class ImdbMoviesService {
                         title = StringEscapeUtils.escapeCsv(title);
                         movie.setTitle(title);
                         movie.setIdImdb(fields[0]);
+                        if (!fields[5].equals("\\N")) {
+                            movie.setReleaseYear(Integer.parseInt(fields[5]));
+                        } else {
+                            movie.setReleaseYear(null);
+                        }
+                        if (!fields[7].equals("\\N")) {
+                            movie.setRuntimeMinutes(Integer.parseInt(fields[7]));
+                        } else {
+                            movie.setRuntimeMinutes(null);
+                        }
+                        if (!fields[8].equals("\\N")) {
+                            movie.setGenres(fields[8]);
+                        } else {
+                            movie.setGenres(null);
+                        }
                         movies.add(movie);
                     }
                 } catch (Exception e) {

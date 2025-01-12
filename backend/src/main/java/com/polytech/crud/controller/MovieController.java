@@ -58,7 +58,7 @@ public class MovieController {
      */
     @GetMapping("/movies")
     public List<Movie> findAllMovies() {
-        List<Movie> movies = service.getMovies();
+        List<Movie> movies = service.getAllMovies();
         if (movies.isEmpty()) {
             logger.info("No movies found in database");
         }
