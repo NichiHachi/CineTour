@@ -155,30 +155,56 @@ public class ImdbLocationsService {
     }
 
     /**
-     * Import filming locations for a movie from IMDb and save them to the database.
-     * Checks if locations already exist in the database before importing (to avoid
-     * having to import them again).
+     * Imports filming locations for a movie from IMDb and saves them to the
+     * database.
      * 
-     * @param movieIdImdb String IMDb ID of the movie
-     * @throws Exception
+     * This method performs the following steps:
+     * 1. Validates if the movie exists in the database
+     * 2. Checks if locations have already been searched for this movie (using
+     * locationsChecked flag)
+     * 3. If not previously checked:
+     * - Scrapes locations from IMDb using Selenium
+     * - Marks the movie as checked in database
+     * - If locations are found, saves them to database
+     * 
+     * The method is idempotent - multiple calls with the same movieIdImdb will only
+     * scrape locations once. Subsequent calls will be skipped if the movie is
+     * marked
+     * as checked or if locations already exist.
+     * 
+     * @param movieIdImdb The IMDb ID of the movie (e.g., "tt0068646" for The
+     *                    Godfather)
+     * @throws Exception If an error occurs during web scraping or database
+     *                   operations
      */
     @Transactional
     public void importLocations(String movieIdImdb) throws Exception {
-        logger.info("Starting import for movieIdImdb: {}", movieIdImdb);
-
-        if (!locationRepository.findByIdImdb(movieIdImdb).isEmpty()) {
-            logger.info("Locations already exist for movie {} in database, skipping import", movieIdImdb);
+        Movie movie = movieRepository.findByIdImdb(movieIdImdb);
+        if (movie == null) {
+            logger.info("Movie {} not found in database", movieIdImdb);
             return;
         }
 
-        List<Location> locations = scrapeLocations(movieIdImdb);
-        if (locations.isEmpty()) {
-            logger.info("No locations found to import for movie {}", movieIdImdb);
+        if (Boolean.TRUE.equals(movie.getLocationsChecked())) {
+            logger.info("Movie {} location(s) (if they exist) has been already searched, skipping import", movieIdImdb);
             return;
         }
 
-        locationRepository.saveAll(locations);
-        logger.info("Successfully imported {} locations for movie {}", locations.size(), movieIdImdb);
+        try {
+            List<Location> locations = scrapeLocations(movieIdImdb);
+            movie.setLocationsChecked(true); // Mark as checked regardless of result
+            movieRepository.save(movie);
+
+            if (locations.isEmpty()) {
+                logger.info("No locations found for movie {}", movieIdImdb);
+                return;
+            }
+            locationRepository.saveAll(locations);
+            logger.info("Successfully imported {} locations for movie {}", locations.size(), movieIdImdb);
+        } catch (Exception e) {
+            logger.error("Failed to import locations for movie {}: {}", movieIdImdb, e.getMessage());
+            throw e;
+        }
     }
 
     /**
@@ -235,9 +261,16 @@ public class ImdbLocationsService {
      */
     @Transactional(readOnly = true)
     public List<Location> getLocationsById(Long movieId) {
-        return locationRepository.findById(movieId)
-                .map(Collections::singletonList)
-                .orElse(Collections.emptyList());
+        Movie movie = movieRepository.findById(movieId.intValue())
+                .orElse(null);
+
+        if (movie == null) {
+            logger.info("No movie found for ID: {}", movieId);
+            return Collections.emptyList();
+        }
+
+        List<Location> locations = locationRepository.findByIdImdb(movie.getIdImdb());
+        return locations;
     }
 
     /**
@@ -259,7 +292,7 @@ public class ImdbLocationsService {
 
         for (Movie movie : movies) {
             List<Location> locations = locationRepository.findByIdImdb(movie.getIdImdb());
-            if (locations.isEmpty()) {
+            if (locations.isEmpty() && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
                 try {
                     importLocations(movie.getIdImdb());
                     locations = locationRepository.findByIdImdb(movie.getIdImdb());
@@ -275,5 +308,10 @@ public class ImdbLocationsService {
     @Transactional(readOnly = true)
     public List<Movie> getMovieByTitle(String title) {
         return movieRepository.findByTitle(title);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Location> getAllLocations() {
+        return locationRepository.findAll();
     }
 }

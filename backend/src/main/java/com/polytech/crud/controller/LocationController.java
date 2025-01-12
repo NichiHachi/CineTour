@@ -26,7 +26,7 @@ public class LocationController {
 
     /**
      * Method GET with a path variable.
-     * Get locations by IMDB ID from the database.
+     * Get locations by IMDB movie ID from the database.
      * 
      * @param idImdb String
      * @return
@@ -44,7 +44,7 @@ public class LocationController {
 
     /**
      * Method GET with a path variable.
-     * Get locations by ID from the database.
+     * Get locations by movie ID from the database.
      * 
      * @param id Long
      * @return
@@ -55,7 +55,7 @@ public class LocationController {
 
         List<Location> locations = imdbLocationsService.getLocationsById(id);
         if (locations.isEmpty()) {
-            logger.info("No locations found for IMDB ID: {}", id);
+            logger.info("No locations found for ID: {}", id);
         }
         return locations;
     }
@@ -99,4 +99,18 @@ public class LocationController {
         return allLocations;
     }
 
+    /**
+     * Method GET.
+     * Get all locations from the database.
+     * 
+     * @return
+     */
+    @GetMapping("/locations")
+    public List<Location> findAllLocations() {
+        List<Location> locations = imdbLocationsService.getAllLocations();
+        if (locations.isEmpty()) {
+            logger.info("No locations found in database");
+        }
+        return locations;
+    }
 }
