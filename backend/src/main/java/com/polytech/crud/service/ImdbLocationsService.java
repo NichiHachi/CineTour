@@ -291,6 +291,7 @@ public class ImdbLocationsService {
         List<Location> allLocations = new ArrayList<>();
 
         for (Movie movie : movies) {
+            incrementLocationCount(movie);
             List<Location> locations = locationRepository.findByIdImdb(movie.getIdImdb());
             if (locations.isEmpty() && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
                 try {
@@ -303,6 +304,13 @@ public class ImdbLocationsService {
             allLocations.addAll(locations);
         }
         return allLocations;
+    }
+
+    @Transactional
+    private void incrementLocationCount(Movie movie) {
+        movie.setLocationSearchCount(movie.getLocationSearchCount() + 1);
+        movieRepository.save(movie);
+        logger.debug("Incremented search locations count for movie {} to {}", movie.getIdImdb(), movie.getLocationSearchCount());
     }
 
     @Transactional(readOnly = true)

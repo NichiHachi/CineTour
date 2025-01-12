@@ -112,6 +112,7 @@ public class MovieController {
         if (movies.isEmpty()) {
             logger.info("No movies found for title: {}", title);
         }
+        
         return movies;
     }
 

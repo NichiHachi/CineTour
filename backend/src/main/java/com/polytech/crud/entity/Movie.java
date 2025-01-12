@@ -29,4 +29,6 @@ public class Movie {
     @Column(nullable = true)
     private String genres;
     private Boolean locationsChecked = false;
+    private int locationSearchCount = 0;
+    private int movieSearchCount = 0;
 }

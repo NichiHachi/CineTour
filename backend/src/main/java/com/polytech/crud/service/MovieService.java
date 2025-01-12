@@ -2,14 +2,19 @@ package com.polytech.crud.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.polytech.crud.entity.Movie;
 import com.polytech.crud.repository.MovieRepository;
 
 @Service
 public class MovieService {
+    private static final Logger logger = LoggerFactory.getLogger(ImdbLocationsService.class);
+
     @Autowired
     private MovieRepository repository;
 
@@ -33,8 +38,21 @@ public class MovieService {
         return repository.findByIdImdb(id);
     }
 
-    public List<Movie> getMoviesByTitle(String name) {
-        return repository.findByTitle(name);
+    public List<Movie> getMoviesByTitle(String title) {
+        List<Movie> movies = repository.findByTitle(title);
+        incrementMovieCount(movies);
+        return movies;
+    }
+
+    @Transactional
+    private void incrementMovieCount(List<Movie> movies) {
+        for (Movie movie : movies) {
+            movie.setMovieSearchCount(movie.getMovieSearchCount() + 1);
+            repository.save(movie);
+            logger.debug("Incremented search locations count for movie {} to {}", 
+                movie.getIdImdb(),
+                movie.getLocationSearchCount());
+        }
     }
 
     public String deleteMovieById(int id) {

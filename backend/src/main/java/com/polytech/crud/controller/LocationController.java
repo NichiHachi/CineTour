@@ -1,13 +1,11 @@
 package com.polytech.crud.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.Location;
-import com.polytech.crud.entity.Movie;
 import com.polytech.crud.service.ImdbLocationsService;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,31 +70,12 @@ public class LocationController {
     public List<Location> findMoviesByLocations(@PathVariable String title) {
         logger.info("Searching locations for title: {}", title);
 
-        List<Location> allLocations = new ArrayList<>();
-
-        List<Movie> movies = imdbLocationsService.getMovieByTitle(title);
-        if (movies.isEmpty()) {
-            logger.info("Movie(s) not found in database: {}", title);
-            return allLocations;
-        }
-
-        for (Movie movie : movies) {
-            List<Location> locations = imdbLocationsService.getLocationsByImdbId(movie.getIdImdb());
-            if (locations.isEmpty()) {
-                try {
-                    imdbLocationsService.importLocations(movie.getIdImdb());
-                    locations = imdbLocationsService.getLocationsByImdbId(movie.getIdImdb());
-                } catch (Exception e) {
-                    logger.error("Error importing locations for movie {}: {}", movie.getIdImdb(), e);
-                }
-            }
-            allLocations.addAll(locations);
-        }
-
-        if (allLocations.isEmpty()) {
+        List<Location> locations = imdbLocationsService.getLocationsByTitle(title);
+        if (locations.isEmpty()) {
             logger.info("No locations found for title: {}", title);
         }
-        return allLocations;
+
+        return locations;
     }
 
     /**
