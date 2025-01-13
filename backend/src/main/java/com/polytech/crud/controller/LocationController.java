@@ -3,6 +3,7 @@ package com.polytech.crud.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.Location;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
+@CrossOrigin(origins = "http://localhost.localdomain:3000/")
 public class LocationController {
 
     private static final Logger logger = LoggerFactory.getLogger(ImdbLocationsService.class);
@@ -25,7 +27,7 @@ public class LocationController {
     /**
      * Method GET with a path variable.
      * Get locations by IMDB movie ID from the database.
-     * 
+     *
      * @param idImdb String
      * @return
      */
@@ -43,7 +45,7 @@ public class LocationController {
     /**
      * Method GET with a path variable.
      * Get locations by movie ID from the database.
-     * 
+     *
      * @param id Long
      * @return
      */
@@ -62,7 +64,7 @@ public class LocationController {
      * Method GET with a path variable.
      * Get locations by title from the database, if not found, import locations from
      * IMDB if they exist.
-     * 
+     *
      * @param title String
      * @return
      */
@@ -81,7 +83,7 @@ public class LocationController {
     /**
      * Method GET.
      * Get all locations from the database.
-     * 
+     *
      * @return
      */
     @GetMapping("/locations")

@@ -31,16 +31,22 @@ function SearchBar({ placeholder, data }) {
   const searchRef = useRef(null)
   const resultsRef = useRef(null)
 
-  const handleFilter = (event) => {
+  const handleFilter = async (event) => {
     const searchWord = event.target.value
-    const newFilter = data.filter((value) => {
-      return value.title.toLowerCase().includes(searchWord.toLowerCase())
-    })
 
-    if (searchWord === '') {
+    if (searchWord.length == 0) {
       setFilteredData([])
     } else {
-      setFilteredData(newFilter)
+      try {
+        const response = await fetch(
+          `http://localhost:9001/search?title=${searchWord}`
+        )
+        const data = await response.json()
+        console.log('API Response:', data)
+        setFilteredData(data)
+      } catch (error) {
+        console.error('Error searching films:', error)
+      }
     }
   }
 
@@ -65,6 +71,7 @@ function SearchBar({ placeholder, data }) {
         <div className="dataResult" ref={resultsRef}>
           <div className="dataResult-content">
             {filteredData.slice(0, 5).map((value, key) => {
+              console.log('Mapping value:', value)
               return (
                 <a className="dataItem" href={value.link} key={key}>
                   <p>{value.title}</p>

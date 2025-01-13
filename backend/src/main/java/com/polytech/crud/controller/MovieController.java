@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import com.polytech.crud.entity.Movie;
 import com.polytech.crud.service.MovieService;
 
 @RestController
+@CrossOrigin(origins = "http://localhost.localdomain:3000/")
 public class MovieController {
 
     private static final Logger logger = LoggerFactory.getLogger(MovieController.class);
@@ -30,7 +32,7 @@ public class MovieController {
     /**
      * Method POST with a JSON body.
      * Add a movie to the database.
-     * 
+     *
      * @param movie JSON Body
      * @return
      */
@@ -42,7 +44,7 @@ public class MovieController {
     /**
      * Method POST with a JSON body.
      * Add a list of movies to the database.
-     * 
+     *
      * @param movies JSON Body
      * @return
      */
@@ -54,7 +56,7 @@ public class MovieController {
     /**
      * Method GET.
      * Get all movies from the database.
-     * 
+     *
      * @return
      */
     @GetMapping("/movies")
@@ -69,7 +71,7 @@ public class MovieController {
     /**
      * Method GET with a path variable.
      * Get a movie by ID from the database.
-     * 
+     *
      * @param id int
      * @return
      */
@@ -85,7 +87,7 @@ public class MovieController {
     /**
      * Method GET with a path variable.
      * Get a movie by IMDB ID from the database.
-     * 
+     *
      * @param id String
      * @return
      */
@@ -101,7 +103,7 @@ public class MovieController {
     /**
      * Method GET with a path variable.
      * Get movies by title from the database.
-     * 
+     *
      * @param title String
      * @return
      */
@@ -119,7 +121,7 @@ public class MovieController {
 
     /**
      * Search movies by title (case insensitive) ordered by popularity.
-     * 
+     *
      * @param title Search term
      * @return List of movies matching the search term, ordered by search counts
      */
@@ -132,7 +134,7 @@ public class MovieController {
     /**
      * Method PUT with a JSON body.
      * Update a movie in the database.
-     * 
+     *
      * @param movie JSON Body
      * @return ResponseEntity<Movie> A response entity containing the updated movie
      *         or an error message
@@ -151,7 +153,7 @@ public class MovieController {
     /**
      * Method DELETE with a path variable.
      * Delete a movie from the database.
-     * 
+     *
      * @param id int
      * @return ResponseEntity<String> A response entity containing a success or
      *         error message
