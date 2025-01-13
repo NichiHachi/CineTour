@@ -55,6 +55,10 @@ public class MovieService {
         }
     }
 
+    public List<Movie> searchMoviesOrderByPopularity(String query) {
+        return repository.searchByTitleContainingOrderBySearchCount(query);
+    }
+
     public String deleteMovieById(int id) {
         try {
             repository.deleteById(id);

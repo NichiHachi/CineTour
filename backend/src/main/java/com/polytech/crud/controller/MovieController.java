@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.Movie;
@@ -112,8 +113,20 @@ public class MovieController {
         if (movies.isEmpty()) {
             logger.info("No movies found for title: {}", title);
         }
-        
+
         return movies;
+    }
+
+    /**
+     * Search movies by title (case insensitive) ordered by popularity.
+     * 
+     * @param title Search term
+     * @return List of movies matching the search term, ordered by search counts
+     */
+    @GetMapping("/search")
+    public List<Movie> searchMovies(@RequestParam String title) {
+        logger.info("Searching movies with title: {}", title);
+        return service.searchMoviesOrderByPopularity(title);
     }
 
     /**
