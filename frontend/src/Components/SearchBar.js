@@ -39,7 +39,7 @@ function SearchBar({ placeholder, data }) {
     } else {
       try {
         const response = await fetch(
-          `http://localhost:9001/search?title=${searchWord}`
+          `/search?title=${searchWord}`
         )
         const data = await response.json()
         console.log('API Response:', data)

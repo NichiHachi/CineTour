@@ -3,7 +3,6 @@ package com.polytech.crud.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.Location;
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@CrossOrigin(origins = "http://localhost.localdomain:3000/")
 public class LocationController {
 
     private static final Logger logger = LoggerFactory.getLogger(ImdbLocationsService.class);
