@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:9001",
   "dependencies": {
     "bootstrap": "5.1",
     "cra-template": "1.2.0",
