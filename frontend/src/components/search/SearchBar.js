@@ -1,30 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import './SearchBar.css'
 import SearchIcon from '@mui/icons-material/Search'
-
-const useMousePosition = (ref, dependency) => {
-  useEffect(() => {
-    const element = ref.current
-
-    const handleMouseMove = (e) => {
-      const rect = element.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      element.style.setProperty('--mouse-x', `${x}px`)
-      element.style.setProperty('--mouse-y', `${y}px`)
-    }
-
-    if (element) {
-      element.addEventListener('mousemove', handleMouseMove)
-    }
-
-    return () => {
-      if (element) {
-        element.removeEventListener('mousemove', handleMouseMove)
-      }
-    }
-  }, [ref, dependency])
-}
+import useMousePosition from '../../utils/UseMousePosition'
 
 function SearchBar({ placeholder, data }) {
   const [filteredData, setFilteredData] = useState([])
@@ -34,7 +11,7 @@ function SearchBar({ placeholder, data }) {
   const handleFilter = async (event) => {
     const searchWord = event.target.value
 
-    if (searchWord.length == 0) {
+    if (searchWord.length === 0) {
       setFilteredData([])
     } else {
       try {
@@ -73,7 +50,11 @@ function SearchBar({ placeholder, data }) {
             {filteredData.slice(0, 5).map((value, key) => {
               console.log('Mapping value:', value)
               return (
-                <a className="dataItem" href={value.link} key={key}>
+                <a
+                  className="dataItem"
+                  href={'http://localhost:9001/movie/' + value.title}
+                  key={key}
+                >
                   <p>{value.title}</p>
                 </a>
               )

@@ -1,11 +1,18 @@
 import React from 'react'
-import SearchBar from './Components/SearchBar'
+import SearchBar from './components/search/SearchBar.js'
+
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 function App() {
   return (
-    <div className="App">
-      <SearchBar placeholder={'Search for a film'} />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/search"
+          element={<SearchBar placeholder="Search for a movie" />}
+        />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
