@@ -2,7 +2,10 @@ package com.polytech.crud.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,12 +21,23 @@ import com.polytech.crud.service.UserService;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
     @Autowired
     private UserService service;
 
     @PostMapping("/add")
     public User addUser(@RequestBody User user) {
-        return service.saveUser(user);
+        User newUser = new User();
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String encodedPassword = encoder.encode(user.getPassword());
+        logger.info("Encoded password: {} ", encodedPassword);
+        newUser.setUsername(user.getUsername());
+        newUser.setPassword(encodedPassword);
+        newUser.setEmail(user.getEmail());
+        logger.info("User added:  {}", newUser);
+        return service.saveUser(newUser);
     }
 
     @GetMapping("/all")

@@ -31,7 +31,7 @@ function App() {
         <ul>
           {users.map((user) => (
             <li key={user.id}>
-              {user.username} - {user.email}
+              {user.username} - {user.email} - {user.password}
             </li>
           ))}
         </ul>
