@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,19 +28,13 @@ public class UserController {
 
     @PostMapping("/add")
     public User addUser(@RequestBody User user) {
-        User newUser = new User();
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String encodedPassword = encoder.encode(user.getPassword());
-        logger.info("Encoded password: {} ", encodedPassword);
-        newUser.setUsername(user.getUsername());
-        newUser.setPassword(encodedPassword);
-        newUser.setEmail(user.getEmail());
-        logger.info("User added:  {}", newUser);
-        return service.saveUser(newUser);
+        logger.info("User added:  {}", user);
+        return service.saveUser(user);
     }
 
     @GetMapping("/all")
     public List<User> findAllUsers() {
+        logger.info("All users");
         return service.getAllUsers();
     }
 
@@ -50,7 +43,7 @@ public class UserController {
         return service.getUserById(id);
     }
 
-    @GetMapping("/username/{username}")
+    @GetMapping("/{username}")
     public User findUserByUsername(@PathVariable String username) {
         return service.getUserByUsername(username);
     }
@@ -63,5 +56,15 @@ public class UserController {
     @DeleteMapping("/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
         return service.deleteUserById(id);
+    }
+
+    @PostMapping("/isUserNotExist")
+    public Boolean isUserNotExist(@RequestBody User user) {
+        User existingUser = service.getUserByUsername(user.getUsername());
+        logger.info("User:  {}", user);
+        logger.info("Username:  {}", user.getUsername());
+        logger.info("User:  {}", existingUser);
+        logger.info("User exist:  {}", existingUser == null);
+        return existingUser == null;
     }
 }

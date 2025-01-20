@@ -32,4 +32,12 @@ export const addUser = async (user) => {
     }
 };
 
-// Ajoutez d'autres fonctions pour les autres endpoints si nécessaire
+export const isUsernameAvailable = async (user) => {
+    try {
+        const response = await axios.post(`/users/isUserNotExist`,  user );
+        return response.data;
+    } catch (error) {
+        console.error('Error checking username availability:', error);
+        throw error;
+    }
+}

@@ -1,21 +1,29 @@
 // frontend/src/AddUserForm.jsx
 import React, { useState } from "react";
-import { addUser } from "./api";
+import { addUser, isUsernameAvailable } from "./api";
 
 const AddUserForm = ({ onUserAdded }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [isNameAvailable, setIsNameAvailable] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const newUser = { username, password, email };
-      const addedUser = await addUser(newUser);
-      onUserAdded(addedUser);
-      setUsername("");
-      setPassword("");
-      setEmail("");
+      const available = await isUsernameAvailable(newUser);
+      setIsNameAvailable(available);
+      console.log("isNameAvailable:", available);
+      if (available) {
+        {
+          const addedUser = await addUser(newUser);
+          onUserAdded(addedUser);
+          setUsername("");
+          setPassword("");
+          setEmail("");
+        }
+      }
     } catch (error) {
       console.error("Error adding user:", error);
     }
@@ -32,6 +40,13 @@ const AddUserForm = ({ onUserAdded }) => {
           required
         />
       </div>
+      {!isNameAvailable && (
+        <div>
+          <p style={{ color: "red" }}>
+            Username is already taken. Please choose a different username.
+          </p>
+        </div>
+      )}
       <div>
         <label>Password:</label>
         <input

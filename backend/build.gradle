@@ -31,8 +31,6 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.30'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-
 
     // Java Persistence API
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
