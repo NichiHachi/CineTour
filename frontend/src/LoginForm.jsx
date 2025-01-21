@@ -1,19 +1,22 @@
 import React, { useState } from "react";
 import { correctPassword } from "./api";
+import { useHistory } from "react-router-dom";
 
 const LoginForm = ({ onUserAdded }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(true);
+  const history = useHistory();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const user = { username, password };
       const correct = await correctPassword(user);
-      if (correct) {
+      if (correct.username === user.username) {
         onUserAdded(correct);
         setIsPasswordCorrect(true);
+        history.push("/");
       } else {
         setIsPasswordCorrect(false);
       }
@@ -46,9 +49,7 @@ const LoginForm = ({ onUserAdded }) => {
         <button type="submit">Se connecter</button>
       </form>
       {isPasswordCorrect ? (
-        <div>
-          <p>Connecté</p>
-        </div>
+        <></>
       ) : (
         <div>
           <p style={{ color: "red" }}>
