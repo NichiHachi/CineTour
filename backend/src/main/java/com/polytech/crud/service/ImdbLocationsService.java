@@ -154,6 +154,37 @@ public class ImdbLocationsService {
         return locations;
     }
 
+    private String getMovieImage(String movieIdImdb) throws IOException {
+        String url = String.format(imdbLocationsUrl, movieIdImdb);
+        WebDriver driver = null;
+        String image = null;
+        try {
+            ChromeOptions options = new ChromeOptions();
+            options.addArguments("--headless", "--disable-gpu", "--no-sandbox");
+            options.addArguments("--window-size=1920,1080");
+            options.addArguments(
+                    "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
+
+            driver = new RemoteWebDriver(new URI(seleniumRemoteUrl).toURL(), options);
+            driver.get(url);
+
+            // Wait for content to load
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+            String pageSource = driver.getPageSource();
+            Document doc = Jsoup.parse(pageSource);
+            image = doc.select("img[class='ipc-image']").attr("src");
+
+        } catch (Exception e) {
+            logger.error("Failed to scrape image for movie {}: {}", movieIdImdb, e.getMessage(), e);
+            throw new IOException("Failed to scrape image", e);
+        } finally {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
+        return image;
+    }
+
     /**
      * Imports filming locations for a movie from IMDb and saves them to the
      * database.
@@ -193,6 +224,8 @@ public class ImdbLocationsService {
         try {
             List<Location> locations = scrapeLocations(movieIdImdb);
             movie.setLocationsChecked(true); // Mark as checked regardless of result
+            String image = getMovieImage(movieIdImdb);
+            movie.setImage(image);
             movieRepository.save(movie);
 
             if (locations.isEmpty()) {
