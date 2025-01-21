@@ -41,3 +41,13 @@ export const isUsernameAvailable = async (user) => {
         throw error;
     }
 }
+
+export const correctPassword = async (user) => {
+    try {
+        const response = await axios.post(`/users/login`, user);
+        return response.data;
+    } catch (error) {
+        console.error('Error checking password:', error);
+        throw error;
+    }
+}

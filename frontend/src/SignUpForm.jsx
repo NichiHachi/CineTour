@@ -1,8 +1,7 @@
-// frontend/src/AddUserForm.jsx
 import React, { useState } from "react";
 import { addUser, isUsernameAvailable } from "./api";
 
-const AddUserForm = ({ onUserAdded }) => {
+const SignUpForm = ({ onUserAdded }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -16,13 +15,10 @@ const AddUserForm = ({ onUserAdded }) => {
       setIsNameAvailable(available);
       console.log("isNameAvailable:", available);
       if (available) {
-        {
-          const addedUser = await addUser(newUser);
-          onUserAdded(addedUser);
-          setUsername("");
-          setPassword("");
-          setEmail("");
-        }
+        await addUser(newUser);
+        setUsername("");
+        setPassword("");
+        setEmail("");
       }
     } catch (error) {
       console.error("Error adding user:", error);
@@ -70,4 +66,4 @@ const AddUserForm = ({ onUserAdded }) => {
   );
 };
 
-export default AddUserForm;
+export default SignUpForm;

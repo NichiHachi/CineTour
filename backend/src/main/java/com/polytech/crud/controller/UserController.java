@@ -67,4 +67,13 @@ public class UserController {
         logger.info("User exist:  {}", existingUser == null);
         return existingUser == null;
     }
+
+    @PostMapping("/login")
+    public User canLogin(@RequestBody User user) {
+        User existingUser = service.getUserByUsername(user.getUsername());
+        if (existingUser != null && existingUser.getPassword().equals(user.getPassword())) {
+            return existingUser;
+        }
+        return null;
+    }
 }
