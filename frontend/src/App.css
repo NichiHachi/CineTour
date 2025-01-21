@@ -2,3 +2,21 @@
   --bg-color: rgb(20, 20, 20);
   --card-color: rgb(23, 23, 23);
 }
+
+body {
+  align-items: center;
+  background-color: var(--bg-color);
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  margin: 0px;
+  overflow: hidden;
+  padding: 0px;
+}
+
+@media (max-width: 1000px) {
+  body {
+    align-items: flex-start;
+    overflow: auto;
+  }
+}
