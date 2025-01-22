@@ -154,7 +154,7 @@ public class ImdbLocationsService {
         return locations;
     }
 
-    private String getMovieImage(String movieIdImdb) throws IOException {
+    public String getMovieImage(String movieIdImdb) throws IOException {
         String url = String.format(imdbLocationsUrl, movieIdImdb);
         WebDriver driver = null;
         String image = null;
