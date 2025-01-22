@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.Movie;
 import com.polytech.crud.service.MovieService;
+import com.polytech.crud.service.MovieSearchHistoryService;
 
 @RestController
 public class MovieController {
@@ -25,6 +27,9 @@ public class MovieController {
 
     @Autowired
     private MovieService service;
+
+    @Autowired
+    private MovieSearchHistoryService movieSearchHistoryService;
 
     /**
      * Method POST with a JSON body.
@@ -89,10 +94,13 @@ public class MovieController {
      * @return
      */
     @GetMapping("/movieByImdbId/{id}")
-    public Movie findMovieByImdbId(@PathVariable String id) {
+    public Movie findMovieByImdbId(@PathVariable String id,
+            @CookieValue(value = "username", defaultValue = "") String username) {
         Movie movie = service.getMovieByImdbId(id);
         if (movie == null) {
             logger.info("No movie found in database for ID: {}", id);
+        } else {
+            movieSearchHistoryService.saveMovieSearchHistoryByImdbId(id, movie.getTitle(), username);
         }
         return movie;
     }
@@ -112,7 +120,7 @@ public class MovieController {
         if (movies.isEmpty()) {
             logger.info("No movies found for title: {}", title);
         }
-        
+
         return movies;
     }
 

@@ -1,10 +1,14 @@
 package com.polytech.crud.controller;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.User;
 import com.polytech.crud.service.UserService;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/users")
@@ -69,11 +77,47 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public User canLogin(@RequestBody User user) {
+    public ResponseEntity<User> canLogin(@RequestBody User user, HttpServletResponse response) {
         User existingUser = service.getUserByUsername(user.getUsername());
         if (existingUser != null && existingUser.getPassword().equals(user.getPassword())) {
-            return existingUser;
+            // Create a new cookie with the username
+            Cookie userCookie = new Cookie("username", existingUser.getUsername());
+            userCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+            userCookie.setSecure(false);
+            userCookie.setHttpOnly(false);
+            userCookie.setPath("/");
+
+            // Add the cookie to the response
+            response.addCookie(userCookie);
+
+            // Return the user with OK status
+            return ResponseEntity.ok(existingUser);
         }
-        return null;
+        // Return unauthorized if login fails
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @GetMapping("/profile/{username}")
+    public ResponseEntity<User> getUserProfile(@PathVariable String username) {
+        logger.info("Fetching profile for username: {}", username);
+        User user = service.getUserByUsername(username);
+        if (user != null) {
+            // Don't send password in response
+            user.setPassword(null);
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/all-cookies")
+    public String readAllCookies(HttpServletRequest request) {
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            return Arrays.stream(cookies)
+                    .map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining(", "));
+        }
+
+        return "No cookies";
     }
 }
