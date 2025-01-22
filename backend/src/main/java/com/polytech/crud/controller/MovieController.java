@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.Movie;
+import com.polytech.crud.service.ImdbMoviesService;
 import com.polytech.crud.service.MovieService;
 
 @RestController
@@ -26,6 +27,7 @@ public class MovieController {
 
     @Autowired
     private MovieService service;
+    private ImdbMoviesService imdbMoviesService;
 
     /**
      * Method POST with a JSON body.
@@ -51,6 +53,15 @@ public class MovieController {
         return service.saveMovies(movies);
     }
 
+    @PostMapping("/addMovieImage")
+    public void addMovieImage(@RequestBody String movieIdImdb) {
+        try {
+            imdbMoviesService.importMovieImage(movieIdImdb);
+        } catch (Exception e) {
+            logger.error("Failed to import movie image: {}", e.getMessage());
+        }
+    }
+
     /**
      * Method GET.
      * Get all movies from the database.
@@ -58,6 +69,7 @@ public class MovieController {
      * @return
      */
     @GetMapping("/movies")
+
     public List<Movie> findAllMovies() {
         List<Movie> movies = service.getAllMovies();
         if (movies.isEmpty()) {
