@@ -12,6 +12,7 @@ import "leaflet-geosearch/dist/geosearch.css";
 import L from "leaflet";
 import customMarkerIcon from "./285659_marker_map_icon.png";
 import stateData from "./custom.geo.json";
+import countries from "i18n-iso-countries";
 
 const SearchField = () => {
   const map = useMap();
@@ -33,6 +34,8 @@ const SearchField = () => {
 
 const Map = () => {
   const [markers, setMarkers] = useState([]);
+  const [paysToHighlight, setPaysToHighlight] = useState([]); // Remplacez par vos pays
+  const [filteredData, setFilteredData] = useState({});
 
   useEffect(() => {
     const addresses = ["Paris, France", "London, United Kingdom"]; // Remplacez par vos adresses
@@ -51,9 +54,30 @@ const Map = () => {
         }
       }
       setMarkers(newMarkers);
+      await updateCountryCodes(newMarkers);
     };
     geocodeAddresses();
   }, []);
+
+  const updateCountryCodes = async (markers) => {
+    const countryCodes = [];
+    for (const [lat, lon] of markers) {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+      );
+      const data = await response.json();
+      if (data.address && data.address.country_code) {
+        const countryCode = countries.alpha2ToAlpha3(
+          data.address.country_code.toUpperCase()
+        );
+        if (countryCode) {
+          countryCodes.push(countryCode);
+        }
+      }
+    }
+    console.log(countryCodes);
+    setPaysToHighlight(countryCodes);
+  };
 
   const customIcon = new L.Icon({
     iconUrl: customMarkerIcon,
@@ -62,14 +86,18 @@ const Map = () => {
     popupAnchor: [1, -34], // Point d'ancrage de la popup par rapport à l'icône
     shadowSize: [41, 41], // Taille de l'ombre de l'icône
   });
-  const paysToHighlight = ["FRA", "USA"]; // Remplacez par vos pays
 
-  const filteredData = {
-    ...stateData,
-    features: stateData.features.filter((feature) =>
-      paysToHighlight.includes(feature.properties.filename.split(".")[0])
-    ),
-  };
+  useEffect(() => {
+    if (stateData && stateData.features) {
+      const filteredFeatures = stateData.features.filter((feature) =>
+        paysToHighlight.includes(feature.properties.filename.split(".")[0])
+      );
+      setFilteredData({
+        ...stateData,
+        features: filteredFeatures,
+      });
+    }
+  }, [paysToHighlight, stateData]);
   console.log(filteredData);
 
   return (
@@ -87,7 +115,7 @@ const Map = () => {
           <Marker key={idx} position={position} icon={customIcon} />
         ))}
         <SearchField />
-        <GeoJSON data={filteredData} />
+        {filteredData && <GeoJSON data={filteredData} />}
       </MapContainer>
     </div>
   );
