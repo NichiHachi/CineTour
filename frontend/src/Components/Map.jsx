@@ -13,7 +13,23 @@ import L from "leaflet";
 import customMarkerIcon from "./285659_marker_map_icon.png";
 import stateData from "./custom.geo.json";
 import countries from "i18n-iso-countries";
+import axios from 'axios';
 import BoxDeroulant from "./BoxDeroulant";
+
+const SearchField = () => {
+  const map = useMap();
+
+  useEffect(() => {
+    const provider = new OpenStreetMapProvider();
+    const searchControl = new GeoSearchControl({
+      provider: provider,
+      style: "bar",
+      autoComplete: true,
+    });
+
+    map.addControl(searchControl);
+    return () => map.removeControl(searchControl);
+  }, [map]);
 
 const Map = ({ height, width }) => {
   const [markers, setMarkers] = useState([]);
@@ -29,20 +45,27 @@ const Map = ({ height, width }) => {
     }
   };
 
+  const fetchLocations = async (idFilm) => {
+    try {
+      const response = await axios.get(`/locationByImdbId/${idFilm}`);
+      return await response.data;
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+      return [];
+    }
+  };
+
   useEffect(() => {
-    const addresses = [
-      "Paris, France",
-      "London, United Kingdom",
-      "Lyon, France",
-      "France",
-    ];
+    const idFilm = "tt0111161";
     const geocodeAddresses = async () => {
+      const locations = await fetchLocations(idFilm);
       const newMarkers = [];
+      for (const location of locations) {
       const newPays = {};
       for (const address of addresses) {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            address
+              location.locationString
           )}`
         );
         const data = await response.json();
