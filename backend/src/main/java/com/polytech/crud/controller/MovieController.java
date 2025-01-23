@@ -97,11 +97,13 @@ public class MovieController {
     @GetMapping("/movieByImdbId/{id}")
     public ResponseEntity<Movie> findMovieByImdbId(@PathVariable String id,
             @CookieValue(value = "username", defaultValue = "") String username) {
+        logger.info("findMovieByImdbId called with id: {}", id);
         Movie movie = service.getMovieByImdbId(id);
         if (movie == null) {
             logger.info("No movie found in database for ID: {}", id);
             return ResponseEntity.notFound().build();
         } else {
+            logger.info("Adding to search history - Movie: {}, User: {}", movie.getTitle(), username);
             movieSearchHistoryService.saveMovieSearchHistoryByImdbId(id, movie.getTitle(), username);
             return ResponseEntity.ok(movie);
         }

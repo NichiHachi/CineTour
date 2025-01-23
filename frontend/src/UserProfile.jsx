@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
-import { UserContext } from './UserContext';
 import axios from 'axios';
 
 function UserProfile() {
   const [cookies] = useCookies(['username']);
   const [userInfo, setUserInfo] = useState(null);
   const [error, setError] = useState(null);
-  const { user } = useContext(UserContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,15 +21,15 @@ function UserProfile() {
           setError('Failed to load user information');
           console.error('Error fetching user info:', err);
         }
-      } else if (!user) {
+      } else {
         navigate('/login');
       }
     };
 
     fetchUserInfo();
-  }, [cookies.username, user, navigate]);
+  }, [cookies.username, navigate]);
 
-  if (!cookies.username && !user) {
+  if (!cookies.username) {
     return <div>Redirecting to login...</div>;
   }
 

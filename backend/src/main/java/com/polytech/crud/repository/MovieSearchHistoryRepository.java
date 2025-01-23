@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface MovieSearchHistoryRepository extends JpaRepository<MovieSearchHistory, Long> {
     List<MovieSearchHistory> findByUserId(Long userId);
-    List<MovieSearchHistory> findByImdbId(String imdbId); // New method to find by IMDB ID
+    MovieSearchHistory findByIdImdb(String imdbId); // New method to find by IMDB ID
 }

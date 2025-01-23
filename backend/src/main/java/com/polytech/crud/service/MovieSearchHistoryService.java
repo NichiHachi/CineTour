@@ -19,13 +19,24 @@ public class MovieSearchHistoryService {
 
     public MovieSearchHistory saveMovieSearchHistoryByImdbId(String imdbId, String movieTitle, String username) {
         User user = userService.getUserByUsername(username);
+        if (user == null) {
+            return null;
+        }
 
-        MovieSearchHistory movieSearchHistory = new MovieSearchHistory();
-        movieSearchHistory.setUser(user);
-        movieSearchHistory.setMovieTitle(movieTitle);
-        movieSearchHistory.setSearchTime(LocalDateTime.now());
-        movieSearchHistory.setImdbId(imdbId);
-        return repository.save(movieSearchHistory);
+        if (repository.findByIdImdb(imdbId) != null) {
+            MovieSearchHistory existingMovieSearchHistory = repository.findByIdImdb(imdbId);
+            existingMovieSearchHistory.setSearchTime(LocalDateTime.now());
+            return repository.save(existingMovieSearchHistory);
+        } else {
+            // Create new entry
+            MovieSearchHistory newMovieSearchHistory = new MovieSearchHistory();
+            newMovieSearchHistory.setUser(user);
+            newMovieSearchHistory.setMovieTitle(movieTitle);
+            newMovieSearchHistory.setSearchTime(LocalDateTime.now());
+            newMovieSearchHistory.setIdImdb(imdbId);
+            return repository.save(newMovieSearchHistory);
+        }
+
     }
 
     public List<MovieSearchHistory> getMovieSearchHistoryByUserId(Long userId) {
