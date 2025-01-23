@@ -38,6 +38,9 @@ const Map = ({ height, width }) => {
   const [filteredData, setFilteredData] = useState(null);
   const mapRef = useRef();
   const [pays, setPays] = useState([]);
+  const [countryPointCount, setCountryPointCount] = useState([]);
+  const [maxCount, setMaxCount] = useState(1);
+  const [minCount, setMinCount] = useState(0);
 
   const zoomToMarker = (position) => {
     const map = mapRef.current;
@@ -57,7 +60,7 @@ const Map = ({ height, width }) => {
   };
 
   useEffect(() => {
-    const idFilm = "tt0111161";
+    const idFilm = "tt9218128";
     const geocodeAddresses = async () => {
       const locations = await fetchLocations(idFilm);
       const newMarkers = [];
@@ -116,22 +119,39 @@ const Map = ({ height, width }) => {
 
   const updateCountryCodes = async (markers) => {
     const countryCodes = [];
+    const newCountryPointCount = {};
+
     for (const [lat, lon] of markers) {
       const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
       );
       const data = await response.json();
       if (data.address && data.address.country_code) {
-        console.log(data);
         const countryCode = countries.alpha2ToAlpha3(
             data.address.country_code.toUpperCase()
         );
 
         if (countryCode) {
           countryCodes.push(countryCode);
+
+          if (!newCountryPointCount[countryCode]) {
+            newCountryPointCount[countryCode] = 0;
+          }
+
+          newCountryPointCount[countryCode]++;
         }
       }
     }
+
+    if (Object.keys(newCountryPointCount).length < 2) {
+      setMaxCount(1);
+      setMinCount(0);
+    } else {
+      setMaxCount(Math.max(...Object.values(newCountryPointCount)));
+      setMinCount(Math.min(...Object.values(newCountryPointCount)));
+    }
+
+    setCountryPointCount(newCountryPointCount);
     const uniqueCountryCodes = [...new Set(countryCodes)];
     setPaysToHighlight(uniqueCountryCodes);
   };
@@ -143,6 +163,33 @@ const Map = ({ height, width }) => {
     popupAnchor: [1, -34], // Point d'ancrage de la popup par rapport à l'icône
     shadowSize: [41, 41], // Taille de l'ombre de l'icône
   });
+
+  const countryStyle = (feature) => {
+    const countryCode = feature.properties.filename.split(".")[0];
+    const pointCount = countryPointCount[countryCode];
+    const percent = (pointCount - minCount) / (maxCount - minCount);
+
+    const colorGradient = [
+      "#fdd71b",
+      "#fdc500",
+      "#fcb400",
+      "#fba100",
+      "#f98f00",
+      "#f67b00",
+      "#f26700",
+      "#ed5104",
+      "#e73711",
+      "#e00b19"
+    ]
+    return {
+      fillColor: colorGradient[percent*9 | 0],
+      weight: 2,
+      opacity: 0.25+percent*0.05,
+      color: colorGradient[Math.min(percent*9 | 0, 9)],
+      dashArray: '8',
+      fillOpacity: 0.15+percent*0.05
+    };
+  }
 
   useEffect(() => {
     if (stateData && stateData.features && paysToHighlight.length > 0) {
@@ -180,7 +227,7 @@ const Map = ({ height, width }) => {
                   }}
               />
           ))}
-          {filteredData && <GeoJSON data={filteredData} />}
+          {filteredData && <GeoJSON data={filteredData}  style={countryStyle} />}
         </MapContainer>
         <div style={{ display: "flex", flexDirection: "column", margin: "10px" }}>
           {Object.keys(pays).length > 0 &&
