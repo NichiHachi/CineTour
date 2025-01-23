@@ -30,6 +30,7 @@ const SearchField = () => {
     map.addControl(searchControl);
     return () => map.removeControl(searchControl);
   }, [map]);
+};
 
 const Map = ({ height, width }) => {
   const [markers, setMarkers] = useState([]);
@@ -60,21 +61,20 @@ const Map = ({ height, width }) => {
     const geocodeAddresses = async () => {
       const locations = await fetchLocations(idFilm);
       const newMarkers = [];
-      for (const location of locations) {
       const newPays = {};
-      for (const address of addresses) {
+      for (const location of locations) {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-              location.locationString
-          )}`
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+                location.locationString
+            )}`
         );
         const data = await response.json();
         if (data.length > 0) {
           const { lat, lon, display_name } = data[0];
           newMarkers.push([lat, lon]);
           const country = display_name
-            .split(",")
-            [display_name.split(",").length - 1].trim();
+              .split(",")
+              [display_name.split(",").length - 1].trim();
 
           if (!newPays[country]) {
             newPays[country] = [];
@@ -98,9 +98,9 @@ const Map = ({ height, width }) => {
     const updatedPays = { ...newPays };
     for (const country in newPays) {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          country
-        )}`
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+              country
+          )}`
       );
       const data = await response.json();
       if (data.length > 0) {
@@ -118,13 +118,13 @@ const Map = ({ height, width }) => {
     const countryCodes = [];
     for (const [lat, lon] of markers) {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
       );
       const data = await response.json();
       if (data.address && data.address.country_code) {
         console.log(data);
         const countryCode = countries.alpha2ToAlpha3(
-          data.address.country_code.toUpperCase()
+            data.address.country_code.toUpperCase()
         );
 
         if (countryCode) {
@@ -147,7 +147,7 @@ const Map = ({ height, width }) => {
   useEffect(() => {
     if (stateData && stateData.features && paysToHighlight.length > 0) {
       const filteredFeatures = stateData.features.filter((feature) =>
-        paysToHighlight.includes(feature.properties.filename.split(".")[0])
+          paysToHighlight.includes(feature.properties.filename.split(".")[0])
       );
       setFilteredData({
         ...stateData,
@@ -157,43 +157,43 @@ const Map = ({ height, width }) => {
   }, [paysToHighlight]);
 
   return (
-    <div style={{ height: height, width: height, margin: "10px" }}>
-      <MapContainer
-        center={[0, 0]}
-        zoom={1}
-        style={{ height: height, width: width }}
-        ref={mapRef}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        {markers.map((position, idx) => (
-          <Marker
-            key={idx}
-            position={position}
-            icon={customIcon}
-            eventHandlers={{
-              click: () => {
-                zoomToMarker(position);
-              },
-            }}
+      <div style={{ height: height, width: height, margin: "10px" }}>
+        <MapContainer
+            center={[0, 0]}
+            zoom={1}
+            style={{ height: height, width: width }}
+            ref={mapRef}
+        >
+          <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-        ))}
-        {filteredData && <GeoJSON data={filteredData} />}
-      </MapContainer>
-      <div style={{ display: "flex", flexDirection: "column", margin: "10px" }}>
-        {Object.keys(pays).length > 0 &&
-          Object.keys(pays).map((key, index) => (
-            <BoxDeroulant
-              key={index}
-              name={key}
-              data={pays[key]}
-              goToMarqueur={zoomToMarker}
-            />
+          {markers.map((position, idx) => (
+              <Marker
+                  key={idx}
+                  position={position}
+                  icon={customIcon}
+                  eventHandlers={{
+                    click: () => {
+                      zoomToMarker(position);
+                    },
+                  }}
+              />
           ))}
+          {filteredData && <GeoJSON data={filteredData} />}
+        </MapContainer>
+        <div style={{ display: "flex", flexDirection: "column", margin: "10px" }}>
+          {Object.keys(pays).length > 0 &&
+              Object.keys(pays).map((key, index) => (
+                  <BoxDeroulant
+                      key={index}
+                      name={key}
+                      data={pays[key]}
+                      goToMarqueur={zoomToMarker}
+                  />
+              ))}
+        </div>
       </div>
-    </div>
   );
 };
 
