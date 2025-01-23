@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -32,13 +32,26 @@ const SearchField = () => {
   return null;
 };
 
-const Map = () => {
+const Map = ({ height, width, setPays }) => {
   const [markers, setMarkers] = useState([]);
-  const [paysToHighlight, setPaysToHighlight] = useState([]); // Remplacez par vos pays
-  const [filteredData, setFilteredData] = useState({});
+  const [paysToHighlight, setPaysToHighlight] = useState([]);
+  const [filteredData, setFilteredData] = useState(null);
+  const mapRef = useRef();
+
+  const zoomToMarker = (position) => {
+    const map = mapRef.current;
+    if (map) {
+      map.setView(position, 6);
+    }
+  };
 
   useEffect(() => {
-    const addresses = ["Paris, France", "London, United Kingdom"]; // Remplacez par vos adresses
+    const addresses = [
+      "Paris, France",
+      "London, United Kingdom",
+      "Lyon, France",
+      "France",
+    ];
     const geocodeAddresses = async () => {
       const newMarkers = [];
       for (const address of addresses) {
@@ -61,6 +74,7 @@ const Map = () => {
 
   const updateCountryCodes = async (markers) => {
     const countryCodes = [];
+    const pays = [];
     for (const [lat, lon] of markers) {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
@@ -70,13 +84,35 @@ const Map = () => {
         const countryCode = countries.alpha2ToAlpha3(
           data.address.country_code.toUpperCase()
         );
+
+        if (countryCode) {
+          countryCodes.push(countryCode);
+          if (!pays[data.address.country]) {
+            pays[countryCode] = [];
+          }
+          pays[countryCode].push(data.display_name);
+        }
+      }
+    }
+    for (const [lat, lon] of markers) {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+      );
+      const data = await response.json();
+      if (data.address && data.address.country_code) {
+        const countryCode = countries.alpha2ToAlpha3(
+          data.address.country_code.toUpperCase()
+        );
+
         if (countryCode) {
           countryCodes.push(countryCode);
         }
       }
     }
-    console.log(countryCodes);
-    setPaysToHighlight(countryCodes);
+    const uniqueCountryCodes = [...new Set(countryCodes)];
+    const uniquePays = [...new Set(pays)];
+    console.log(uniqueCountryCodes);
+    setPaysToHighlight(uniqueCountryCodes);
   };
 
   const customIcon = new L.Icon({
@@ -88,7 +124,8 @@ const Map = () => {
   });
 
   useEffect(() => {
-    if (stateData && stateData.features) {
+    if (stateData && stateData.features && paysToHighlight.length > 0) {
+      console.log(paysToHighlight);
       const filteredFeatures = stateData.features.filter((feature) =>
         paysToHighlight.includes(feature.properties.filename.split(".")[0])
       );
@@ -97,15 +134,16 @@ const Map = () => {
         features: filteredFeatures,
       });
     }
-  }, [paysToHighlight, stateData]);
+  }, [paysToHighlight]);
   console.log(filteredData);
 
   return (
     <div style={{ height: "100vh", width: "100vw" }}>
       <MapContainer
         center={[51.505, -0.09]}
-        zoom={13}
-        style={{ height: "100%", width: "100%" }}
+        zoom={6}
+        style={{ height: height, width: width }}
+        ref={mapRef}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -117,6 +155,13 @@ const Map = () => {
         <SearchField />
         {filteredData && <GeoJSON data={filteredData} />}
       </MapContainer>
+      <div>
+        {markers.map((position, idx) => (
+          <button key={idx} onClick={() => zoomToMarker(position)}>
+            Go to Marker {idx + 1}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
