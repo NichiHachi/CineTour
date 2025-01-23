@@ -13,17 +13,19 @@ import L from "leaflet";
 import customMarkerIcon from "./285659_marker_map_icon.png";
 import stateData from "./custom.geo.json";
 import countries from "i18n-iso-countries";
+import BoxDeroulant from "./BoxDeroulant";
 
-const Map = ({ height, width, setPays }) => {
+const Map = ({ height, width }) => {
   const [markers, setMarkers] = useState([]);
   const [paysToHighlight, setPaysToHighlight] = useState([]);
   const [filteredData, setFilteredData] = useState(null);
   const mapRef = useRef();
+  const [pays, setPays] = useState([]);
 
   const zoomToMarker = (position) => {
     const map = mapRef.current;
     if (map) {
-      map.setView(position, 6);
+      map.setView(position, 5);
     }
   };
 
@@ -50,19 +52,44 @@ const Map = ({ height, width, setPays }) => {
           const country = display_name
             .split(",")
             [display_name.split(",").length - 1].trim();
+
           if (!newPays[country]) {
             newPays[country] = [];
           }
-          newPays[country].push(display_name);
+          newPays[country].push({
+            address: display_name,
+            coordinates: [lat, lon],
+          });
         }
       }
       setMarkers(newMarkers);
-      setPays(newPays);
-      console.log(newPays);
+
+      await fetchCountryCoordinates(newPays);
+
       await updateCountryCodes(newMarkers);
     };
     geocodeAddresses();
   }, []);
+
+  const fetchCountryCoordinates = async (newPays) => {
+    const updatedPays = { ...newPays };
+    for (const country in newPays) {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          country
+        )}`
+      );
+      const data = await response.json();
+      if (data.length > 0) {
+        const { lat, lon } = data[0];
+        updatedPays[country] = {
+          ...updatedPays[country],
+          coordinatesCountry: [lat, lon],
+        };
+      }
+    }
+    setPays(updatedPays);
+  };
 
   const updateCountryCodes = async (markers) => {
     const countryCodes = [];
@@ -72,6 +99,7 @@ const Map = ({ height, width, setPays }) => {
       );
       const data = await response.json();
       if (data.address && data.address.country_code) {
+        console.log(data);
         const countryCode = countries.alpha2ToAlpha3(
           data.address.country_code.toUpperCase()
         );
@@ -108,8 +136,8 @@ const Map = ({ height, width, setPays }) => {
   return (
     <div style={{ height: height, width: height, margin: "10px" }}>
       <MapContainer
-        center={[51.505, -0.09]}
-        zoom={6}
+        center={[0, 0]}
+        zoom={1}
         style={{ height: height, width: width }}
         ref={mapRef}
       >
@@ -118,10 +146,30 @@ const Map = ({ height, width, setPays }) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         {markers.map((position, idx) => (
-          <Marker key={idx} position={position} icon={customIcon} />
+          <Marker
+            key={idx}
+            position={position}
+            icon={customIcon}
+            eventHandlers={{
+              click: () => {
+                zoomToMarker(position);
+              },
+            }}
+          />
         ))}
         {filteredData && <GeoJSON data={filteredData} />}
       </MapContainer>
+      <div style={{ display: "flex", flexDirection: "column", margin: "10px" }}>
+        {Object.keys(pays).length > 0 &&
+          Object.keys(pays).map((key, index) => (
+            <BoxDeroulant
+              key={index}
+              name={key}
+              data={pays[key]}
+              goToMarqueur={zoomToMarker}
+            />
+          ))}
+      </div>
     </div>
   );
 };

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 
-const BoxDeroulant = ({ name, data }) => {
+const BoxDeroulant = ({ name, data, goToMarqueur }) => {
   const [visible, isVisible] = useState(false);
 
   const handleClick = (e) => {
     isVisible(!visible);
+    goToMarqueur(data.coordinatesCountry);
   };
 
   console.log(name, data);
@@ -15,11 +16,17 @@ const BoxDeroulant = ({ name, data }) => {
         {name}
       </div>
       {visible &&
-        data.map((item, index) => (
-          <div key={index} style={{ border: "1px solid white" }}>
-            {typeof item === "object" ? JSON.stringify(item) : item}
-          </div>
-        ))}
+        Object.keys(data)
+          .filter((key) => key !== "coordinatesCountry")
+          .map((key, index) => (
+            <div
+              key={index}
+              style={{ border: "1px solid white" }}
+              onClick={() => goToMarqueur(data[key].coordinates)}
+            >
+              {data[key].address}
+            </div>
+          ))}
     </div>
   );
 };
