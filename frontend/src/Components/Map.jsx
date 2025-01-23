@@ -14,24 +14,6 @@ import customMarkerIcon from "./285659_marker_map_icon.png";
 import stateData from "./custom.geo.json";
 import countries from "i18n-iso-countries";
 
-const SearchField = () => {
-  const map = useMap();
-
-  useEffect(() => {
-    const provider = new OpenStreetMapProvider();
-    const searchControl = new GeoSearchControl({
-      provider: provider,
-      style: "bar",
-      autoComplete: true,
-    });
-
-    map.addControl(searchControl);
-    return () => map.removeControl(searchControl);
-  }, [map]);
-
-  return null;
-};
-
 const Map = ({ height, width, setPays }) => {
   const [markers, setMarkers] = useState([]);
   const [paysToHighlight, setPaysToHighlight] = useState([]);
@@ -54,6 +36,7 @@ const Map = ({ height, width, setPays }) => {
     ];
     const geocodeAddresses = async () => {
       const newMarkers = [];
+      const newPays = {};
       for (const address of addresses) {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
@@ -62,11 +45,20 @@ const Map = ({ height, width, setPays }) => {
         );
         const data = await response.json();
         if (data.length > 0) {
-          const { lat, lon } = data[0];
+          const { lat, lon, display_name } = data[0];
           newMarkers.push([lat, lon]);
+          const country = display_name
+            .split(",")
+            [display_name.split(",").length - 1].trim();
+          if (!newPays[country]) {
+            newPays[country] = [];
+          }
+          newPays[country].push(display_name);
         }
       }
       setMarkers(newMarkers);
+      setPays(newPays);
+      console.log(newPays);
       await updateCountryCodes(newMarkers);
     };
     geocodeAddresses();
@@ -74,26 +66,6 @@ const Map = ({ height, width, setPays }) => {
 
   const updateCountryCodes = async (markers) => {
     const countryCodes = [];
-    const pays = [];
-    for (const [lat, lon] of markers) {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-      );
-      const data = await response.json();
-      if (data.address && data.address.country_code) {
-        const countryCode = countries.alpha2ToAlpha3(
-          data.address.country_code.toUpperCase()
-        );
-
-        if (countryCode) {
-          countryCodes.push(countryCode);
-          if (!pays[data.address.country]) {
-            pays[countryCode] = [];
-          }
-          pays[countryCode].push(data.display_name);
-        }
-      }
-    }
     for (const [lat, lon] of markers) {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
@@ -110,8 +82,6 @@ const Map = ({ height, width, setPays }) => {
       }
     }
     const uniqueCountryCodes = [...new Set(countryCodes)];
-    const uniquePays = [...new Set(pays)];
-    console.log(uniqueCountryCodes);
     setPaysToHighlight(uniqueCountryCodes);
   };
 
@@ -125,7 +95,6 @@ const Map = ({ height, width, setPays }) => {
 
   useEffect(() => {
     if (stateData && stateData.features && paysToHighlight.length > 0) {
-      console.log(paysToHighlight);
       const filteredFeatures = stateData.features.filter((feature) =>
         paysToHighlight.includes(feature.properties.filename.split(".")[0])
       );
@@ -135,10 +104,9 @@ const Map = ({ height, width, setPays }) => {
       });
     }
   }, [paysToHighlight]);
-  console.log(filteredData);
 
   return (
-    <div style={{ height: "100vh", width: "100vw" }}>
+    <div style={{ height: height, width: height, margin: "10px" }}>
       <MapContainer
         center={[51.505, -0.09]}
         zoom={6}
@@ -152,16 +120,8 @@ const Map = ({ height, width, setPays }) => {
         {markers.map((position, idx) => (
           <Marker key={idx} position={position} icon={customIcon} />
         ))}
-        <SearchField />
         {filteredData && <GeoJSON data={filteredData} />}
       </MapContainer>
-      <div>
-        {markers.map((position, idx) => (
-          <button key={idx} onClick={() => zoomToMarker(position)}>
-            Go to Marker {idx + 1}
-          </button>
-        ))}
-      </div>
     </div>
   );
 };

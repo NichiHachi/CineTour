@@ -7,7 +7,10 @@ const LocationResultatZone = () => {
   return (
     <div>
       <Map height="500px" width="500px" setPays={setPays} />
-      {pays.length > 0 && <BoxDeroulant name={pays} data={pays} />}
+      {Object.keys(pays).length > 0 &&
+        Object.keys(pays).map((key, index) => (
+          <BoxDeroulant key={index} name={key} data={pays[key]} />
+        ))}
     </div>
   );
 };

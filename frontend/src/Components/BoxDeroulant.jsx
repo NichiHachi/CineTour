@@ -7,6 +7,8 @@ const BoxDeroulant = ({ name, data }) => {
     isVisible(!visible);
   };
 
+  console.log(name, data);
+
   return (
     <div style={{ border: "1px solid white", color: "white" }}>
       <div onClick={handleClick} style={{ border: "1px solid white" }}>
@@ -15,7 +17,7 @@ const BoxDeroulant = ({ name, data }) => {
       {visible &&
         data.map((item, index) => (
           <div key={index} style={{ border: "1px solid white" }}>
-            {item}
+            {typeof item === "object" ? JSON.stringify(item) : item}
           </div>
         ))}
     </div>

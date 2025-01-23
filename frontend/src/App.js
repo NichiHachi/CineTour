@@ -8,7 +8,7 @@ import LocationResultatZone from './Components/LocationResultatZone'
 function App() {
   return (
     <div className="App">
-
+      <LocationResultatZone />
     </div>
   )
 }
