@@ -1,12 +1,15 @@
-all: clean build run
+all: clean-all build run
 
-all-import: clean build run-import
+all-import: clean-all build run-import
 
-all-without-tests: clean build-without-tests run
+all-without-tests: clean-all build-without-tests run
 
-all-import-without-tests: clean build-without-tests run-import
+all-import-without-tests: clean-all build-without-tests run-import
 
 clean:
+	docker rm cinetour-backend-1
+
+clean-all:
 	docker compose -p cinetour down --volumes --rmi all || true
 	./gradlew clean
 
@@ -15,6 +18,9 @@ build:
 
 build-without-tests:
 	./gradlew clean build -x test
+
+rebuild-backend: clean build
+	docker compose -p cinetour up --build backend
 
 run:
 	docker compose -p cinetour up --build
