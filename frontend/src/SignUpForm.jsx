@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { addUser, isUsernameAvailable } from "./api";
 
-const SignUpForm = ({ onUserAdded }) => {
+const SignUpForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");

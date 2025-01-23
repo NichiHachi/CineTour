@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
-const LoginForm = ({ onUserAdded }) => {
+const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(true);
@@ -23,7 +23,6 @@ const LoginForm = ({ onUserAdded }) => {
       console.log('Login response:', response.data); // Debug log
       
       if (response.data) {
-        onUserAdded(response.data);
         setIsPasswordCorrect(true);
         navigate("/profile");
       } else {

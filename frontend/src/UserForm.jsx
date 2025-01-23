@@ -1,12 +1,10 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import SignUpForm from "./SignUpForm";
 import LoginForm from "./LoginForm";
 import "./UserForm.scss";
-import { UserContext } from "./UserContext";
 
-const UserForm = ({ onUserLogin }) => {
+const UserForm = () => {
   const [loginClicked, setLoginClicked] = useState(true);
-  const { setUser } = useContext(UserContext);
 
   const handleLoginClick = (isLog) => {
     setLoginClicked(isLog);
@@ -22,8 +20,9 @@ const UserForm = ({ onUserLogin }) => {
           Sign up
         </div>
       </div>
-      {loginClicked ? <LoginForm onUserAdded={setUser} /> : <SignUpForm />}
+      {loginClicked ? <LoginForm /> : <SignUpForm />}
     </div>
   );
 };
+
 export default UserForm;

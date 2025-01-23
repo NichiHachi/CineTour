@@ -1,4 +1,3 @@
-// frontend/src/api.js
 import axios from 'axios';
 
 export const getAllUsers = async () => {
@@ -23,24 +22,31 @@ export const getUserById = async (id) => {
 
 export const addUser = async (user) => {
     try {
-        console.log('user:', user);
-        const response = await axios.post(`/users/add`, user);
-        return response.data;
+      const response = await axios.post('/users/add', user, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
     } catch (error) {
-        console.error('Error adding user:', error);
-        throw error;
+      console.error('Error adding user:', error.response?.data || error.message);
+      throw error;
     }
-};
+  };
 
 export const isUsernameAvailable = async (user) => {
     try {
-        const response = await axios.post(`/users/isUserNotExist`,  user );
-        return response.data;
+      const response = await axios.post('/users/isUserNotExist', user, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
     } catch (error) {
-        console.error('Error checking username availability:', error);
-        throw error;
+      console.error('Error checking username availability:', error.response?.data || error.message);
+      throw error;
     }
-}
+  };
 
 export const correctPassword = async (user) => {
     try {
