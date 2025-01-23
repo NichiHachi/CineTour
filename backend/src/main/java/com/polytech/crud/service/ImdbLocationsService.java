@@ -13,6 +13,7 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -20,7 +21,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.openqa.selenium.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -310,7 +310,8 @@ public class ImdbLocationsService {
     private void incrementLocationCount(Movie movie) {
         movie.setLocationSearchCount(movie.getLocationSearchCount() + 1);
         movieRepository.save(movie);
-        logger.debug("Incremented search locations count for movie {} to {}", movie.getIdImdb(), movie.getLocationSearchCount());
+        logger.debug("Incremented search locations count for movie {} to {}", movie.getIdImdb(),
+                movie.getLocationSearchCount());
     }
 
     @Transactional(readOnly = true)

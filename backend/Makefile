@@ -23,7 +23,10 @@ run-import:
 	SPRING_PROFILES_ACTIVE=import docker compose -p cinetour up --build
 
 start:
-	docker compose -p cinetour start
+	docker compose -p cinetour up -d
 
 stop:
 	docker compose -p cinetour stop
+
+logs:
+	docker compose -p cinetour logs -f
