@@ -27,8 +27,52 @@ import chaletIcon from "../assets/icons/chalet.png";
 import galleryIcon from "../assets/icons/gallery.png";
 import waterParcIcon from "../assets/icons/water_parc.png";
 import apartmentIcon from "../assets/icons/apartment.png";
+import beachIcon from "../assets/icons/beach.png";
+import peakIcon from "../assets/icons/peak.png";
+import volcanoIcon from "../assets/icons/volcano.png";
+import caveEntranceIcon from "../assets/icons/cave_entrance.png";
+import geyserIcon from "../assets/icons/geyser.png";
+import hotSpringIcon from "../assets/icons/hot_spring.png";
+import archIcon from "../assets/icons/arch.png";
+import cliffIcon from "../assets/icons/cliff.png";
+import duneIcon from "../assets/icons/dune.png";
+import amusementArcadeIcon from "../assets/icons/amusement_arcade.png";
+import beachResortIcon from "../assets/icons/beach.png";
+import birdHideIcon from "../assets/icons/bird_hide.png";
+import bowlingAlleyIcon from "../assets/icons/bowling_alley.png";
+import danceIcon from "../assets/icons/dance.png";
+import dogParkIcon from "../assets/icons/dog_park.png";
+import escapeGameIcon from "../assets/icons/escape_game.png";
+import fishingIcon from "../assets/icons/fishing.png";
+import fitnessCentreIcon from "../assets/icons/fitness_centre.png";
+import gardenIcon from "../assets/icons/garden.png";
+import golfCourseIcon from "../assets/icons/golf_course.png";
+import hackerspaceIcon from "../assets/icons/hackerspace.png";
+import iceRinkIcon from "../assets/icons/ice_rink.png";
+import marinaIcon from "../assets/icons/marina.png";
+import natureReserveIcon from "../assets/icons/nature_reserve.png";
+import parkIcon from "../assets/icons/park.png";
+import playgroundIcon from "../assets/icons/playground.png";
+import resortIcon from "../assets/icons/resort.png";
+import saunaIcon from "../assets/icons/sauna.png";
+import stadiumIcon from "../assets/icons/stadium.png";
+import swimmingPoolIcon from "../assets/icons/swimming_pool.png";
+import wildlifeHideIcon from "../assets/icons/wildlife_hide.png";
+import castleIcon from "../assets/icons/castle.png";
+import archeologyIcon from "../assets/icons/archeology.png";
+import manorIcon from "../assets/icons/manor.png";
+import memorialIcon from "../assets/icons/memorial.png";
+import monumentIcon from "../assets/icons/monument.png";
+import shrineIcon from "../assets/icons/shrine.png";
+import crossIcon from "../assets/icons/cross.png";
+import fortIcon from "../assets/icons/fort.png";
+import cityGateIcon from "../assets/icons/city_gate.png";
 import stateData from "./custom.geo.json";
 import countries from "i18n-iso-countries";
+import defaultLeisureIcon from "../assets/icons/default_leisure.png";
+import defaultNaturalIcon from "../assets/icons/default_natural.png";
+import defaultHistoricIcon from "../assets/icons/default_historic.png";
+import defaultTourismIcon from "../assets/icons/default_tourism.png";
 import axios from 'axios';
 import BoxDeroulant from "./BoxDeroulant";
 
@@ -44,7 +88,7 @@ const Map = ({ height, width }) => {
   const [visibleBox, setVisibleBox] = useState(null);
   const [tourismSite, setTourismSite] = useState([]);
 
-  const zoomToMarker = (position, zoomLevel = 15) => {
+  const zoomToMarker = (position, zoomLevel = 14) => {
     const map = mapRef.current;
     if (map) {
       map.setView(position, zoomLevel);
@@ -186,15 +230,71 @@ const Map = ({ height, width }) => {
     gallery: galleryIcon,
     water_park: waterParcIcon,
     apartment: apartmentIcon,
+    beach: beachIcon,
+    peak: peakIcon,
+    volcano: volcanoIcon,
+    cave_entrance: caveEntranceIcon,
+    geyser: geyserIcon,
+    hot_spring: hotSpringIcon,
+    arch: archIcon,
+    cliff: cliffIcon,
+    dune: duneIcon,
+    amusement_arcade: amusementArcadeIcon,
+    beach_resort: beachResortIcon,
+    bird_hide: birdHideIcon,
+    bowling_alley: bowlingAlleyIcon,
+    dance: danceIcon,
+    dog_park: dogParkIcon,
+    escape_game: escapeGameIcon,
+    fishing: fishingIcon,
+    fitness_centre: fitnessCentreIcon,
+    garden: gardenIcon,
+    golf_course: golfCourseIcon,
+    hackerspace: hackerspaceIcon,
+    ice_rink: iceRinkIcon,
+    marina: marinaIcon,
+    nature_reserve: natureReserveIcon,
+    park: parkIcon,
+    playground: playgroundIcon,
+    resort: resortIcon,
+    sauna: saunaIcon,
+    stadium: stadiumIcon,
+    swimming_pool: swimmingPoolIcon,
+    wildlife_hide: wildlifeHideIcon,
+    castle: castleIcon,
+    archeology: archeologyIcon,
+    manor: manorIcon,
+    memorial: memorialIcon,
+    monument: monumentIcon,
+    shrine: shrineIcon,
+    cross: crossIcon,
+    fort: fortIcon,
+    city_gate: cityGateIcon,
   };
 
-  const getIcon = (tourismType) => {
-    const iconSize = tourismType === 'hotel' ? [12, 12] : [20, 20];
+  const getIcon = (tags) => {
+    // const iconSize = tags.tourism === 'hotel' ? [12, 12] : [20, 20];
+    // const iconAnchor = [iconSize[0] / 2, iconSize[1] / 2];
+    // const shadowSize = tags.tourism === 'hotel' ? [6, 6] : [10, 10];
+
+    const iconSize = [20, 20];
     const iconAnchor = [iconSize[0] / 2, iconSize[1] / 2];
-    const shadowSize = tourismType === 'hotel' ? [6, 6] : [10, 10];
+    const shadowSize = [10, 10];
+
+    let iconUrl = markerIcon;
+
+    if (tags.tourism) {
+      iconUrl = iconMapping[tags.tourism] || defaultTourismIcon;
+    } else if (tags.historic) {
+      iconUrl = iconMapping[tags.historic] || defaultHistoricIcon;
+    } else if (tags.leisure){
+      iconUrl = iconMapping[tags.leisure] || defaultLeisureIcon;
+    } else if(tags.natural){
+      iconUrl = iconMapping[tags.natural] || defaultNaturalIcon
+    }
 
     return new L.Icon({
-      iconUrl: iconMapping[tourismType] || markerIcon,
+      iconUrl: iconUrl,
       iconSize: iconSize,
       iconAnchor: iconAnchor,
       popupAnchor: [0, -iconSize[1] / 2],
@@ -283,7 +383,7 @@ const Map = ({ height, width }) => {
                   <Marker
                       key={idx}
                       position={[site.lat, site.lon]}
-                      icon={getIcon(site.tags.tourism)}
+                      icon={getIcon(site.tags)}
                   >
                   {site.tags.name && (
                       <Popup>

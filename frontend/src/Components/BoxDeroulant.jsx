@@ -14,6 +14,41 @@ const BoxDeroulant = ({ name, data, goToMarqueur, onToggle, isVisible, setTouris
             [out:json][timeout:25];
             (
                 node["tourism"](around:${searchRadius},${lat},${lon});
+                node["historic"](around:${searchRadius},${lat},${lon});
+                node["leisure"](around:${searchRadius},${lat},${lon});
+                node["tourism"](around:${searchRadius},${lat},${lon});
+                node["historic"](around:${searchRadius},${lat},${lon});            node["leisure"="amusement_arcade"](around:${searchRadius},${lat},${lon});
+                node["leisure"="beach_resort"](around:${searchRadius},${lat},${lon});
+                node["leisure"="bird_hide"](around:${searchRadius},${lat},${lon});
+                node["leisure"="bowling_alley"](around:${searchRadius},${lat},${lon});
+                node["leisure"="dance"](around:${searchRadius},${lat},${lon});
+                node["leisure"="dog_park"](around:${searchRadius},${lat},${lon});
+                node["leisure"="escape_game"](around:${searchRadius},${lat},${lon});
+                node["leisure"="fishing"](around:${searchRadius},${lat},${lon});
+                node["leisure"="fitness_centre"](around:${searchRadius},${lat},${lon});
+                node["leisure"="garden"](around:${searchRadius},${lat},${lon});
+                node["leisure"="golf_course"](around:${searchRadius},${lat},${lon});
+                node["leisure"="hackerspace"](around:${searchRadius},${lat},${lon});
+                node["leisure"="ice_rink"](around:${searchRadius},${lat},${lon});
+                node["leisure"="marina"](around:${searchRadius},${lat},${lon});
+                node["leisure"="nature_reserve"](around:${searchRadius},${lat},${lon});
+                node["leisure"="park"](around:${searchRadius},${lat},${lon});
+                node["leisure"="playground"](around:${searchRadius},${lat},${lon});
+                node["leisure"="resort"](around:${searchRadius},${lat},${lon});
+                node["leisure"="sauna"](around:${searchRadius},${lat},${lon});
+                node["leisure"="stadium"](around:${searchRadius},${lat},${lon});
+                node["leisure"="swimming_pool"](around:${searchRadius},${lat},${lon});
+                node["leisure"="water_park"](around:${searchRadius},${lat},${lon});
+                node["leisure"="wildlife_hide"](around:${searchRadius},${lat},${lon});
+                node["natural"="beach"](around:${searchRadius},${lat},${lon});
+                node["natural"="peak"](around:${searchRadius},${lat},${lon});
+                node["natural"="volcano"](around:${searchRadius},${lat},${lon});
+                node["natural"="cave_entrance"](around:${searchRadius},${lat},${lon});
+                node["natural"="geyser"](around:${searchRadius},${lat},${lon});
+                node["natural"="hot_spring"](around:${searchRadius},${lat},${lon});
+                node["natural"="arch"](around:${searchRadius},${lat},${lon});
+                node["natural"="cliff"](around:${searchRadius},${lat},${lon});
+                node["natural"="dune"](around:${searchRadius},${lat},${lon});
             );
             out body;
             >;
@@ -24,7 +59,7 @@ const BoxDeroulant = ({ name, data, goToMarqueur, onToggle, isVisible, setTouris
 
     const fetchTourism = async (coordinates) => {
         try {
-            const response = await axios.get(tourismRequest(coordinates[0], coordinates[1], 1000)); // 750m pour tout voir sur un zoom 15
+            const response = await axios.get(tourismRequest(coordinates[0], coordinates[1], 1500)); // 750m pour tout voir sur un zoom 15
             return response.data.elements;
         } catch (error) {
             console.error("Error fetching tourism site:", error);
@@ -46,7 +81,6 @@ const BoxDeroulant = ({ name, data, goToMarqueur, onToggle, isVisible, setTouris
                             style={{ border: "1px solid white" }}
                             onClick={async () => {
                                 const tourismData = await fetchTourism(data[key].coordinates);
-                                console.log(tourismData);
                                 setTourismSite(tourismData);
                                 goToMarqueur(data[key].coordinates);
                             }}
