@@ -3,14 +3,30 @@ import {
   MapContainer,
   TileLayer,
   Marker,
-  GeoJSON,
-  useMap,
+  GeoJSON, Popup,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
-import "leaflet-geosearch/dist/geosearch.css";
 import L from "leaflet";
-import customMarkerIcon from "./285659_marker_map_icon.png";
+import markerIcon from "../assets/icons/marker_map.png";
+import attractionIcon from "../assets/icons/attraction.png";
+import museumIcon from "../assets/icons/museum.png";
+import themeParkIcon from "../assets/icons/theme_park.png";
+import zooIcon from "../assets/icons/zoo.png";
+import aquariumIcon from "../assets/icons/aquarium.png";
+import artworkIcon from "../assets/icons/artwork.png";
+import viewpointIcon from "../assets/icons/viewpoint.png";
+import informationIcon from "../assets/icons/information.png";
+import hotelIcon from "../assets/icons/hotel.png";
+import guestHouseIcon from "../assets/icons/guest_house.png";
+import campSiteIcon from "../assets/icons/camp_site.png";
+import caravanSiteIcon from "../assets/icons/caravan_site.png";
+import picnicSiteIcon from "../assets/icons/picnic_site.png";
+import alpineHutIcon from "../assets/icons/alpine_hut.png";
+import wildernessHutIcon from "../assets/icons/wilderness_hut.png";
+import chaletIcon from "../assets/icons/chalet.png";
+import galleryIcon from "../assets/icons/gallery.png";
+import waterParcIcon from "../assets/icons/water_parc.png";
+import apartmentIcon from "../assets/icons/apartment.png";
 import stateData from "./custom.geo.json";
 import countries from "i18n-iso-countries";
 import axios from 'axios';
@@ -26,8 +42,9 @@ const Map = ({ height, width }) => {
   const [maxCount, setMaxCount] = useState(1);
   const [minCount, setMinCount] = useState(0);
   const [visibleBox, setVisibleBox] = useState(null);
+  const [tourismSite, setTourismSite] = useState([]);
 
-  const zoomToMarker = (position, zoomLevel = 11) => {
+  const zoomToMarker = (position, zoomLevel = 15) => {
     const map = mapRef.current;
     if (map) {
       map.setView(position, zoomLevel);
@@ -142,11 +159,55 @@ const Map = ({ height, width }) => {
   };
 
   const customIcon = new L.Icon({
-    iconUrl: customMarkerIcon,
+    iconUrl: markerIcon,
     iconSize: [41, 41], // Taille de l'icône
     iconAnchor: [20, 41], // Point d'ancrage de l'icône (centré en bas)
     popupAnchor: [1, -34], // Point d'ancrage de la popup par rapport à l'icône
     shadowSize: [41, 41], // Taille de l'ombre de l'icône
+  });
+
+  const iconMapping = {
+    attraction: attractionIcon,
+    museum: museumIcon,
+    theme_park: themeParkIcon,
+    zoo: zooIcon,
+    aquarium: aquariumIcon,
+    artwork: artworkIcon,
+    viewpoint: viewpointIcon,
+    information: informationIcon,
+    hotel: hotelIcon,
+    guest_house: guestHouseIcon,
+    camp_site: campSiteIcon,
+    caravan_site: caravanSiteIcon,
+    picnic_site: picnicSiteIcon,
+    alpine_hut: alpineHutIcon,
+    wilderness_hut: wildernessHutIcon,
+    chalet: chaletIcon,
+    gallery: galleryIcon,
+    water_park: waterParcIcon,
+    apartment: apartmentIcon,
+  };
+
+  const getIcon = (tourismType) => {
+    const iconSize = tourismType === 'hotel' ? [12, 12] : [20, 20];
+    const iconAnchor = [iconSize[0] / 2, iconSize[1] / 2];
+    const shadowSize = tourismType === 'hotel' ? [6, 6] : [10, 10];
+
+    return new L.Icon({
+      iconUrl: iconMapping[tourismType] || markerIcon,
+      iconSize: iconSize,
+      iconAnchor: iconAnchor,
+      popupAnchor: [0, -iconSize[1] / 2],
+      shadowSize: shadowSize,
+    });
+  };
+
+  L.Marker.prototype.options.icon = new L.Icon({
+    iconUrl: '',
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+    popupAnchor: [0, 0],
+    shadowSize: [0, 0],
   });
 
   const countryStyle = (feature) => {
@@ -216,6 +277,26 @@ const Map = ({ height, width }) => {
                   }}
               />
           ))}
+          {tourismSite.map((site, idx) => {
+            if (site.type === "node") {
+              return (
+                  <Marker
+                      key={idx}
+                      position={[site.lat, site.lon]}
+                      icon={getIcon(site.tags.tourism)}
+                  >
+                  {site.tags.name && (
+                      <Popup>
+                        <div>
+                          <p>{site.tags.name}</p>
+                        </div>
+                      </Popup>
+                  )}
+                  </Marker>
+              );
+            }
+            return null;
+          })}
           {filteredData && <GeoJSON data={filteredData}  style={countryStyle} />}
         </MapContainer>
         <div style={{ display: "flex", flexDirection: "column", margin: "10px" }}>
@@ -228,6 +309,7 @@ const Map = ({ height, width }) => {
                       goToMarqueur={zoomToMarker}
                       onToggle={handleToggle}
                       isVisible={visibleBox === key}
+                      setTourismSite={setTourismSite}
                   />
               ))}
         </div>
