@@ -3,7 +3,7 @@ import React, { useState } from "react";
 const BoxDeroulant = ({ name, data, goToMarqueur, onToggle, isVisible }) => {
   const handleClick = (e) => {
     onToggle(name);
-    goToMarqueur(data.coordinatesCountry);
+    goToMarqueur(data.coordinatesCountry, 5);
   };
 
   return (

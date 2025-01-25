@@ -27,10 +27,10 @@ const Map = ({ height, width }) => {
   const [minCount, setMinCount] = useState(0);
   const [visibleBox, setVisibleBox] = useState(null);
 
-  const zoomToMarker = (position) => {
+  const zoomToMarker = (position, zoomLevel = 11) => {
     const map = mapRef.current;
     if (map) {
-      map.setView(position, 5);
+      map.setView(position, zoomLevel);
     }
   };
 
