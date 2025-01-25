@@ -352,6 +352,7 @@ const Map = ({ height, width }) => {
       html: `<div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center;">${iconHtml}</div>`,
       className: 'custom-cluster-icon',
       iconSize: L.point(40, 40, true),
+      iconAnchor: [20, 20],
     });
   };
 
