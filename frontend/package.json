@@ -16,6 +16,7 @@
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^3.1.0",
     "leaflet-geosearch": "^4.1.0",
+    "popup": "^0.0.3",
     "react": "^19.0.0",
     "react-cookie": "^4.1.1",
     "react-dom": "^19.0.0",
