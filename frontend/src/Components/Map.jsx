@@ -6,6 +6,10 @@ import {
   GeoJSON, Popup,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet.markercluster";
+import MarkerClusterGroup from "react-leaflet-markercluster";
 import L from "leaflet";
 import markerIcon from "../assets/icons/marker_map.png";
 import attractionIcon from "../assets/icons/attraction.png";
@@ -337,6 +341,34 @@ const Map = ({ height, width }) => {
     };
   }
 
+  const createClusterIcon = (cluster) => {
+    const markers = cluster.getAllChildMarkers();
+    const iconUrls = markers.map(marker => marker.options.icon.options.iconUrl);
+    const uniqueIconUrls = [...new Set(iconUrls)];
+
+    const iconHtml = uniqueIconUrls.map(url => `<img src="${url}" style="width: 20px; height: 20px;" />`).join('');
+
+    return L.divIcon({
+      html: `<div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center;">${iconHtml}</div>`,
+      className: 'custom-cluster-icon',
+      iconSize: L.point(40, 40, true),
+    });
+  };
+
+  const createClusterMarkerIcon = (cluster) => {
+    const markers = cluster.getAllChildMarkers();
+    const iconUrl = markers[0].options.icon.options.iconUrl;
+
+    // Create a custom icon based on the first icon inside the cluster
+    const iconHtml = `<img src="${iconUrl}" style="width: 40px; height: 40px;" />`;
+
+    return L.divIcon({
+      html: `<div style="display: flex; justify-content: center; align-items: center;">${iconHtml}</div>`,
+      className: 'custom-cluster-icon',
+      iconSize: L.point(40, 40, true),
+    });
+  };
+
   useEffect(() => {
     if (stateData && stateData.features && paysToHighlight.length > 0) {
       const filteredFeatures = stateData.features.filter((feature) =>
@@ -365,6 +397,7 @@ const Map = ({ height, width }) => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
+          <MarkerClusterGroup maxClusterRadius={20} iconCreateFunction={createClusterMarkerIcon}>
           {markers.map((position, idx) => (
               <Marker
                   key={idx}
@@ -377,6 +410,8 @@ const Map = ({ height, width }) => {
                   }}
               />
           ))}
+          </MarkerClusterGroup>
+          <MarkerClusterGroup maxClusterRadius={20} iconCreateFunction={createClusterIcon}>
           {tourismSite.map((site, idx) => {
             if (site.type === "node") {
               return (
@@ -397,6 +432,7 @@ const Map = ({ height, width }) => {
             }
             return null;
           })}
+          </MarkerClusterGroup>
           {filteredData && <GeoJSON data={filteredData}  style={countryStyle} />}
         </MapContainer>
         <div style={{ display: "flex", flexDirection: "column", margin: "10px" }}>
