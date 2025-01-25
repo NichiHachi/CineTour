@@ -16,22 +16,6 @@ import countries from "i18n-iso-countries";
 import axios from 'axios';
 import BoxDeroulant from "./BoxDeroulant";
 
-const SearchField = () => {
-  const map = useMap();
-
-  useEffect(() => {
-    const provider = new OpenStreetMapProvider();
-    const searchControl = new GeoSearchControl({
-      provider: provider,
-      style: "bar",
-      autoComplete: true,
-    });
-
-    map.addControl(searchControl);
-    return () => map.removeControl(searchControl);
-  }, [map]);
-};
-
 const Map = ({ height, width }) => {
   const [markers, setMarkers] = useState([]);
   const [paysToHighlight, setPaysToHighlight] = useState([]);
@@ -41,6 +25,7 @@ const Map = ({ height, width }) => {
   const [countryPointCount, setCountryPointCount] = useState([]);
   const [maxCount, setMaxCount] = useState(1);
   const [minCount, setMinCount] = useState(0);
+  const [visibleBox, setVisibleBox] = useState(null);
 
   const zoomToMarker = (position) => {
     const map = mapRef.current;
@@ -203,6 +188,10 @@ const Map = ({ height, width }) => {
     }
   }, [paysToHighlight]);
 
+  const handleToggle = (name) => {
+    setVisibleBox(visibleBox === name ? null : name);
+  };
+
   return (
       <div style={{ height: height, width: height, margin: "10px" }}>
         <MapContainer
@@ -237,6 +226,8 @@ const Map = ({ height, width }) => {
                       name={key}
                       data={pays[key]}
                       goToMarqueur={zoomToMarker}
+                      onToggle={handleToggle}
+                      isVisible={visibleBox === key}
                   />
               ))}
         </div>
