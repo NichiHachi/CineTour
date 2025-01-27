@@ -17,7 +17,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -63,7 +63,7 @@ public class ImdbLocationsService {
         WebDriver driver = null;
 
         try {
-            ChromeOptions options = new ChromeOptions();
+            FirefoxOptions options = new FirefoxOptions();
             options.addArguments("--headless", "--disable-gpu", "--no-sandbox");
             options.addArguments("--window-size=1920,1080");
             options.addArguments(
@@ -159,7 +159,7 @@ public class ImdbLocationsService {
         WebDriver driver = null;
         String image = null;
         try {
-            ChromeOptions options = new ChromeOptions();
+            FirefoxOptions options = new FirefoxOptions();
             options.addArguments("--headless", "--disable-gpu", "--no-sandbox");
             options.addArguments("--window-size=1920,1080");
             options.addArguments(
