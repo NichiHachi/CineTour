@@ -40,6 +40,10 @@ function SearchBar({ placeholder }) {
       if (response.data) {
         navigate(`/movie/${imdbId}`);
       }
+      const responseImage = await axios.post(`/addMovieImage/${imdbId}`);
+      console.log('handleMovieClick - Image response received', responseImage);
+      const responseLocation = await fetch(`/importLocationByImdbId/${imdbId}`, {});
+      console.log('handleMovieClick - Location response received', responseLocation);
     } catch (error) {
       console.error('handleMovieClick - Error:', error);
     } finally {

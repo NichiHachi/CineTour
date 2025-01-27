@@ -24,6 +24,24 @@ public class LocationController {
 
     /**
      * Method GET with a path variable.
+     * Get locations by idImdb from the database, if not found, import locations from
+     * IMDB if they exist.
+     * @param idImdb
+     * @return
+     */
+    @GetMapping("importLocationByImdbId/{idImdb}")
+    public String getMethodName(@PathVariable String idImdb) {
+        try {
+            imdbLocationsService.importLocations(idImdb);
+        } catch (Exception e) {
+            return "Error importing locations for IMDB ID: " + idImdb + e.getStackTrace();
+        }
+
+        return new String();
+    }
+
+    /**
+     * Method GET with a path variable.
      * Get locations by IMDB movie ID from the database.
      *
      * @param idImdb String

@@ -58,8 +58,8 @@ public class MovieController {
         return service.saveMovies(movies);
     }
 
-    @PostMapping("/addMovieImage")
-    public void addMovieImage(@RequestBody String movieIdImdb) {
+    @PostMapping("/addMovieImage/{movieIdImdb}")
+    public void addMovieImage(@PathVariable String movieIdImdb) {
         try {
             imdbMoviesService.importMovieImage(movieIdImdb);
         } catch (Exception e) {

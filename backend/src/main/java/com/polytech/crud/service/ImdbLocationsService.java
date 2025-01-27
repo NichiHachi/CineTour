@@ -168,8 +168,6 @@ public class ImdbLocationsService {
             driver = new RemoteWebDriver(new URI(seleniumRemoteUrl).toURL(), options);
             driver.get(url);
 
-            // Wait for content to load
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
             String pageSource = driver.getPageSource();
             Document doc = Jsoup.parse(pageSource);
             image = doc.select("img[class='ipc-image']").attr("src");

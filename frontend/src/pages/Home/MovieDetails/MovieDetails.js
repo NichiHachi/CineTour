@@ -35,6 +35,13 @@ function MovieDetails() {
 
   return (
     <div className="movie-details">
+      {movie.image ? (
+        <img 
+          src={movie.image} 
+          alt={`${movie.title} poster`}
+        />
+      ) : (
+        <div>No image available</div> )}
       <h2>{movie.title}</h2>
       <p><strong>Year:</strong> {movie.releaseYear}</p>
       <p><strong>Runtime:</strong> {movie.runtimeMinutes} minutes</p>
