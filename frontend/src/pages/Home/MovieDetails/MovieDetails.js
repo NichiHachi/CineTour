@@ -11,7 +11,7 @@ function MovieDetails() {
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const response = await axios.get(`/movieByImdbId/${imdbId}`, {
+        const response = await axios.get(`/api/movieByImdbId/${imdbId}`, {
           withCredentials: true // Important for sending cookies
         });
         setMovie(response.data);

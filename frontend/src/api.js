@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const getAllUsers = async () => {
     try {
-        const response = await axios.get(`/users/all`);
+        const response = await axios.get(`/api/users/all`);
         return response.data;
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -12,7 +12,7 @@ export const getAllUsers = async () => {
 
 export const getUserById = async (id) => {
     try {
-        const response = await axios.get(`/users/${id}`);
+        const response = await axios.get(`/api/users/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching user by ID:', error);
@@ -22,7 +22,7 @@ export const getUserById = async (id) => {
 
 export const addUser = async (user) => {
     try {
-      const response = await axios.post('/users/add', user, {
+      const response = await axios.post('/api/users/add', user, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -36,7 +36,7 @@ export const addUser = async (user) => {
 
 export const isUsernameAvailable = async (user) => {
     try {
-      const response = await axios.post('/users/isUserNotExist', user, {
+      const response = await axios.post('/api/users/isUserNotExist', user, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -50,7 +50,7 @@ export const isUsernameAvailable = async (user) => {
 
 export const correctPassword = async (user) => {
     try {
-        const response = await axios.post(`/users/login`, user);
+        const response = await axios.post(`/api/users/login`, user);
         return response.data;
     } catch (error) {
         console.error('Error checking password:', error);

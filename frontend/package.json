@@ -46,6 +46,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/react-router-dom": "^5.3.3",
+    "sass": "^1.83.4",
     "web-vitals": "^4.2.4"
   }
 }

@@ -18,31 +18,49 @@ function SearchBar({ placeholder }) {
       setFilteredData([]);
     } else {
       try {
-        const response = await fetch(`/search?title=${searchWord}`);
-        const data = await response.json();
-        setFilteredData(data);
+        console.log('Searching for:', searchWord); // Debug request
+
+        const response = await axios.get(`/api/search?title=${searchWord}`, {
+          withCredentials: true,
+        });
+
+        console.log('Raw response:', response); // Debug full response
+        console.log('Response headers:', response.headers); // Debug headers
+
+        if (response.data && Array.isArray(response.data)) {
+          console.log('Valid movies array:', response.data);
+          setFilteredData(response.data);
+        } else {
+          console.warn('Invalid response format:', response.data);
+          setFilteredData([]);
+        }
       } catch (error) {
-        console.error('Error searching films:', error);
+        console.error('Search error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        setFilteredData([]);
       }
     }
   };
-  
+
   const handleMovieClick = async (imdbId) => {
     if (isNavigating) return;
     setIsNavigating(true);
-  
+
     console.log('handleMovieClick called with imdbId:', imdbId);
     try {
-      const response = await axios.get(`/movieByImdbId/${imdbId}`, {
+      const response = await axios.get(`/api/movieByImdbId/${imdbId}`, {
         withCredentials: true
       });
       console.log('handleMovieClick - Response received', response.data);
       if (response.data) {
         navigate(`/movie/${imdbId}`);
       }
-      const responseImage = await axios.post(`/addMovieImage/${imdbId}`);
+      const responseImage = await axios.post(`/api/addMovieImage/${imdbId}`);
       console.log('handleMovieClick - Image response received', responseImage);
-      const responseLocation = await fetch(`/importLocationByImdbId/${imdbId}`, {});
+      const responseLocation = await fetch(`/api/importLocationByImdbId/${imdbId}`, {});
       console.log('handleMovieClick - Location response received', responseLocation);
     } catch (error) {
       console.error('handleMovieClick - Error:', error);
@@ -54,7 +72,7 @@ function SearchBar({ placeholder }) {
 
   useMousePosition(searchRef, [filteredData]);
   useMousePosition(resultsRef, [filteredData]);
-  
+
   return (
     <div className="search">
       <div className="searchInputs" ref={searchRef}>

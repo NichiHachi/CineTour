@@ -13,7 +13,7 @@ function UserProfile() {
     const fetchUserInfo = async () => {
       if (cookies.username) {
         try {
-          const response = await axios.get(`/users/profile/${cookies.username}`, {
+          const response = await axios.get(`/api/users/profile/${cookies.username}`, {
             withCredentials: true
           });
           setUserInfo(response.data);

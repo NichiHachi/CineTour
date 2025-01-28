@@ -13,7 +13,7 @@ const LoginForm = () => {
     try {
       console.log('Attempting login with:', { username }); // Debug log
       
-      const response = await axios.post('/users/login', {
+      const response = await axios.post('/api/users/login', {
         username,
         password
       }, {
