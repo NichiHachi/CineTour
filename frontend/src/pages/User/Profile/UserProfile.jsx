@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import API_ENDPOINTS from './resources/api-links';
+import API_ENDPOINTS from "../../../resources/api-links";
 
 function UserProfile() {
   const [cookies] = useCookies(['username']);

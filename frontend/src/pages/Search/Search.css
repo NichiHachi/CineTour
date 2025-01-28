@@ -1,4 +1,4 @@
-.home {
+.search {
   /* border: 2px dashed plum; */
   display: flex;
   flex-direction: column;
@@ -9,18 +9,9 @@
   gap: 10px;
 }
 
-.home > h1 {
-  width: 584px;
-  text-align: center;
-}
-
 @media screen and (max-width: 600px) {
-  .home {
+  .search {
     width: calc(100vw - 40px);
     margin: 20px;
-  }
-
-  .home > h1 {
-    width: calc(100vw - 40px);
   }
 }

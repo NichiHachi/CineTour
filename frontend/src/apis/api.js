@@ -1,5 +1,5 @@
 import axios from 'axios';
-import API_ENDPOINTS from './resources/api-links';
+import API_ENDPOINTS from "../resources/api-links";
 
 export const getAllUsers = async () => {
     try {

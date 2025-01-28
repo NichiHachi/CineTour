@@ -1,22 +1,17 @@
 :root {
-  --bg-color: rgb(20, 20, 20);
-  --card-color: rgb(23, 23, 23);
+  --border-radius: 16px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  align-items: center;
-  background-color: var(--bg-color);
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  margin: 0px;
-  overflow: hidden;
-  padding: 0px;
-}
-
-@media (max-width: 1000px) {
-  body {
-    align-items: flex-start;
-    overflow: auto;
-  }
+  margin: 0;
+  padding: 0;
+  background-color: rgb(20, 20, 20);
+  color: #ffffff;
 }

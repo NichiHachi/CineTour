@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import API_ENDPOINTS from "./resources/api-links";
+import API_ENDPOINTS from "../../../resources/api-links";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");

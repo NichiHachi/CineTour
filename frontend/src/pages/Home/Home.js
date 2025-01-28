@@ -1,10 +1,21 @@
 import React from 'react'
-import Card from '../../components/Card/Card'
+import Searchbar from '../../components/Searchbar/Searchbar'
+import './Home.css'
+import GlowContainer from '../../components/GlowContainer/GlowContainer'
+import Navbar from '../../components/Navbar/Navbar'
+import RevealText from '../../components/TextEffects/RevealText/RevealText'
 
 const Home = () => {
   return (
     <>
-      <Card />
+      <GlowContainer className="home">
+        <Navbar />
+        <h1>
+          Passer vos prochaines vacances dans un décor de{' '}
+          <RevealText>cinéma</RevealText>
+        </h1>
+        <Searchbar />
+      </GlowContainer>
     </>
   )
 }

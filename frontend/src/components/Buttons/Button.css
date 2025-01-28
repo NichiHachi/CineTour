@@ -1,0 +1,33 @@
+.button {
+  /* border: 1px dashed red; */
+  display: flex;
+  padding: 1px;
+  z-index: 100;
+  position: relative;
+  z-index: 1;
+  padding: 1px !important;
+  border-radius: var(--border-radius);
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.button-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.glow.button::before {
+  background: radial-gradient(
+    80px circle at var(--mouse-x) var(--mouse-y),
+    rgba(255, 0, 255, 0.06),
+    transparent 60%
+  );
+  z-index: 3;
+}
+
+.button a {
+  color: white;
+  text-decoration: none;
+}

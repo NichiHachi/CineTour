@@ -1,12 +1,12 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './SearchBar.css';
-import SearchIcon from '@mui/icons-material/Search';
-import useMousePosition from '../../utils/useMousePosition';
+import React, { useRef, useState } from 'react'
+import './Searchbar.css'
+import Glow from '../Glow/Glow'
+import SearchIcon from '@mui/icons-material/Search'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import API_ENDPOINTS from '../../resources/api-links';
 
-function SearchBar({ placeholder }) {
+const Searchbar = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isNavigating, setIsNavigating] = useState(false);
   const searchRef = useRef(null);
@@ -19,32 +19,23 @@ function SearchBar({ placeholder }) {
       setFilteredData([]);
     } else {
       try {
-        console.log('Searching for:', searchWord); // Debug request
-
         const response = await axios.get(API_ENDPOINTS.search(searchWord), {
           withCredentials: true,
         });
-
-        console.log('Raw response:', response); // Debug full response
-        console.log('Response headers:', response.headers); // Debug headers
-
-        if (response.data && Array.isArray(response.data)) {
-          console.log('Valid movies array:', response.data);
+        console.log('API Response:', response.data);
+        
+        if (Array.isArray(response.data)) {
           setFilteredData(response.data);
         } else {
           console.warn('Invalid response format:', response.data);
           setFilteredData([]);
         }
       } catch (error) {
-        console.error('Search error details:', {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status
-        });
+        console.error('Error searching films:', error);
         setFilteredData([]);
       }
     }
-  };
+  }
 
   const handleMovieClick = async (imdbId) => {
     if (isNavigating) return;
@@ -69,44 +60,38 @@ function SearchBar({ placeholder }) {
       setIsNavigating(false);
       console.log('handleMovieClick - END');
     }
-  };
-
-  useMousePosition(searchRef, [filteredData]);
-  useMousePosition(resultsRef, [filteredData]);
+  }
 
   return (
-    <div className="search">
-      <div className="searchInputs" ref={searchRef}>
-        <div className="searchInputs-content">
+    <Glow className="searchbar">
+      <div className="search-section">
+        <div className="search-input" ref={searchRef}>
           <input
             type="text"
-            placeholder={placeholder}
+            placeholder="Rechercher un film"
             onChange={handleFilter}
           />
-          <div className="searchIcon">
-            <SearchIcon />
-          </div>
+        </div>
+        <div className="search-icon">
+          <SearchIcon />
         </div>
       </div>
-      {filteredData.length !== 0 && (
-        <div className="dataResult" ref={resultsRef}>
-          <div className="dataResult-content">
-            {filteredData.slice(0, 5).map((value, key) => (
-              <div
-                className="dataItem"
-                onClick={() => !isNavigating && handleMovieClick(value.idImdb)}
-                key={key}
-                role="button"
-                tabIndex={0}
-              >
-                <p>{value.title}</p>
-              </div>
-            ))}
+      <div
+        className={`results-section ${filteredData.length !== 0 ? 'show' : ''}`}
+        ref={resultsRef}
+      >
+        {filteredData.slice(0, 10).map((value, key) => (
+          <div
+            className="result"
+            onClick={() => handleMovieClick(value.idImdb)}
+            key={key}
+          >
+            <p>{value.title}</p>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        ))}
+      </div>
+    </Glow>
+  )
 }
 
-export default SearchBar;
+export default Searchbar

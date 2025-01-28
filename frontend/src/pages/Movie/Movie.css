@@ -1,0 +1,9 @@
+.movie {
+  /* border: 2px dashed plum; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  margin-top: 63px;
+  padding: 10px;
+}

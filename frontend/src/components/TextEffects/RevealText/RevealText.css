@@ -1,0 +1,17 @@
+.reveal-text .letter {
+  display: inline-block;
+  opacity: 0;
+  animation: reveal 0.5s forwards ease-in-out;
+  animation-delay: calc(0.5s + var(--index) * 0.05s);
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
