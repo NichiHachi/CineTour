@@ -77,25 +77,48 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> canLogin(@RequestBody User user, HttpServletResponse response) {
+    public ResponseEntity<User> canLogin(@RequestBody User user, HttpServletRequest request,
+            HttpServletResponse response) {
+        // Vérifie si l'utilisateur a déjà un cookie de connexion
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("username".equals(cookie.getName())) {
+                    // Si un cookie "username" existe, l'utilisateur est déjà connecté
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                }
+            }
+        }
+
+        // Si l'utilisateur n'est pas déjà connecté, procède à la vérification des
+        // identifiants
         User existingUser = service.getUserByUsername(user.getUsername());
         if (existingUser != null && existingUser.getPassword().equals(user.getPassword())) {
-            // Create a new cookie with the username
             Cookie userCookie = new Cookie("username", existingUser.getUsername());
-            userCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+            userCookie.setMaxAge(7 * 24 * 60 * 60);
+            userCookie.setPath("/");
+
             userCookie.setSecure(false);
             userCookie.setHttpOnly(false);
-            userCookie.setPath("/");
-            userCookie.setAttribute("SameSite", "Strict");
 
-            // Add the cookie to the response
+            userCookie.setAttribute("SameSite", "Lax");
+
             response.addCookie(userCookie);
 
-            // Return the user with OK status
+            existingUser.setPassword(null);
             return ResponseEntity.ok(existingUser);
         }
-        // Return unauthorized if login fails
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        Cookie userCookie = new Cookie("username", null);
+        userCookie.setMaxAge(0); // Supprime immédiatement le cookie
+        userCookie.setPath("/"); // Assurez-vous que le chemin correspond à celui du cookie initial
+        response.addCookie(userCookie);
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/profile/{username}")

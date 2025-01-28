@@ -1,8 +1,9 @@
 import axios from 'axios';
+import API_ENDPOINTS from "../resources/api-links";
 
 export const getAllUsers = async () => {
     try {
-        const response = await axios.get(`/api/users/all`);
+        const response = await axios.get(API_ENDPOINTS.allUsers);
         return response.data;
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -12,7 +13,7 @@ export const getAllUsers = async () => {
 
 export const getUserById = async (id) => {
     try {
-        const response = await axios.get(`/api/users/${id}`);
+        const response = await axios.get(API_ENDPOINTS.userById(id));
         return response.data;
     } catch (error) {
         console.error('Error fetching user by ID:', error);
@@ -22,7 +23,7 @@ export const getUserById = async (id) => {
 
 export const addUser = async (user) => {
     try {
-      const response = await axios.post('/api/users/add', user, {
+      const response = await axios.post(API_ENDPOINTS.addUser, user, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -36,7 +37,7 @@ export const addUser = async (user) => {
 
 export const isUsernameAvailable = async (user) => {
     try {
-      const response = await axios.post('/api/users/isUserNotExist', user, {
+      const response = await axios.post(API_ENDPOINTS.isUserNotExists, user, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -50,7 +51,7 @@ export const isUsernameAvailable = async (user) => {
 
 export const correctPassword = async (user) => {
     try {
-        const response = await axios.post(`/api/users/login`, user);
+        const response = await axios.post(API_ENDPOINTS.login, user);
         return response.data;
     } catch (error) {
         console.error('Error checking password:', error);

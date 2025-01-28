@@ -1,14 +1,14 @@
-import React, { useState } from "react";
-import SignUpForm from "./SignUpForm";
-import LoginForm from "./LoginForm";
-import "./UserForm.scss";
+import React, { useState } from 'react'
+import SignUpForm from './SignUpForm'
+import LoginForm from './LoginForm'
+import './UserForm.css'
 
 const UserForm = () => {
-  const [loginClicked, setLoginClicked] = useState(true);
+  const [loginClicked, setLoginClicked] = useState(true)
 
   const handleLoginClick = (isLog) => {
-    setLoginClicked(isLog);
-  };
+    setLoginClicked(isLog)
+  }
 
   return (
     <div className="userForm">
@@ -22,7 +22,7 @@ const UserForm = () => {
       </div>
       {loginClicked ? <LoginForm /> : <SignUpForm />}
     </div>
-  );
-};
+  )
+}
 
-export default UserForm;
+export default UserForm

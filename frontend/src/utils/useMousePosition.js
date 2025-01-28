@@ -5,7 +5,7 @@ const useMousePosition = (containerRef) => {
     const container = containerRef.current
 
     const handleMouseMove = (e) => {
-      const cards = container.getElementsByClassName('card')
+      const cards = container.getElementsByClassName('glow')
       for (const card of cards) {
         const rect = card.getBoundingClientRect()
         const x = e.clientX - rect.left

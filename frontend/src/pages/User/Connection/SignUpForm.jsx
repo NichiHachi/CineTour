@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { addUser, isUsernameAvailable } from "./api";
+import React, { useState } from 'react'
+import { addUser, isUsernameAvailable } from '../../../apis/api'
 
 const SignUpForm = () => {
   const [username, setUsername] = useState("");
@@ -8,22 +8,22 @@ const SignUpForm = () => {
   const [isNameAvailable, setIsNameAvailable] = useState(true);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      const newUser = { username, password, email };
-      const available = await isUsernameAvailable(newUser);
-      setIsNameAvailable(available);
-      console.log("isNameAvailable:", available);
+      const newUser = { username, password, email }
+      const available = await isUsernameAvailable(newUser)
+      setIsNameAvailable(available)
+      console.log('isNameAvailable:', available)
       if (available) {
-        await addUser(newUser);
-        setUsername("");
-        setPassword("");
-        setEmail("");
+        await addUser(newUser)
+        setUsername('')
+        setPassword('')
+        setEmail('')
       }
     } catch (error) {
-      console.error("Error adding user:", error);
+      console.error('Error adding user:', error)
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -38,7 +38,7 @@ const SignUpForm = () => {
       </div>
       {!isNameAvailable && (
         <div>
-          <p style={{ color: "red" }}>
+          <p style={{ color: 'red' }}>
             Username is already taken. Please choose a different username.
           </p>
         </div>
@@ -61,9 +61,9 @@ const SignUpForm = () => {
           required
         />
       </div>
-      <button type="submit">Add User</button>
+      <button type="submit">Créer un compte</button>
     </form>
-  );
-};
+  )
+}
 
 export default SignUpForm;

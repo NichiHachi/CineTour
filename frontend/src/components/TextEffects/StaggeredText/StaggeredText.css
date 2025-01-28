@@ -1,0 +1,45 @@
+:root {
+  --transition-duration: 0.2s;
+  --stagger-delay: 0.02s;
+}
+
+.staggered-text-container {
+  /* border: 1px solid pink; */
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  display: inline-block;
+}
+
+.staggered-text {
+  position: relative;
+  overflow: hidden;
+}
+
+.staggered-text .first,
+.staggered-text .second {
+  white-space: nowrap;
+  transition: transform var(--transition-duration) ease-in-out;
+}
+
+.staggered-text .second {
+  position: absolute;
+  bottom: -100%;
+  left: 0;
+}
+
+.staggered-text .letter {
+  display: inline-block;
+  transition: transform var(--transition-duration) ease-in-out;
+  transition-delay: calc(var(--index) * var(--stagger-delay));
+}
+
+/* Hover */
+
+.staggered-text-container:hover .first .letter {
+  transform: translateY(-100%);
+}
+
+.staggered-text-container:hover .second .letter {
+  transform: translateY(-100%);
+}

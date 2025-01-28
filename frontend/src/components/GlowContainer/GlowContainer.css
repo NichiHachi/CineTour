@@ -1,0 +1,7 @@
+.glow-container {
+  /* border: 1px solid red; */
+}
+
+.glow-container:hover .glow::after {
+  opacity: 1;
+}
