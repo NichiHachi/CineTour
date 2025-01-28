@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_ENDPOINTS from '../../../resources/api-links';
 
 function MovieDetails() {
   const { imdbId } = useParams();
@@ -11,7 +12,7 @@ function MovieDetails() {
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const response = await axios.get(`/api/movieByImdbId/${imdbId}`, {
+        const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId), {
           withCredentials: true // Important for sending cookies
         });
         setMovie(response.data);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_ENDPOINTS from './resources/api-links';
 
 function UserProfile() {
   const [cookies] = useCookies(['username']);
@@ -13,7 +14,7 @@ function UserProfile() {
     const fetchUserInfo = async () => {
       if (cookies.username) {
         try {
-          const response = await axios.get(`/api/users/profile/${cookies.username}`, {
+          const response = await axios.get(API_ENDPOINTS.profile(cookies.username), {
             withCredentials: true
           });
           setUserInfo(response.data);

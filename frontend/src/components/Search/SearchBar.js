@@ -4,6 +4,7 @@ import './SearchBar.css';
 import SearchIcon from '@mui/icons-material/Search';
 import useMousePosition from '../../utils/useMousePosition';
 import axios from 'axios';
+import API_ENDPOINTS from '../../resources/api-links';
 
 function SearchBar({ placeholder }) {
   const [filteredData, setFilteredData] = useState([]);
@@ -20,7 +21,7 @@ function SearchBar({ placeholder }) {
       try {
         console.log('Searching for:', searchWord); // Debug request
 
-        const response = await axios.get(`/api/search?title=${searchWord}`, {
+        const response = await axios.get(API_ENDPOINTS.search(searchWord), {
           withCredentials: true,
         });
 
@@ -51,16 +52,16 @@ function SearchBar({ placeholder }) {
 
     console.log('handleMovieClick called with imdbId:', imdbId);
     try {
-      const response = await axios.get(`/api/movieByImdbId/${imdbId}`, {
+      const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId), {
         withCredentials: true
       });
       console.log('handleMovieClick - Response received', response.data);
       if (response.data) {
         navigate(`/movie/${imdbId}`);
       }
-      const responseImage = await axios.post(`/api/addMovieImage/${imdbId}`);
+      const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
       console.log('handleMovieClick - Image response received', responseImage);
-      const responseLocation = await fetch(`/api/importLocationByImdbId/${imdbId}`, {});
+      const responseLocation = await fetch(API_ENDPOINTS.importLocationByImdbId(imdbId), {});
       console.log('handleMovieClick - Location response received', responseLocation);
     } catch (error) {
       console.error('handleMovieClick - Error:', error);
