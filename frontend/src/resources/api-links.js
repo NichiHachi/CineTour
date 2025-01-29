@@ -10,6 +10,7 @@ const API_ENDPOINTS = {
     addUser: isProduction ? '/api/users/add' : '/users/add',
     isUserNotExists: isProduction ? '/api/users/isUserNotExist' : '/users/isUserNotExist',
     login: isProduction ? '/api/users/login' : '/users/login',
+    logout: isProduction ? '/api/users/logout' : '/users/logout',
     profile: (cookiesUsername) => isProduction ? `/api/users/profile/${cookiesUsername}` : `/users/profile/${cookiesUsername}`,
 };
 

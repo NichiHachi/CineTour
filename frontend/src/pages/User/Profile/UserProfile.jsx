@@ -8,38 +8,69 @@ function UserProfile() {
   const [cookies] = useCookies(['username']);
   const [userInfo, setUserInfo] = useState(null);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Effect triggered, cookies:', cookies);
+    console.log('Document cookies:', document.cookie); // Vérification des cookies
+
+    const username = cookies.username;
+    
+    if (!username) {
+      console.log('No username cookie found, redirecting...');
+      navigate('/login');
+      return;
+    }
+
+    let isMounted = true;
+
     const fetchUserInfo = async () => {
-      if (cookies.username) {
-        try {
-          const response = await axios.get(API_ENDPOINTS.profile(cookies.username), {
-            withCredentials: true
-          });
+      try {
+        console.log('Fetching user info for:', username);
+        const response = await axios.get(API_ENDPOINTS.profile(username), {
+          withCredentials: true
+        });
+
+        console.log('Response received:', response.data);
+        
+        if (isMounted) {
           setUserInfo(response.data);
-        } catch (err) {
-          setError('Failed to load user information');
-          console.error('Error fetching user info:', err);
+          setIsLoading(false);
         }
-      } else {
-        navigate('/login');
+      } catch (err) {
+        console.error('Fetch error:', err);
+        if (isMounted) {
+          setError('Failed to load user information');
+          setIsLoading(false);
+        }
       }
     };
 
     fetchUserInfo();
-  }, [cookies.username, navigate]);
 
-  if (!cookies.username) {
-    return <div>Redirecting to login...</div>;
+    return () => {
+      console.log('Cleanup triggered');
+      isMounted = false;
+    };
+  }, [cookies, navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(API_ENDPOINTS.logout, {}, { withCredentials: true });
+
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading profile...</div>;
   }
 
   if (error) {
-    return <div>{error}</div>;
-  }
-
-  if (!userInfo) {
-    return <div>Loading...</div>;
+    return <div>Error: {error}</div>;
   }
 
   return (
@@ -61,6 +92,7 @@ function UserProfile() {
       ) : (
         <p>No movie search history available.</p>
       )}
+      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 }
