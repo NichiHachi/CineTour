@@ -1,0 +1,49 @@
+.country-box {
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  min-height: min-content;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.country-name {
+  font-size: 1.2rem;
+  padding: 20px;
+}
+
+.country-name:hover {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: all 0.1s ease-in-out;
+}
+
+.country-location:hover {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: all 0.1s ease-in-out;
+}
+
+.country-locations {
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.country-location {
+  padding: 10px;
+  padding-left: 40px;
+}
+
+.country-location:hover {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: all 0.1s ease-in-out;
+}

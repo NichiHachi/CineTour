@@ -10,7 +10,7 @@ function Movie() {
     <GlowContainer className="movie">
       <Navbar />
       <MovieBanner />
-      <Map height="500px" width="500px"/>
+      <Map height="1000px" width="1000px" />
     </GlowContainer>
   )
 }

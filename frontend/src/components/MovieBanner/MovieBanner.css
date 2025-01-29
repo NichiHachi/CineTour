@@ -2,10 +2,9 @@
   /* border: 1px dashed red; */
   display: flex;
   flex-direction: row;
-  width: 100%;
   max-width: 584px;
-  padding: 1px;
   gap: 10px;
+  border-radius: 20px;
 }
 
 .movie-header {

@@ -29,7 +29,7 @@
 .glow::after {
   background: radial-gradient(
     600px circle at var(--mouse-x) var(--mouse-y),
-    rgba(255, 0, 255, 0.4),
+    rgba(255, 255, 255, 0.4),
     transparent 40%
   );
   z-index: 1;
@@ -46,4 +46,8 @@
   background: rgb(23, 23, 23);
   z-index: 2;
   width: 100%;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* For Safari support */
+  /* Optional: you can add a slight transparency to the background */
+  background: rgba(23, 23, 23, 0.8);
 }
