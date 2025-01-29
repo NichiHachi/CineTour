@@ -1,18 +1,39 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect,useContext } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Glow from '../Glow/Glow'
 import './MovieBanner.css'
 import API_ENDPOINTS from '../../resources/api-links';
+import { LocationContext } from "../../context/LocationContext";
+
 
 function MovieBanner() {
   const { imdbId } = useParams()
   const [movie, setMovie] = useState(null)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
+  const {imageData} = useContext(LocationContext);
 
   useEffect(() => {
-    const fetchMovieDetails = async () => {
+    const FetchMovieDetails = async () => {
+      while( imageData.length > 0){
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      if (imageData.length > 0) {
+        try {
+          const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId), {
+            withCredentials: true, // Important for sending cookies
+          })
+          setMovie(response.data)
+        } catch (err) {
+          if (err.response?.status === 401) {
+            navigate('/login')
+          } else {
+            setError('Failed to load movie details')
+            console.error('Error fetching movie details:', err)
+          }
+        }
+      }
       try {
         const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId), {
           withCredentials: true, // Important for sending cookies
@@ -29,9 +50,9 @@ function MovieBanner() {
     }
 
     if (imdbId) {
-      fetchMovieDetails()
+      FetchMovieDetails()
     }
-  }, [imdbId, navigate])
+  }, [imdbId, navigate,imageData ])
 
   if (error) return <div>{error}</div>
   if (!movie) return <div>Loading...</div>
@@ -56,7 +77,7 @@ function MovieBanner() {
           </div>
           <div className="movie-details-container">
             <div className="movie-genres">
-              {movie.genres.split(',').map((genre) => (
+              {movie.genres && movie.genres.split(',').map((genre) => (
                 <Glow className="tag" key={genre}>
                   <div className="tag-text">{genre}</div>
                 </Glow>

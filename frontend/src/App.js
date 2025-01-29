@@ -1,6 +1,8 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { CookiesProvider } from 'react-cookie'
+import { LocationProvider } from './context/LocationContext';
+ 
 
 // Pages
 import Home from './pages/Home/Home'
@@ -18,16 +20,18 @@ function App() {
   return (
     <BrowserRouter>
       <CookiesProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<UserForm onUserLogin={true} />} />
-          <Route path="/signup" element={<UserForm onUserLogin={false} />} />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/movie/:imdbId" element={<Movie />} />
-          <Route path="/map" element={<Map height="500px" width="500px" />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <LocationProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<UserForm onUserLogin={true} />} />
+            <Route path="/signup" element={<UserForm onUserLogin={false} />} />
+            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/movie/:imdbId" element={<Movie />} />
+            <Route path="/map" element={<Map height="500px" width="500px" />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </LocationProvider>
       </CookiesProvider>
     </BrowserRouter>
   )
