@@ -333,7 +333,7 @@ const Map = ({ height, width }) => {
     const countryCode = feature.properties.filename.split(".")[0];
     const pointCount = countryPointCount[countryCode];
     const percent = (pointCount - minCount) / (maxCount - minCount);
-
+    console.log("percent", percent);
     const colorGradient = [
       "#fdd71b",
       "#fdc500",
@@ -349,10 +349,10 @@ const Map = ({ height, width }) => {
     return {
       fillColor: colorGradient[(percent * 9) | 0],
       weight: 2,
-      opacity: 0.25 + percent * 0.05,
+      opacity: 0.25,
       color: colorGradient[Math.min((percent * 9) | 0, 9)],
       dashArray: "8",
-      fillOpacity: 0.15 + percent * 0.05,
+      fillOpacity: 0.15,
     };
   };
 
