@@ -1,10 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  GeoJSON, Popup,
-} from "react-leaflet";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import { useParams } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, GeoJSON, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -77,9 +73,11 @@ import defaultLeisureIcon from "../../assets/icons/default_leisure.png";
 import defaultNaturalIcon from "../../assets/icons/default_natural.png";
 import defaultHistoricIcon from "../../assets/icons/default_historic.png";
 import defaultTourismIcon from "../../assets/icons/default_tourism.png";
-import axios from 'axios';
+import axios from "axios";
 import BoxDeroulant from "./BoxDeroulant";
-import API_ENDPOINTS from '../../resources/api-links';
+import API_ENDPOINTS from "../../resources/api-links";
+
+import { LocationContext } from "../../context/LocationContext";
 
 const Map = ({ height, width }) => {
   const [markers, setMarkers] = useState([]);
@@ -92,6 +90,10 @@ const Map = ({ height, width }) => {
   const [minCount, setMinCount] = useState(0);
   const [visibleBox, setVisibleBox] = useState(null);
   const [tourismSite, setTourismSite] = useState([]);
+  const { imdbId } = useParams();
+  const { locationData } = useContext(LocationContext);
+
+  console.log(imdbId);
 
   const zoomToMarker = (position, zoomLevel = 14) => {
     const map = mapRef.current;
@@ -103,6 +105,7 @@ const Map = ({ height, width }) => {
   const fetchLocations = async (idFilm) => {
     try {
       const response = await axios.get(API_ENDPOINTS.locationsByImdbId(idFilm));
+      console.log("response", response);
       return await response.data;
     } catch (error) {
       console.error("Error fetching locations:", error);
@@ -111,24 +114,33 @@ const Map = ({ height, width }) => {
   };
 
   useEffect(() => {
-    const idFilm = "tt0111161";
+    const idFilm = imdbId;
     const geocodeAddresses = async () => {
       const locations = await fetchLocations(idFilm);
+      console.log("locations", locations);
+      console.log("locationData", locationData);
+      while (locationData.length === 0 && locations.length === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      if (locationData.length > 0) {
+        locations = await fetchLocations(idFilm);
+      }
       const newMarkers = [];
       const newPays = {};
       for (const location of locations) {
+        console.log("location", location);
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-                location.locationString
-            )}`
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            location.locationString
+          )}`
         );
         const data = await response.json();
         if (data.length > 0) {
           const { lat, lon, display_name } = data[0];
           newMarkers.push([lat, lon]);
           const country = display_name
-              .split(",")
-              [display_name.split(",").length - 1].trim();
+            .split(",")
+            [display_name.split(",").length - 1].trim();
 
           if (!newPays[country]) {
             newPays[country] = [];
@@ -141,20 +153,22 @@ const Map = ({ height, width }) => {
       }
       setMarkers(newMarkers);
 
+      console.log("newMarkers", newMarkers);
+
       await fetchCountryCoordinates(newPays);
 
       await updateCountryCodes(newMarkers);
     };
     geocodeAddresses();
-  }, []);
+  }, [imdbId, locationData]);
 
   const fetchCountryCoordinates = async (newPays) => {
     const updatedPays = { ...newPays };
     for (const country in newPays) {
       const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-              country
-          )}`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          country
+        )}`
       );
       const data = await response.json();
       if (data.length > 0) {
@@ -174,12 +188,12 @@ const Map = ({ height, width }) => {
 
     for (const [lat, lon] of markers) {
       const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
       );
       const data = await response.json();
       if (data.address && data.address.country_code) {
         const countryCode = countries.alpha2ToAlpha3(
-            data.address.country_code.toUpperCase()
+          data.address.country_code.toUpperCase()
         );
 
         if (countryCode) {
@@ -292,10 +306,10 @@ const Map = ({ height, width }) => {
       iconUrl = iconMapping[tags.tourism] || defaultTourismIcon;
     } else if (tags.historic) {
       iconUrl = iconMapping[tags.historic] || defaultHistoricIcon;
-    } else if (tags.leisure){
+    } else if (tags.leisure) {
       iconUrl = iconMapping[tags.leisure] || defaultLeisureIcon;
-    } else if(tags.natural){
-      iconUrl = iconMapping[tags.natural] || defaultNaturalIcon
+    } else if (tags.natural) {
+      iconUrl = iconMapping[tags.natural] || defaultNaturalIcon;
     }
 
     return new L.Icon({
@@ -308,7 +322,7 @@ const Map = ({ height, width }) => {
   };
 
   L.Marker.prototype.options.icon = new L.Icon({
-    iconUrl: '',
+    iconUrl: "",
     iconSize: [0, 0],
     iconAnchor: [0, 0],
     popupAnchor: [0, 0],
@@ -330,28 +344,32 @@ const Map = ({ height, width }) => {
       "#f26700",
       "#ed5104",
       "#e73711",
-      "#e00b19"
-    ]
+      "#e00b19",
+    ];
     return {
-      fillColor: colorGradient[percent*9 | 0],
+      fillColor: colorGradient[(percent * 9) | 0],
       weight: 2,
-      opacity: 0.25+percent*0.05,
-      color: colorGradient[Math.min(percent*9 | 0, 9)],
-      dashArray: '8',
-      fillOpacity: 0.15+percent*0.05
+      opacity: 0.25 + percent * 0.05,
+      color: colorGradient[Math.min((percent * 9) | 0, 9)],
+      dashArray: "8",
+      fillOpacity: 0.15 + percent * 0.05,
     };
-  }
+  };
 
   const createClusterIcon = (cluster) => {
     const markers = cluster.getAllChildMarkers();
-    const iconUrls = markers.map(marker => marker.options.icon.options.iconUrl);
+    const iconUrls = markers.map(
+      (marker) => marker.options.icon.options.iconUrl
+    );
     const uniqueIconUrls = [...new Set(iconUrls)];
 
-    const iconHtml = uniqueIconUrls.map(url => `<img src="${url}" style="width: 20px; height: 20px;" />`).join('');
+    const iconHtml = uniqueIconUrls
+      .map((url) => `<img src="${url}" style="width: 20px; height: 20px;" />`)
+      .join("");
 
     return L.divIcon({
       html: `<div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center;">${iconHtml}</div>`,
-      className: 'custom-cluster-icon',
+      className: "custom-cluster-icon",
       iconSize: L.point(40, 40, true),
       iconAnchor: [20, 20],
     });
@@ -366,7 +384,7 @@ const Map = ({ height, width }) => {
 
     return L.divIcon({
       html: `<div style="display: flex; justify-content: center; align-items: center;">${iconHtml}</div>`,
-      className: 'custom-cluster-icon',
+      className: "custom-cluster-icon",
       iconSize: L.point(40, 40, true),
     });
   };
@@ -374,7 +392,7 @@ const Map = ({ height, width }) => {
   useEffect(() => {
     if (stateData && stateData.features && paysToHighlight.length > 0) {
       const filteredFeatures = stateData.features.filter((feature) =>
-          paysToHighlight.includes(feature.properties.filename.split(".")[0])
+        paysToHighlight.includes(feature.properties.filename.split(".")[0])
       );
       setFilteredData({
         ...stateData,
@@ -388,70 +406,76 @@ const Map = ({ height, width }) => {
   };
 
   return (
-      <div style={{ height: height, width: height, margin: "10px" }}>
-        <MapContainer
-            center={[0, 0]}
-            zoom={1}
-            style={{ height: height, width: width }}
-            ref={mapRef}
+    <div style={{ height: height, width: height, margin: "10px" }}>
+      <MapContainer
+        center={[0, 0]}
+        zoom={1}
+        style={{ height: height, width: width }}
+        ref={mapRef}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        <MarkerClusterGroup
+          maxClusterRadius={20}
+          iconCreateFunction={createClusterMarkerIcon}
         >
-          <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          <MarkerClusterGroup maxClusterRadius={20} iconCreateFunction={createClusterMarkerIcon}>
           {markers.map((position, idx) => (
-              <Marker
-                  key={idx}
-                  position={position}
-                  icon={customIcon}
-                  eventHandlers={{
-                    click: () => {
-                      zoomToMarker(position);
-                    },
-                  }}
-              />
+            <Marker
+              key={idx}
+              position={position}
+              icon={customIcon}
+              eventHandlers={{
+                click: () => {
+                  zoomToMarker(position);
+                },
+              }}
+            />
           ))}
-          </MarkerClusterGroup>
-          <MarkerClusterGroup maxClusterRadius={20} iconCreateFunction={createClusterIcon}>
+        </MarkerClusterGroup>
+        <MarkerClusterGroup
+          maxClusterRadius={20}
+          iconCreateFunction={createClusterIcon}
+        >
           {tourismSite.map((site, idx) => {
             if (site.type === "node") {
               return (
-                  <Marker
-                      key={idx}
-                      position={[site.lat, site.lon]}
-                      icon={getIcon(site.tags)}
-                  >
+                <Marker
+                  key={idx}
+                  position={[site.lat, site.lon]}
+                  icon={getIcon(site.tags)}
+                >
                   {site.tags.name && (
-                      <Popup>
-                        <div>
-                          <p>{site.tags.name}</p>
-                        </div>
-                      </Popup>
+                    <Popup>
+                      <div>
+                        <p>{site.tags.name}</p>
+                      </div>
+                    </Popup>
                   )}
-                  </Marker>
+                </Marker>
               );
             }
             return null;
           })}
-          </MarkerClusterGroup>
-          {filteredData && <GeoJSON data={filteredData}  style={countryStyle} />}
-        </MapContainer>
-        <div style={{ display: "flex", flexDirection: "column", margin: "10px" }}>
-          {Object.keys(pays).length > 0 &&
-              Object.keys(pays).map((key, index) => (
-                  <BoxDeroulant
-                      key={index}
-                      name={key}
-                      data={pays[key]}
-                      goToMarqueur={zoomToMarker}
-                      onToggle={handleToggle}
-                      isVisible={visibleBox === key}
-                      setTourismSite={setTourismSite}
-                  />
-              ))}
-        </div>
+        </MarkerClusterGroup>
+        {filteredData && <GeoJSON data={filteredData} style={countryStyle} />}
+      </MapContainer>
+      <div style={{ display: "flex", flexDirection: "column", margin: "10px" }}>
+        {Object.keys(pays).length > 0 &&
+          Object.keys(pays).map((key, index) => (
+            <BoxDeroulant
+              key={index}
+              name={key}
+              data={pays[key]}
+              goToMarqueur={zoomToMarker}
+              onToggle={handleToggle}
+              isVisible={visibleBox === key}
+              setTourismSite={setTourismSite}
+            />
+          ))}
       </div>
+    </div>
   );
 };
 

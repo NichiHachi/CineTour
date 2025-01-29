@@ -1,10 +1,12 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState,useContext } from 'react'
 import './Searchbar.css'
 import Glow from '../Glow/Glow'
 import SearchIcon from '@mui/icons-material/Search'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import API_ENDPOINTS from '../../resources/api-links';
+import { LocationContext } from '../../context/LocationContext';
+
 
 const Searchbar = () => {
   const [filteredData, setFilteredData] = useState([]);
@@ -12,6 +14,7 @@ const Searchbar = () => {
   const searchRef = useRef(null);
   const resultsRef = useRef(null);
   const navigate = useNavigate();
+  const { setLocationData, setImageData } = useContext(LocationContext);
 
   const handleFilter = async (event) => {
     const searchWord = event.target.value;
@@ -53,6 +56,10 @@ const Searchbar = () => {
       const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
       console.log('handleMovieClick - Image response received', responseImage);
       const responseLocation = await fetch(API_ENDPOINTS.importLocationByImdbId(imdbId), {});
+      setImageData(responseImage);
+      setLocationData(responseLocation);
+     
+
       console.log('handleMovieClick - Location response received', responseLocation);
     } catch (error) {
       console.error('handleMovieClick - Error:', error);
