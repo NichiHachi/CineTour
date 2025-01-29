@@ -14,10 +14,10 @@ const UserForm = () => {
     <div className="userForm">
       <div className="chooseFileDiv">
         <div onClick={() => handleLoginClick(true)} className="userFormName">
-          Login
+          Se connecter
         </div>
         <div onClick={() => handleLoginClick(false)} className="userFormName">
-          Sign up
+          Créer un compte
         </div>
       </div>
       {loginClicked ? <LoginForm /> : <SignUpForm />}

@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(23)
     }
 }
 
@@ -63,16 +63,16 @@ test {
     testLogging {
         // Affiche les événements de passage, échec, saut et sortie standard/erreur
         events "passed", "skipped", "failed", "standardOut", "standardError"
-        
+
         // Affiche toujours les flux de sortie standard
         showStandardStreams = true
-        
+
         // Affiche les détails complets pour tous les événements
         showExceptions true
         showCauses true
         showStackTraces true
     }
-    
+
     // Ajout des arguments JVM pour résoudre les avertissements et problèmes spécifiques
     jvmArgs += [
         '-Xshare:off',

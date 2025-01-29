@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import { addUser, isUsernameAvailable } from '../../../apis/api'
 
 const SignUpForm = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [isNameAvailable, setIsNameAvailable] = useState(true);
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
+  const [isNameAvailable, setIsNameAvailable] = useState(true)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -28,7 +28,7 @@ const SignUpForm = () => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label>Username:</label>
+        <label>Nom d'utilisateur :</label>
         <input
           type="text"
           value={username}
@@ -39,12 +39,12 @@ const SignUpForm = () => {
       {!isNameAvailable && (
         <div>
           <p style={{ color: 'red' }}>
-            Username is already taken. Please choose a different username.
+            Nom d'utilisateur déjà utilisé ou non valide.
           </p>
         </div>
       )}
       <div>
-        <label>Password:</label>
+        <label>Mot de passe :</label>
         <input
           type="password"
           value={password}
@@ -53,7 +53,7 @@ const SignUpForm = () => {
         />
       </div>
       <div>
-        <label>Email:</label>
+        <label>Email :</label>
         <input
           type="email"
           value={email}
@@ -66,4 +66,4 @@ const SignUpForm = () => {
   )
 }
 
-export default SignUpForm;
+export default SignUpForm

@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Glow from '../Glow/Glow'
 import './MovieBanner.css'
-import API_ENDPOINTS from '../../resources/api-links';
 
 function MovieBanner() {
   const { imdbId } = useParams()
@@ -14,7 +13,7 @@ function MovieBanner() {
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId), {
+        const response = await axios.get(`/movieByImdbId/${imdbId}`, {
           withCredentials: true, // Important for sending cookies
         })
         setMovie(response.data)
