@@ -5,6 +5,7 @@ const API_ENDPOINTS = {
     movieByImdbId: (imdbId) => isProduction ? `/api/movieByImdbId/${imdbId}` : `/movieByImdbId/${imdbId}`,
     movieImage: (imdbId) => isProduction ? `/api/addMovieImage/${imdbId}` : `/addMovieImage/${imdbId}`,
     importLocationByImdbId: (imdbId) => isProduction ? `/api/importLocationByImdbId/${imdbId}` : `/importLocationByImdbId/${imdbId}`,
+    locationsByImdbId: (imdbId) => isProduction ? `/api/locationByImdbId/${imdbId}` : `/locationByImdbId/${imdbId}`,
     allUsers: isProduction ? '/api/users/all' : '/users/all',
     userById: (id) => isProduction ? `/api/users/${id}` : `/users/${id}`,
     addUser: isProduction ? '/api/users/add' : '/users/add',

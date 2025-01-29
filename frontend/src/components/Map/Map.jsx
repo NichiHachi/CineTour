@@ -79,6 +79,7 @@ import defaultHistoricIcon from "../../assets/icons/default_historic.png";
 import defaultTourismIcon from "../../assets/icons/default_tourism.png";
 import axios from 'axios';
 import BoxDeroulant from "./BoxDeroulant";
+import API_ENDPOINTS from '../../resources/api-links';
 
 const Map = ({ height, width }) => {
   const [markers, setMarkers] = useState([]);
@@ -101,7 +102,7 @@ const Map = ({ height, width }) => {
 
   const fetchLocations = async (idFilm) => {
     try {
-      const response = await axios.get(`/locationByImdbId/${idFilm}`);
+      const response = await axios.get(API_ENDPOINTS.locationsByImdbId(idFilm));
       return await response.data;
     } catch (error) {
       console.error("Error fetching locations:", error);
