@@ -100,7 +100,7 @@ function UserProfile() {
           ) : (
             <div>No movie search history available.</div>
           )}
-          <button onClick={handleLogout}>Logout</button>
+          <button onClick={handleLogout}>Se déconnecter</button>
         </div>
       </Glow>
     </GlowContainer>

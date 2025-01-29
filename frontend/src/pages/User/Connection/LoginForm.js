@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useCookies } from 'react-cookie'
 import axios from 'axios'
 import API_ENDPOINTS from '../../../resources/api-links'
+import './LoginForm.css'
+import GlowContainer from '../../../components/GlowContainer/GlowContainer'
+import Button from '../../../components/Buttons/Button'
 
 const LoginForm = () => {
   const [cookies] = useCookies(['username'])
@@ -60,10 +63,11 @@ const LoginForm = () => {
   return (
     <div className="login-form">
       {cookies.username ? (
-        <div>
-          <p>Bienvenue, {cookies.username} !</p>
-          <button onClick={handleLogout}>Logout</button>
-        </div>
+        <GlowContainer className="welcome-message">
+          <h1>Bienvenue, {cookies.username} !</h1>
+          <button onClick={handleLogout}>Se déconnecter</button>
+          <Button onClick={handleLogout} />
+        </GlowContainer>
       ) : (
         <form onSubmit={handleLogin}>
           <div>
@@ -88,7 +92,7 @@ const LoginForm = () => {
           {isAlreadyLoggedIn && (
             <p>Vous être déjà connecté, veuillez vous déconnecter.</p>
           )}
-          <button type="submit">Login</button>
+          <button type="submit">Se connecter</button>
         </form>
       )}
     </div>
