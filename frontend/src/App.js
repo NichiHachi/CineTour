@@ -8,6 +8,7 @@ import UserForm from './pages/User/Connection/UserForm'
 import UserProfile from './pages/User/Profile/UserProfile'
 import Search from './pages/Search/Search'
 import Movie from './pages/Movie/Movie'
+import Map from './components/Map/Map.jsx'
 import NotFound from './pages/NotFound/NotFound'
 
 // Styles
@@ -24,6 +25,7 @@ function App() {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/search" element={<Search />} />
           <Route path="/movie/:imdbId" element={<Movie />} />
+          <Route path="/map" element={<Map height="500px" width="500px" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </CookiesProvider>
@@ -31,4 +33,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
