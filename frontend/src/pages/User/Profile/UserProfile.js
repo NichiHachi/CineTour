@@ -7,6 +7,8 @@ import GlowContainer from '../../../components/GlowContainer/GlowContainer'
 import Glow from '../../../components/Glow/Glow'
 import './UserProfile.css'
 import Navbar from '../../../components/Navbar/Navbar'
+import Button from '../../../components/Buttons/Button'
+import StaggeredText from '../../../components/TextEffects/StaggeredText/StaggeredText'
 
 function UserProfile() {
   const [cookies] = useCookies(['username'])
@@ -101,7 +103,12 @@ function UserProfile() {
           ) : (
             <div>No movie search history available.</div>
           )}
-          <button onClick={handleLogout}>Se déconnecter</button>
+          <div className="profile-footer">
+            <Button
+              className="button-logout"
+              children={<button onClick={handleLogout}>Se déconnecter</button>}
+            />
+          </div>
         </div>
       </Glow>
     </GlowContainer>
