@@ -63,8 +63,8 @@ const LoginForm = () => {
   return (
     <div className="login-form">
       {cookies.username ? (
-        <GlowContainer className="welcome-message">
-          <h1>Bienvenue, {cookies.username} !</h1>
+        <GlowContainer className="login-form-container">
+          <h1>Bonjour, {cookies.username} !</h1>
           <button onClick={handleLogout}>Se déconnecter</button>
           <Button onClick={handleLogout} />
         </GlowContainer>

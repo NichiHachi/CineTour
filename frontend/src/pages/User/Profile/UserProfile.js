@@ -6,7 +6,7 @@ import API_ENDPOINTS from '../../../resources/api-links'
 import GlowContainer from '../../../components/GlowContainer/GlowContainer'
 import Glow from '../../../components/Glow/Glow'
 import './UserProfile.css'
-import RevealText from '../../../components/TextEffects/RevealText/RevealText'
+import Navbar from '../../../components/Navbar/Navbar'
 
 function UserProfile() {
   const [cookies] = useCookies(['username'])
@@ -79,6 +79,7 @@ function UserProfile() {
 
   return (
     <GlowContainer className="user-profile-container">
+      <Navbar />
       <Glow className="user-profile">
         <div className="profile-info">
           <div className="profile-header">

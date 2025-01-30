@@ -3,8 +3,11 @@ import './Navbar.css'
 import Button from '../Buttons/Button'
 import Glow from '../Glow/Glow'
 import StaggeredText from '../TextEffects/StaggeredText/StaggeredText'
+import { useCookies } from 'react-cookie'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 
-function Navbar({ isConnected }) {
+function Navbar() {
+  const [cookies] = useCookies(['username'])
   return (
     <Glow className="navbar">
       <div className="navbar-section">
@@ -15,8 +18,16 @@ function Navbar({ isConnected }) {
         </div>
 
         <div className="navbar-right">
-          {isConnected ? (
-            ''
+          {cookies.username ? (
+            <a href="/profile" className="navbar-user">
+              <Glow className="navbar-user-icon">
+                <div className="user-icon">
+                  <AccountCircleIcon />
+                </div>
+              </Glow>
+              <div className="navbar-username"></div>
+              {cookies.username}
+            </a>
           ) : (
             <>
               <Button

@@ -16,6 +16,29 @@
   color: white;
 }
 
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-user-icon {
+  /* border: 1px dashed red; */
+  padding: 1px;
+  border-radius: 50%;
+}
+
+.user-icon {
+  /* border: 1px dashed red; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
 .navbar-section {
   height: 100%;
   display: flex;

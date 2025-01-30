@@ -1,4 +1,4 @@
-.notfound {
+.login-form-container {
   /* border: 2px dashed plum; */
   display: flex;
   flex-direction: column;
@@ -9,18 +9,18 @@
   gap: 10px;
 }
 
-.notfound > h1 {
+.login-form-container > h1 {
   width: 584px;
   text-align: center;
 }
 
 @media screen and (max-width: 600px) {
-  .notfound {
+  .login-form-container {
     width: calc(100vw - 40px);
     margin: 20px;
   }
 
-  .notfound > h1 {
+  .login-form-container > h1 {
     width: calc(100vw - 40px);
   }
 }
