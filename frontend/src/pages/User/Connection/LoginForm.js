@@ -4,7 +4,9 @@ import axios from 'axios'
 import API_ENDPOINTS from '../../../resources/api-links'
 import './LoginForm.css'
 import GlowContainer from '../../../components/GlowContainer/GlowContainer'
+import Glow from '../../../components/Glow/Glow'
 import Button from '../../../components/Buttons/Button'
+import Navbar from '../../../components/Navbar/Navbar'
 
 const LoginForm = () => {
   const [cookies] = useCookies(['username'])
@@ -61,41 +63,55 @@ const LoginForm = () => {
   }
 
   return (
-    <div className="login-form">
+    <>
       {cookies.username ? (
         <GlowContainer className="login-form-container">
-          <h1>Bonjour, {cookies.username} !</h1>
-          <button onClick={handleLogout}>Se déconnecter</button>
-          <Button onClick={handleLogout} />
+          <h1>Vous êtes déjà connecté, {cookies.username} !</h1>
         </GlowContainer>
       ) : (
-        <form onSubmit={handleLogin}>
-          <div>
-            <label>Nom d'utilisateur :</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>Mot de passe :</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          {!isPasswordCorrect && (
-            <p>Mot de passe incorrect ou nom d'utilisateur introuvable.</p>
-          )}
-          {isAlreadyLoggedIn && (
-            <p>Vous être déjà connecté, veuillez vous déconnecter.</p>
-          )}
-          <button type="submit">Se connecter</button>
-        </form>
+        <GlowContainer className="login-form-container">
+          <Navbar />
+          <Glow className="login-form">
+            <div className="login-form-content">
+              <h2>Connexion</h2>
+
+              <form onSubmit={handleLogin}>
+                <div>
+                  <label>Nom d'utilisateur : </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>Mot de passe : </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                {!isPasswordCorrect && (
+                  <p>
+                    Mot de passe incorrect ou nom d'utilisateur introuvable.
+                  </p>
+                )}
+                {isAlreadyLoggedIn && (
+                  <p>Vous être déjà connecté, veuillez vous déconnecter.</p>
+                )}
+                <div className="profile-footer">
+                  <Button
+                    className="button-logout"
+                    children={<button type="submit">Se connecter</button>}
+                  />
+                </div>
+              </form>
+            </div>
+          </Glow>
+        </GlowContainer>
       )}
-    </div>
+    </>
   )
 }
 

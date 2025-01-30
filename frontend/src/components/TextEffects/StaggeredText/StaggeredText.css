@@ -34,8 +34,6 @@
   transition-delay: calc(var(--index) * var(--stagger-delay));
 }
 
-/* Hover */
-
 .staggered-text-container:hover .first .letter {
   transform: translateY(-100%);
 }

@@ -9,18 +9,23 @@
   gap: 10px;
 }
 
-.login-form-container > h1 {
-  width: 584px;
-  text-align: center;
+.login-form {
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-@media screen and (max-width: 600px) {
-  .login-form-container {
-    width: calc(100vw - 40px);
-    margin: 20px;
-  }
+.login-form input {
+  border: none;
+  background-color: transparent;
+  color: white;
+  outline: none;
+}
 
-  .login-form-container > h1 {
-    width: calc(100vw - 40px);
-  }
+.login-form-content {
+  margin: 10px;
 }

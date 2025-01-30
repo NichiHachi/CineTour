@@ -8,7 +8,6 @@ import Glow from '../../../components/Glow/Glow'
 import './UserProfile.css'
 import Navbar from '../../../components/Navbar/Navbar'
 import Button from '../../../components/Buttons/Button'
-import StaggeredText from '../../../components/TextEffects/StaggeredText/StaggeredText'
 
 function UserProfile() {
   const [cookies] = useCookies(['username'])

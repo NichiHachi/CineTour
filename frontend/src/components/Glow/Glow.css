@@ -36,7 +36,6 @@
 }
 
 .glow:hover::before {
-  /* Add after to hover state */
   opacity: 1;
 }
 
@@ -47,7 +46,6 @@
   z-index: 2;
   width: 100%;
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px); /* For Safari support */
-  /* Optional: you can add a slight transparency to the background */
+  -webkit-backdrop-filter: blur(10px);
   background: rgba(23, 23, 23, 0.8);
 }
