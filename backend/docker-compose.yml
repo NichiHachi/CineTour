@@ -1,7 +1,7 @@
 services:
-  selenium-chrome:
-    image: selenium/standalone-chrome:latest
-    container_name: selenium-chrome
+  selenium-firefox:
+    image: selenium/standalone-firefox:latest
+    container_name: selenium-firefox
     ports:
       - "4444:4444"
     shm_size: 2gb
@@ -16,16 +16,17 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      selenium-chrome: 
+      selenium-firefox: 
         condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-default}
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cinetour
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=dbpassword
-      - SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub
+      - SELENIUM_REMOTE_URL=http://selenium-firefox:4444/wd/hub
   mysql:
     image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
       - "3307:3306"

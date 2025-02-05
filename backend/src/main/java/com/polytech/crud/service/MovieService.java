@@ -49,10 +49,14 @@ public class MovieService {
         for (Movie movie : movies) {
             movie.setMovieSearchCount(movie.getMovieSearchCount() + 1);
             repository.save(movie);
-            logger.debug("Incremented search locations count for movie {} to {}", 
-                movie.getIdImdb(),
-                movie.getLocationSearchCount());
+            logger.debug("Incremented search locations count for movie {} to {}",
+                    movie.getIdImdb(),
+                    movie.getLocationSearchCount());
         }
+    }
+
+    public List<Movie> searchMoviesOrderByPopularity(String query) {
+        return repository.searchByTitleContainingOrderBySearchCount(query);
     }
 
     public String deleteMovieById(int id) {

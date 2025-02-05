@@ -1,11 +1,11 @@
 package com.polytech.crud.service;
 
-import org.apache.commons.text.StringEscapeUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
@@ -13,6 +13,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
+
+import org.apache.commons.text.StringEscapeUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.polytech.crud.entity.Movie;
 import com.polytech.crud.repository.MovieRepository;
@@ -115,5 +120,21 @@ public class ImdbMoviesService {
         System.out.println("Saving movies to database");
         movieRepository.saveAll(movies);
         System.out.println("Finished importing movies");
+    }
+
+    public void importMovieImage(String idImdb) {
+        Movie movie = movieRepository.findByIdImdb(idImdb);
+        if (movie == null) {
+            System.out.println("Movie with IMDb ID " + idImdb + " not found");
+            return;
+        }
+        try {
+            ImdbLocationsService imdbLocationsService = new ImdbLocationsService();
+            String image = imdbLocationsService.getMovieImage(idImdb);
+            movie.setImage(image);
+            movieRepository.save(movie);
+        } catch (Exception e) {
+            System.err.println("Failed to import image for movie with IMDb ID " + idImdb + ": " + e.getMessage());
+        }
     }
 }

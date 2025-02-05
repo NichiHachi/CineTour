@@ -1,0 +1,26 @@
+.notfound {
+  /* border: 2px dashed plum; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  gap: 10px;
+}
+
+.notfound > h1 {
+  width: 584px;
+  text-align: center;
+}
+
+@media screen and (max-width: 600px) {
+  .notfound {
+    width: calc(100vw - 40px);
+    margin: 20px;
+  }
+
+  .notfound > h1 {
+    width: calc(100vw - 40px);
+  }
+}

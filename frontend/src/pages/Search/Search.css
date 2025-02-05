@@ -1,0 +1,17 @@
+.search {
+  /* border: 2px dashed plum; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  gap: 10px;
+}
+
+@media screen and (max-width: 600px) {
+  .search {
+    width: calc(100vw - 40px);
+    margin: 20px;
+  }
+}
