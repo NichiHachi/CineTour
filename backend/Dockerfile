@@ -1,6 +1,13 @@
-FROM eclipse-temurin:23-jdk
+FROM gradle:jdk23
 
-WORKDIR /my-project
+WORKDIR /cinetour_backend
+
+# Copy the source code
+COPY src src
+
+# Copy the start script and make it executable
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 # Copy the Gradle wrapper and build files
 COPY gradlew .
@@ -8,18 +15,10 @@ COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
 
-# Copy the source code
-COPY src src
-
 # Run Gradle commands to build the project
-RUN chmod +x ./gradlew && ./gradlew clean build -x test
+RUN chmod +x ./gradlew && ./gradlew build -x test
 
-# Copy the generated JAR file
-COPY build/libs/*.jar app.jar
-
-# Copy the entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+EXPOSE 8080
 
 # Set the entry point to run the entrypoint script
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/start.sh"]
