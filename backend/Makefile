@@ -1,26 +1,37 @@
-all: clean build run
+all: clean test run
 
-all-import: clean build run-import
+allImport: clean test runImport
 
-all-without-tests: clean build-without-tests run
+allWithoutTests: clean buildWithoutTests run
 
-all-import-without-tests: clean build-without-tests run-import
+allImportWithoutTests: clean buildWithoutTests runImport
+
+restart: stopOtherServices cleanOnlyCinetour run
+
+restartWithImport: stopOtherServices cleanOnlyCinetour runImport
 
 clean:
 	docker compose -p cinetour down --volumes --rmi all || true
 	./gradlew clean
 
-build:
+cleanOnlyCinetour:
+	docker compose -p cinetour down --volumes cinetour-backend
+	./gradlew clean
+
+stopOtherServices:
+	docker compose -p cinetour stop cinetour-mysql selenium-firefox
+
+test:
 	./gradlew clean build
 
-build-without-tests:
+buildWithoutTests:
 	./gradlew clean build -x test
 
 run:
-	docker compose -p cinetour up --build
+	docker compose -p cinetour up --build -d
 
-run-import:
-	SPRING_PROFILES_ACTIVE=import docker compose -p cinetour up --build
+runImport:
+	SPRING_PROFILES_ACTIVE=import docker compose -p cinetour up --build -d
 
 start:
 	docker compose -p cinetour up -d

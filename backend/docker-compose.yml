@@ -8,11 +8,14 @@ services:
     environment:
       - SE_ENABLE_TRACING=false
   backend:
+    container_name: cinetour-backend
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "9001:8080"
+    volumes:
+      - ./src:/cinetour_backend/src
     depends_on:
       mysql:
         condition: service_healthy
@@ -26,6 +29,7 @@ services:
       - SELENIUM_REMOTE_URL=http://selenium-firefox:4444/wd/hub
   mysql:
     image: mysql:8.0
+    container_name: cinetour-mysql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
