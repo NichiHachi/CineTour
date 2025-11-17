@@ -20,6 +20,8 @@ Ces commandes sont utiles pour des opérations courantes liées au backend. Elle
 
   > TLDR: faire `make` ou `make allImport` la première fois pour initialiser l'application et ses services. Ensuite, si l'auto restart (Spring Boot DevTools) ne suffit pas, faire `restart`.
 
+En cas de problème de permission, `chmod +x gradlew`.
+
 ## Utilisation du Makefile
 
 Afin de simplifier les étapes de la procédure de lancement en local, vous pouvez utilisez les commandes suivantes :
