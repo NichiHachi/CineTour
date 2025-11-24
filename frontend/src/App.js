@@ -16,6 +16,7 @@ import Globe from "./pages/Globe/Globe.jsx";
 
 // Styles
 import "./App.css";
+import MultiSearch from "./pages/MultiSearch/MultiSearch";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/movie/:imdbId" element={<Movie />} />
             <Route path="/map" element={<Map height="500px" width="500px" />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="home2" element={<MultiSearch />} />
           </Routes>
         </LocationProvider>
       </CookiesProvider>

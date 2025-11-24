@@ -472,6 +472,7 @@ const Map = ({ height, width }) => {
             />
           ))}
       </GlowContainer>
+
     </div>
   );
 };
