@@ -17,6 +17,7 @@ const RangeSlider = ({
     const maxRef = useRef(null)
     const rangeRef = useRef(null)
 
+    // met à jour la position et la largeur de la plage sélectionnée
     useEffect(() => {
         const updateRange = () => {
             if (rangeRef.current) {
@@ -30,7 +31,7 @@ const RangeSlider = ({
     }, [minValue, maxValue, min, max])
 
 
-
+    // gère le changement de la valeur minimale
     const handleMinChange = (e) => {
         const value = Math.min(Number(e.target.value), maxValue - step)
         setMinValue(value)
@@ -39,6 +40,7 @@ const RangeSlider = ({
         }
     }
 
+    // gère le changement de la valeur maximale
     const handleMaxChange = (e) => {
         const value = Math.max(Number(e.target.value), minValue + step)
         setMaxValue(value)
