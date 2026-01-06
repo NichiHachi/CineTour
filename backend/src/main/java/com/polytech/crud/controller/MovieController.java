@@ -91,7 +91,7 @@ public class MovieController {
      * @return
      */
     @GetMapping("/movieById/{id}")
-    public Movie findMovieById(@PathVariable int id) {
+    public Movie findMovieById(@PathVariable Long id) {
         Movie movie = service.getMovieById(id);
         if (movie == null) {
             logger.info("No movie found in database for ID: {}", id);
@@ -180,7 +180,7 @@ public class MovieController {
      *         error message
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable int id) {
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
         try {
             service.deleteMovieById(id);
             return ResponseEntity.ok("Movie deleted successfully");

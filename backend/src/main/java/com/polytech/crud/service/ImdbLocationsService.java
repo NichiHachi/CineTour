@@ -53,7 +53,7 @@ public class ImdbLocationsService {
     /**
      * Scrape filming locations from IMDb for a given movie ID (IMDb ID).
      * Uses Selenium WebDriver to scrape dynamic content.
-     * 
+     *
      * @param movieIdImdb String IMDb ID of the movie
      * @return List of Location objects
      * @throws IOException
@@ -187,7 +187,7 @@ public class ImdbLocationsService {
     /**
      * Imports filming locations for a movie from IMDb and saves them to the
      * database.
-     * 
+     *
      * This method performs the following steps:
      * 1. Validates if the movie exists in the database
      * 2. Checks if locations have already been searched for this movie (using
@@ -196,12 +196,12 @@ public class ImdbLocationsService {
      * - Scrapes locations from IMDb using Selenium
      * - Marks the movie as checked in database
      * - If locations are found, saves them to database
-     * 
+     *
      * The method is idempotent - multiple calls with the same movieIdImdb will only
      * scrape locations once. Subsequent calls will be skipped if the movie is
      * marked
      * as checked or if locations already exist.
-     * 
+     *
      * @param movieIdImdb The IMDb ID of the movie (e.g., "tt0068646" for The
      *                    Godfather)
      * @throws Exception If an error occurs during web scraping or database
@@ -244,7 +244,7 @@ public class ImdbLocationsService {
      * database.
      * Checks if locations already exist in the database before importing (to avoid
      * having to import them again).
-     * 
+     *
      * @param movies List of Movie
      * @throws Exception
      */
@@ -284,16 +284,16 @@ public class ImdbLocationsService {
 
     /**
      * Retrieves a list of locations by their ID.
-     * 
+     *
      * Uses `Optional` to safely and explicitly handle the absence of a result.
-     * 
+     *
      * @param movieId The unique identifier of the location in the database.
      * @return A list containing a list of locations if it exists, an empty list
      *         otherwise.
      */
     @Transactional(readOnly = true)
     public List<Location> getLocationsById(Long movieId) {
-        Movie movie = movieRepository.findById(movieId.intValue())
+        Movie movie = movieRepository.findById(movieId)
                 .orElse(null);
 
         if (movie == null) {
@@ -307,12 +307,12 @@ public class ImdbLocationsService {
 
     /**
      * Retrieves a list of locations by their title.
-     * 
+     *
      * This method searches for movies by their title, then retrieves the filming
      * locations for each movie.
      * If no locations are found for a movie in database, it attempts to import the
      * locations from IMDb.
-     * 
+     *
      * @param title The title of the location in the database.
      * @return A list containing a list of locations if it exists, an empty list
      *         otherwise.

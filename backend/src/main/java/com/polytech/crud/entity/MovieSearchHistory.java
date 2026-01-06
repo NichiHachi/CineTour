@@ -1,30 +1,34 @@
 package com.polytech.crud.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.Relationship;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "movie_search_history")
+@Node("MovieSearchHistory")
 public class MovieSearchHistory {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
-    @JsonBackReference
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
+    @Property("movieTitle")
     private String movieTitle;
+
+    @Property("searchTime")
     private LocalDateTime searchTime;
+
+    @Property("idImdb")
     private String idImdb;
+
+    @Relationship(type = "HAS_SEARCH_HISTORY", direction = Relationship.Direction.INCOMING)
+    private User user;
 }

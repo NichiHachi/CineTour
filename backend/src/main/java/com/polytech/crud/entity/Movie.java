@@ -1,11 +1,9 @@
 package com.polytech.crud.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,23 +11,36 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "movies")
+@Node("Movie")
 public class Movie {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue
+    private Long id;
+
+    @Property("idImdb")
     private String idImdb;
-    @Column(length = 1000)
+
+    @Property("title")
     private String title;
-    @Column(nullable = true)
+
+    @Property("releaseYear")
     private Integer releaseYear;
-    @Column(nullable = true)
+
+    @Property("runtimeMinutes")
     private Integer runtimeMinutes;
-    @Column(nullable = true)
+
+    @Property("genres")
     private String genres;
+
+    @Property("locationsChecked")
     private Boolean locationsChecked = false;
-    private int locationSearchCount = 0;
-    private int movieSearchCount = 0;
+
+    @Property("locationSearchCount")
+    private Integer locationSearchCount = 0;
+
+    @Property("movieSearchCount")
+    private Integer movieSearchCount = 0;
+
+    @Property("image")
     private String image = "";
 }

@@ -17,34 +17,48 @@ services:
     volumes:
       - ./src:/cinetour_backend/src
     depends_on:
-      mysql:
+      neo4j:
         condition: service_healthy
-      selenium-firefox: 
+      selenium-firefox:
         condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-default}
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cinetour
-      - SPRING_DATASOURCE_USERNAME=dbuser
-      - SPRING_DATASOURCE_PASSWORD=dbpassword
+      - SPRING_NEO4J_URI=bolt://neo4j:7687
+      - SPRING_NEO4J_AUTHENTICATION_USERNAME=neo4j
+      - SPRING_NEO4J_AUTHENTICATION_PASSWORD=neo4jpassword
       - SELENIUM_REMOTE_URL=http://selenium-firefox:4444/wd/hub
-  mysql:
-    image: mysql:8.0
-    container_name: cinetour-mysql
-    command: --default-authentication-plugin=mysql_native_password
+  neo4j:
+    image: neo4j:5.15.0
+    container_name: cinetour-neo4j
     restart: always
     ports:
-      - "3307:3306"
+      - "7474:7474" # HTTP
+      - "7687:7687" # Bolt
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: cinetour
-      MYSQL_USER: dbuser
-      MYSQL_PASSWORD: dbpassword
+      NEO4J_AUTH: neo4j/neo4jpassword
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      NEO4J_dbms_memory_pagecache_size: 1G
+      NEO4J_dbms_memory_heap_initial__size: 1G
+      NEO4J_dbms_memory_heap_max__size: 2G
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
     healthcheck:
-      test: ["CMD", "mysql", "-u", "dbuser", "-pdbpassword", "-e", "USE cinetour;"]
-      interval: 1s
-      timeout: 3s
+      test:
+        [
+          "CMD",
+          "cypher-shell",
+          "-u",
+          "neo4j",
+          "-p",
+          "neo4jpassword",
+          "RETURN 1",
+        ]
+      interval: 5s
+      timeout: 10s
       retries: 30
-      start_period: 20s
+      start_period: 30s
 
 volumes:
-  mysql-data:
+  neo4j-data:
+  neo4j-logs:

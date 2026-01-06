@@ -2,16 +2,16 @@ package com.polytech.crud.repository;
 
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import com.polytech.crud.entity.Movie;
 
-public interface MovieRepository extends JpaRepository<Movie, Integer> {
+public interface MovieRepository extends Neo4jRepository<Movie, Long> {
     List<Movie> findByTitle(String name);
 
     Movie findByIdImdb(String idImdb);
 
-    @Query("SELECT m FROM Movie m WHERE LOWER(m.title) LIKE LOWER(CONCAT('%', :query, '%')) ORDER BY (m.movieSearchCount + m.locationSearchCount) DESC LIMIT 10")
+    @Query("MATCH (m:Movie) WHERE toLower(m.title) CONTAINS toLower($query) RETURN m ORDER BY (m.movieSearchCount + m.locationSearchCount) DESC LIMIT 10")
     List<Movie> searchByTitleContainingOrderBySearchCount(@Param("query") String query);
 }

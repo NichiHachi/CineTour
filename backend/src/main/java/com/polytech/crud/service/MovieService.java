@@ -30,7 +30,7 @@ public class MovieService {
         return repository.findAll();
     }
 
-    public Movie getMovieById(int id) {
+    public Movie getMovieById(Long id) {
         return repository.findById(id).orElse(null);
     }
 
@@ -59,7 +59,7 @@ public class MovieService {
         return repository.searchByTitleContainingOrderBySearchCount(query);
     }
 
-    public String deleteMovieById(int id) {
+    public String deleteMovieById(Long id) {
         try {
             repository.deleteById(id);
             return "Movie removed with the id : " + id;

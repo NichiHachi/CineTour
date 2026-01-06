@@ -19,9 +19,6 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -32,11 +29,8 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 
 
-    // Java Persistence API
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-    // Datasource Proxy for logging SQL queries
-    implementation 'com.github.gavlyukovskiy:datasource-proxy-spring-boot-starter:1.9.1'
+    // Spring Data Neo4j
+    implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
 
     // Apache Commons CSV
     implementation 'org.apache.commons:commons-csv:1.9.0'
