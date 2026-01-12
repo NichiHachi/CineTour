@@ -16,30 +16,29 @@ import Globe from "./pages/Globe/Globe.jsx";
 
 // Styles
 import "./App.css";
-import MultiSearch from "./pages/MultiSearch/MultiSearch";
 import SearchResults from "./components/SearchResults/SearchResults";
 
 function App() {
-    return (
-        <BrowserRouter>
-            <CookiesProvider>
-                <LocationProvider>
-                    <Routes>
-                        <Route path="/" element={<Home/>}/>
-                        <Route path="/login" element={<LoginForm/>}/>
-                        <Route path="/signup" element={<SignUpForm/>}/>
-                        <Route path="/profile" element={<UserProfile/>}/>
-                        <Route path="/search" element={<Search/>}/>
-                        <Route path="/movie/:imdbId" element={<Movie/>}/>
-                        <Route path="/map" element={<Map height="500px" width="500px"/>}/>
-                        <Route path="*" element={<NotFound/>}/>
-                        <Route path="home2" element={<MultiSearch/>}/>
-                        <Route path="/search-results" element={<SearchResults/>}/>
-                    </Routes>
-                </LocationProvider>
-            </CookiesProvider>
-        </BrowserRouter>
-    )
+  return (
+    <BrowserRouter>
+      <CookiesProvider>
+        <LocationProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/signup" element={<SignUpForm />} />
+            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/movie/:imdbId" element={<Movie />} />
+            <Route path="/map" element={<Map height="500px" width="500px" />} />
+            <Route path="*" element={<NotFound />} />
+            <Route path="/globe" element={<Globe />} />
+            <Route path="/search-results" element={<SearchResults />} />
+          </Routes>
+        </LocationProvider>
+      </CookiesProvider>
+    </BrowserRouter>
+  );
 }
 
 export default App;
