@@ -33,6 +33,12 @@ run:
 runImport:
 	SPRING_PROFILES_ACTIVE=import docker compose -p cinetour up --build -d
 
+runNetworkDocker:
+    docker compose -p cinetour -f docker-compose.network.yml up --build -d
+
+stopNetworkDocker:
+    docker compose -p cinetour -f docker-compose.network.yml down
+
 start:
 	docker compose -p cinetour up -d
 

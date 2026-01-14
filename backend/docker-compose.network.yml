@@ -1,0 +1,28 @@
+services:
+  selenium-firefox:
+    image: selenium/standalone-firefox:latest
+    container_name: selenium-firefox
+    ports:
+      - "4444:4444"
+    shm_size: 4gb
+    environment:
+      - SE_ENABLE_TRACING=false
+  cinetour-backend:
+    container_name: cinetour-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9001:8080"
+    volumes:
+      - ./src:/cinetour_backend/src
+    depends_on:
+      selenium-firefox: 
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: network
+      CINETOUR_NETWORK_DB_URL: "jdbc:mysql://IP_SERVEUR:3306/cinetour?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      CINETOUR_NETWORK_DB_USER: "cinetour_net"
+      CINETOUR_NETWORK_DB_PASSWORD: "CHANGE_ME_STRONG_PASSWORD"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

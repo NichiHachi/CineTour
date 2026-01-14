@@ -49,9 +49,9 @@ public class ImdbPersonService {
                         Person.setBirthYear(null);
                     }
                     if (!fields[3].equals("\\N")) {
-                        Person.setBirthYear(Year.of(Integer.parseInt(fields[3])));
+                        Person.setDeathYear(Year.of(Integer.parseInt(fields[3])));
                     } else {
-                        Person.setBirthYear(null);
+                        Person.setDeathYear(null);
                     }
                     if (!fields[4].equals("\\N")) {
                         Person.setPrimaryProfessions(Arrays.asList(fields[4].split(",")));
