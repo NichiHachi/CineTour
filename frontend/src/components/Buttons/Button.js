@@ -1,19 +1,26 @@
-import React from 'react'
-import './Button.css'
-import Glow from '../Glow/Glow'
+import React from "react";
+import "./Button.css";
+import Glow from "../Glow/Glow";
 
 const Button = ({
   onClick,
   children,
-  type = 'button',
+  type = "button",
   disabled = false,
-  className = '',
+  className = "",
 }) => {
   return (
     <Glow className="button">
-      <div className="button-section">{children}</div>
+      <button
+        type={type}
+        onClick={onClick}
+        disabled={disabled}
+        className={`button-section ${className}`}
+      >
+        {children}
+      </button>
     </Glow>
-  )
-}
+  );
+};
 
-export default Button
+export default Button;

@@ -6,7 +6,6 @@ import { LocationProvider } from "./context/LocationContext";
 // Pages
 import Home from "./pages/Home/Home";
 import UserProfile from "./pages/User/Profile/UserProfile";
-import Search from "./pages/Search/Search";
 import Movie from "./pages/Movie/Movie";
 import Map from "./components/Map/Map.jsx";
 import NotFound from "./pages/NotFound/NotFound";
@@ -28,7 +27,6 @@ function App() {
             <Route path="/login" element={<LoginForm />} />
             <Route path="/signup" element={<SignUpForm />} />
             <Route path="/profile" element={<UserProfile />} />
-            <Route path="/search" element={<Search />} />
             <Route path="/movie/:imdbId" element={<Movie />} />
             <Route path="/map" element={<Map height="500px" width="500px" />} />
             <Route path="*" element={<NotFound />} />

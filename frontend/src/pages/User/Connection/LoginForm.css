@@ -1,31 +1,52 @@
 .login-form-container {
-  /* border: 2px dashed plum; */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100vw;
-  height: 100vh;
-  gap: 10px;
+    /* border: 2px dashed plum; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    gap: 10px;
 }
 
 .login-form {
-  border-radius: var(--border-radius);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+    border-radius: var(--border-radius);
+    max-width: 584px;
+    padding: var(--border-width);
+    background-color: var(--color-border);
+    margin: 1rem;
+}
 
-  padding: 1px;
-  background-color: rgba(255, 255, 255, 0.1);
+.login-form-section {
+    padding: 1rem;
+}
+
+.login-form-section h2 {
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
 .login-form input {
-  border: none;
-  background-color: transparent;
-  color: white;
-  outline: none;
+    border-radius: var(--border-radius);
+    border: var(--border-width) solid var(--color-border);
+    padding: 10px;
+    background-color: var(--color-bg-light);
+    color: var(--color-text);
+    outline: none;
+    margin-bottom: 1rem;
+    width: 100%;
 }
 
-.login-form-content {
-  margin: 10px;
+.output {
+    border-radius: var(--border-radius);
+    border: var(--border-width) solid var(--color-error);
+    padding: 10px;
+    background-color: var(--color-error-light);
+    color: var(--color-text-error);
+    outline: none;
+    margin-bottom: 1rem;
+}
+
+.login-form input:focus {
+    border-color: var(--color-primary);
 }

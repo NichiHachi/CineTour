@@ -10,6 +10,9 @@
     --border-width: 1px;
     --color-primary: hsl(292, 100%, 75%);
     --color-primary-highlight: hsl(248, 100%, 66%);
+    --color-error: hsl(0, 80%, 60%);
+    --color-error-light: hsl(0, 100%, 80%);
+
     --color-bg-dark: hsl(0, 0%, 0%);
     --color-bg: hsl(0, 0%, 10%);
     --color-bg-light: hsl(0, 0%, 20%);
@@ -19,6 +22,7 @@
     --color-border-light: hsl(0, 0%, 50%);
 
     --color-text: hsl(0, 0%, 95%);
+    --color-text-error: hsl(0, 80%, 40%);
     --color-text-light: hsl(0, 0%, 75%);
     --color-text-muted: hsl(0, 0%, 55%);
 
@@ -34,14 +38,14 @@
     --width: 90%;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
     :root {
         --color-bg-dark: hsl(0, 0%, 95%);
         --color-bg: hsl(0, 0%, 100%);
         --color-bg-light: hsl(0, 0%, 100%);
         --color-bg-light-highlight: rgba(0, 0, 0, 0.1);
 
-        --color-border: hsl(0, 0%, 80%);
+        --color-border: hsl(0, 0%, 90%);
         --color-border-light: hsl(0, 0%, 50%);
 
         --color-text: hsl(0, 0%, 5%);
@@ -115,16 +119,4 @@ button {
     color: var(--color-text-light);
     border: none;
     cursor: pointer;
-}
-
-.btn {
-    background: var(--color-text);
-    color: var(--color-bg);
-    font: var(--links);
-    padding: 0.25rem 0.75rem;
-    border-radius: var(--rounded);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
 }

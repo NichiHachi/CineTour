@@ -1,7 +1,7 @@
 .searchbar {
     border-radius: var(--border-radius);
     width: 584px;
-    padding: 1px;
+    padding: var(--border-width);
     background-color: var(--color-border);
 }
 
