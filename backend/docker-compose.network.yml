@@ -12,8 +12,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "9001:8080"
+    network_mode: host
     volumes:
       - ./src:/cinetour_backend/src
     depends_on:
@@ -21,8 +20,6 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: network
-      CINETOUR_NETWORK_DB_URL: "jdbc:mysql://IP_SERVEUR:3306/cinetour?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      CINETOUR_NETWORK_DB_URL: "jdbc:mysql://127.0.0.1:3307/cinetour?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
       CINETOUR_NETWORK_DB_USER: "cinetour_net"
       CINETOUR_NETWORK_DB_PASSWORD: "CHANGE_ME_STRONG_PASSWORD"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
