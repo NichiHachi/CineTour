@@ -1,12 +1,11 @@
 .home {
-    /* border: 2px dashed plum; */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100vw;
     height: 100vh;
-    gap: 10px;
+    gap: 1.5rem;
 }
 
 .home > h1 {
@@ -16,11 +15,11 @@
 
 @media screen and (max-width: 600px) {
     .home {
-        width: calc(100vw - 40px);
-        margin: 20px;
+        width: calc(100vw - 4rem);
+        margin: 2rem;
     }
 
     .home > h1 {
-        width: calc(100vw - 40px);
+        width: calc(100vw - 4rem);
     }
 }
