@@ -2,6 +2,8 @@ package com.polytech.CineTour;
 
 import java.util.List;
 
+import com.polytech.crud.entity.Director;
+import com.polytech.crud.service.ImdbDirectorsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -14,8 +16,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.Movie;
+import com.polytech.crud.entity.Person;
 import com.polytech.crud.service.ImdbLocationsService;
 import com.polytech.crud.service.ImdbMoviesService;
+import com.polytech.crud.service.ImdbPersonService;
 import com.polytech.utils.Console;
 
 import jakarta.annotation.PostConstruct;
@@ -32,6 +36,12 @@ public class CineTourApplication implements CommandLineRunner {
 
     @Autowired
     private ImdbMoviesService imdbMovies;
+
+    @Autowired
+    private ImdbDirectorsService imdbDirectors;
+
+    @Autowired
+    private ImdbPersonService imdbPersons;
 
     @Autowired
     private ImdbLocationsService imdbLocations;
@@ -61,14 +71,27 @@ public class CineTourApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if ("import".equals(activeProfile)) {
             Console.warnln("Import mode activated\n");
-            String gzFilePath = "title.basics.tsv.gz";
-            String tsvFilePath = "title.basics.tsv";
-            List<Movie> movies = imdbMovies.getMovies(gzFilePath, tsvFilePath);
-            imdbMovies.importMovies(movies);
-            Console.warnln(movies.size() + " Movies imported\n");
 
-            // Import locations for a SHAWSHANK REDEMPTION (Les évadés)
-            imdbLocations.importLocations("tt0111161");
+            // // Movies
+            // Console.warnln("Movies importation started\n");
+            // List<Movie> movies = imdbMovies.getMovies();
+            // imdbMovies.importMovies(movies);
+            // Console.warnln(movies.size() + " Movies imported\n");
+
+            // // Import locations for a SHAWSHANK REDEMPTION (Les évadés)
+            // imdbLocations.importLocations("tt0111161");
+
+            // // Directors
+            // Console.warnln("Directors importation started\n");
+            // List<Director> directors = imdbDirectors.getDirectors();
+            // imdbDirectors.importDirectors(directors);
+            // Console.warnln(directors.size() + " Directors imported\n");
+
+            // Persons : Actors + Directors informations
+            Console.warnln("Persons importation started\n");
+            List<Person> persons = imdbPersons.getPersons();
+            imdbPersons.importPersons(persons);
+            Console.warnln(persons.size() + " Directors imported\n");
 
             System.exit(0); // Clean exit after import
         } else {
