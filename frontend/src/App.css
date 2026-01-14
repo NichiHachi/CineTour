@@ -1,17 +1,130 @@
-:root {
-  --border-radius: 16px;
+/* reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+    --border-radius: 1rem;
+    --border-width: 1px;
+    --color-primary: hsl(292, 100%, 75%);
+    --color-primary-highlight: hsl(248, 100%, 66%);
+    --color-bg-dark: hsl(0, 0%, 0%);
+    --color-bg: hsl(0, 0%, 10%);
+    --color-bg-light: hsl(0, 0%, 20%);
+    --color-bg-light-highlight: rgba(255, 255, 255, 0.1);
+
+    --color-border: hsl(0, 0%, 30%);
+    --color-border-light: hsl(0, 0%, 50%);
+
+    --color-text: hsl(0, 0%, 95%);
+    --color-text-light: hsl(0, 0%, 75%);
+    --color-text-muted: hsl(0, 0%, 55%);
+
+    --ff: "Fira Sans", sans-serif;
+    --h1: 700 1.6rem/1em var(--ff);
+    --h2: 700 1.4rem/1em var(--ff);
+    --h3: 700 1.2rem/1em var(--ff);
+    --p: 400 1rem/1em var(--ff);
+    --links: 700 1rem/1em var(--ff);
+    --small: 400 0.8rem/1em var(--ff);
+    --rounded: 1rem;
+    --max-width: 1280px;
+    --width: 90%;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-bg-dark: hsl(0, 0%, 95%);
+        --color-bg: hsl(0, 0%, 100%);
+        --color-bg-light: hsl(0, 0%, 100%);
+        --color-bg-light-highlight: rgba(0, 0, 0, 0.1);
+
+        --color-border: hsl(0, 0%, 90%);
+        --color-border-light: hsl(0, 0%, 50%);
+
+        --color-text: hsl(0, 0%, 5%);
+        --color-text-light: hsl(0, 0%, 25%);
+        --color-text-muted: hsl(0, 0%, 45%);
+    }
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+small {
+    margin: 0;
+    padding: 0;
+}
+
+h1,
+.h1 {
+    font: var(--h1);
+}
+
+h2,
+.h2 {
+    font: var(--h2);
+}
+
+h3,
+.h3 {
+    font: var(--h3);
+    color: var(--color-text);
+}
+
+.small {
+    font: var(--small);
+}
+
+.links {
+    font: var(--links);
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  background-color: rgb(20, 20, 20);
-  color: #ffffff;
+    margin: 0 auto;
+    width: 100%;
+    background: var(--color-bg-dark);
+    color: var(--color-text);
+    font-family: var(--ff);
+    font: var(--p);
+}
+
+img {
+    width: 100%;
+}
+
+a {
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+svg {
+    width: 1.25rem;
+    fill: none;
+    stroke: var(--color-text);
+    stroke-width: 1px;
+}
+
+/* button */
+button {
+    background: none;
+    color: var(--color-text-light);
+    border: none;
+    cursor: pointer;
+}
+
+.btn {
+    background: var(--color-text);
+    color: var(--color-bg);
+    font: var(--links);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--rounded);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
 }
