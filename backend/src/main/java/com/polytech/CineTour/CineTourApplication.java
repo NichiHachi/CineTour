@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.Movie;
 import com.polytech.crud.entity.Person;
+import com.polytech.crud.entity.Principal;
 import com.polytech.crud.service.ImdbLocationsService;
 import com.polytech.crud.service.ImdbMoviesService;
 import com.polytech.crud.service.ImdbPersonService;
+import com.polytech.crud.service.ImdbPrincipalsService;
 import com.polytech.utils.Console;
 
 import jakarta.annotation.PostConstruct;
@@ -45,6 +47,9 @@ public class CineTourApplication implements CommandLineRunner {
 
     @Autowired
     private ImdbLocationsService imdbLocations;
+
+    @Autowired
+    private ImdbPrincipalsService imdbPrincipals;
 
     @Value("${spring.profiles.active:default}")
     private String activeProfile;
@@ -92,6 +97,12 @@ public class CineTourApplication implements CommandLineRunner {
             List<Person> persons = imdbPersons.getPersons();
             imdbPersons.importPersons(persons);
             Console.warnln(persons.size() + " Persons imported\n");
+
+            // Principals
+            Console.warnln("Principals importation started");
+            List<Principal> principals = imdbPrincipals.getPrincipals();
+            imdbPrincipals.importPrincipals(principals);
+            Console.warnln(principals.size() + " Principals imported\n");
 
             System.exit(0); // Clean exit after import
         } else {
