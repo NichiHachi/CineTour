@@ -2,8 +2,8 @@ package com.polytech.CineTour;
 
 import java.util.List;
 
-import com.polytech.crud.entity.Director;
-import com.polytech.crud.service.ImdbDirectorsService;
+import com.polytech.crud.entity.*;
+import com.polytech.crud.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -15,13 +15,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.polytech.crud.entity.Movie;
-import com.polytech.crud.entity.Person;
-import com.polytech.crud.entity.Principal;
-import com.polytech.crud.service.ImdbLocationsService;
-import com.polytech.crud.service.ImdbMoviesService;
-import com.polytech.crud.service.ImdbPersonService;
-import com.polytech.crud.service.ImdbPrincipalsService;
 import com.polytech.utils.Console;
 
 import jakarta.annotation.PostConstruct;
@@ -51,6 +44,9 @@ public class CineTourApplication implements CommandLineRunner {
     @Autowired
     private ImdbPrincipalsService imdbPrincipals;
 
+    @Autowired
+    private ImdbRatingsService imdbRatings;
+
     @Value("${spring.profiles.active:default}")
     private String activeProfile;
 
@@ -68,7 +64,7 @@ public class CineTourApplication implements CommandLineRunner {
      * If the active profile is “import”, then first import the films and then
      * switch to the default state.
      * Otherwise, the default profile is “default”.
-     * 
+     *
      * @param args
      * @throws Exception
      */
@@ -103,6 +99,12 @@ public class CineTourApplication implements CommandLineRunner {
             List<Principal> principals = imdbPrincipals.getPrincipals();
             imdbPrincipals.importPrincipals(principals);
             Console.warnln(principals.size() + " Principals imported\n");
+
+            // Ratings
+            Console.warnln("Ratings importation started");
+            List<Rating> ratings = imdbRatings.getRatings();
+            imdbRatings.importRatings(ratings);
+            Console.warnln(ratings.size() + " Ratings imported\n");
 
             System.exit(0); // Clean exit after import
         } else {
