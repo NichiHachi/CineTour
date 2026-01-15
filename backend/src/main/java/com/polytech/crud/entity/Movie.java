@@ -22,11 +22,8 @@ public class Movie {
     private String idImdb;
     @Column(length = 1000)
     private String title;
-    @Column(nullable = true)
     private Integer releaseYear;
-    @Column(nullable = true)
     private Integer runtimeMinutes;
-    @Column(nullable = true)
     private String genres;
     private Boolean locationsChecked = false;
     private int locationSearchCount = 0;

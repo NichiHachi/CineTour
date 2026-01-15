@@ -84,7 +84,7 @@ public class ImdbPersonService {
             return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
-        ImdbExtraction.extractGzFile(ImdbDatasets.NAMES.getUrl(), gzFileName);
+        ImdbExtraction.extractGzFile(gzFileName);
         System.out.println("Parsing IMDb dataset");
         return parsePersonsTsvFile(tsvFileName);
     }

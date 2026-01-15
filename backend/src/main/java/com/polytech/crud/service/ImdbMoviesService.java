@@ -77,7 +77,7 @@ public class ImdbMoviesService {
             return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
-        ImdbExtraction.extractGzFile(ImdbDatasets.MOVIE_BASICS.getUrl(), gzFileName);
+        ImdbExtraction.extractGzFile(gzFileName);
         System.out.println("Parsing IMDb dataset");
         return parseMoviesTsvFile(tsvFileName);
     }

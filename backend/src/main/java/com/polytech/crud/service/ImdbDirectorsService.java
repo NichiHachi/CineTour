@@ -61,7 +61,7 @@ public class ImdbDirectorsService {
             return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
-        ImdbExtraction.extractGzFile(ImdbDatasets.CREW.getUrl(), gzFileName);
+        ImdbExtraction.extractGzFile(gzFileName);
         System.out.println("Parsing IMDb dataset");
         return parseDirectorsTsvFile(tsvFileName);
     }

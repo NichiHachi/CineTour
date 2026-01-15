@@ -72,20 +72,20 @@ public class CineTourApplication implements CommandLineRunner {
         if ("import".equals(activeProfile)) {
             Console.warnln("Import mode activated\n");
 
-            // // Movies
-            // Console.warnln("Movies importation started\n");
-            // List<Movie> movies = imdbMovies.getMovies();
-            // imdbMovies.importMovies(movies);
-            // Console.warnln(movies.size() + " Movies imported\n");
+            // Movies
+            Console.warnln("Movies importation started\n");
+            List<Movie> movies = imdbMovies.getMovies();
+            imdbMovies.importMovies(movies);
+            Console.warnln(movies.size() + " Movies imported\n");
 
-            // // Import locations for a SHAWSHANK REDEMPTION (Les évadés)
-            // imdbLocations.importLocations("tt0111161");
+            // Import locations for a SHAWSHANK REDEMPTION (Les évadés)
+            imdbLocations.importLocations("tt0111161");
 
-            // // Directors
-            // Console.warnln("Directors importation started\n");
-            // List<Director> directors = imdbDirectors.getDirectors();
-            // imdbDirectors.importDirectors(directors);
-            // Console.warnln(directors.size() + " Directors imported\n");
+            // Directors
+            Console.warnln("Directors importation started\n");
+            List<Director> directors = imdbDirectors.getDirectors();
+            imdbDirectors.importDirectors(directors);
+            Console.warnln(directors.size() + " Directors imported\n");
 
             // Persons : Actors + Directors informations
             Console.warnln("Persons importation started\n");

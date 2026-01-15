@@ -27,8 +27,8 @@ public class ImdbExtraction {
         }
     }
 
-    public static void extractGzFile(String url, String gzFileName) throws IOException {
-        try (FileInputStream fis = new FileInputStream(gzFileName); // Utilise gzFileName, pas url
+    public static void extractGzFile(String gzFileName) throws IOException {
+        try (FileInputStream fis = new FileInputStream(gzFileName);
              GZIPInputStream gis = new GZIPInputStream(fis);
              FileOutputStream fos = new FileOutputStream(gzFileName.replace(".gz", ""))) {
 
