@@ -92,7 +92,27 @@
     padding-right: 2rem;
 }
 
+.navbar-right :has(#toggle-searchbar-button) {
+    display: none;
+}
+
+@media (max-width: 1200px) {
+    .navbar-center {
+        display: none;
+    }
+
+    .navbar-right :has(#toggle-searchbar-button) {
+        display: flex;
+    }
+}
+
 @media (max-width: 600px) {
+    .navbar-right :has(a) {
+        display: none;
+    }
+}
+
+@media (max-width: 370px) {
     .navbar-left h1 {
         display: none;
     }

@@ -36,17 +36,26 @@ function Navbar() {
         </div>
 
         <div className="navbar-right">
+          <Button
+            children={
+              <div className="icon">
+                <SearchIcon />
+              </div>
+            }
+            onClick="toggleSearchbar()"
+            id="toggle-searchbar-button"
+          />
+          <Button
+            children={
+              <div className="icon">
+                <MenuOpenIcon />
+              </div>
+            }
+            onClick="toggleRightbar()"
+            id="toggle-rightbar-button"
+          />
           {cookies.username ? (
             <a href="/profile" className="navbar-user">
-              <Button
-                children={
-                  <div className="icon">
-                    <SearchIcon />
-                  </div>
-                }
-                onClick="toggleSearchbar()"
-                id="toggle-searchbar-button"
-              />
               <Glow className="navbar-user-icon">
                 <div className="user-icon">
                   <AccountCircleIcon />
@@ -57,15 +66,6 @@ function Navbar() {
             </a>
           ) : (
             <>
-              <Button
-                children={
-                  <div className="icon">
-                    <SearchIcon />
-                  </div>
-                }
-                onClick="toggleSearchbar()"
-                id="toggle-searchbar-button"
-              />
               <Button
                 children={
                   <a href="/login">
