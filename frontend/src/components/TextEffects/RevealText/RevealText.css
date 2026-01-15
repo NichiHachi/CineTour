@@ -7,7 +7,7 @@
     display: inline-block;
     opacity: 0;
     animation: reveal 0.5s forwards ease-in-out;
-    animation-delay: calc(0.5s + var(--index) * 0.05s);
+    animation-delay: calc(var(--delay) * 1s + var(--index) * var(--speed) * 1s);
 }
 
 @keyframes reveal {

@@ -1,25 +1,18 @@
 import React from "react";
 import Searchbar from "../../components/Searchbar/Searchbar";
-import "./Home.css";
+import "./Search.css";
 import GlowContainer from "../../components/GlowContainer/GlowContainer";
 import Navbar from "../../components/Navbar/Navbar";
 import RevealText from "../../components/TextEffects/RevealText/RevealText";
 
-const Home = () => {
+const Search = () => {
   return (
     <>
-      <GlowContainer className="home">
+      <GlowContainer className="search-page">
         <Navbar />
-        <h1>
-          Passer vos prochaines vacances dans un décor de{" "}
-          <RevealText delay={0.3} speed={0.03}>
-            cinéma
-          </RevealText>
-        </h1>
-        <Searchbar />
       </GlowContainer>
     </>
   );
 };
 
-export default Home;
+export default Search;

@@ -8,6 +8,7 @@ const Button = ({
   type = "button",
   disabled = false,
   className = "",
+  id = "",
 }) => {
   return (
     <Glow className="button">
@@ -15,6 +16,7 @@ const Button = ({
         type={type}
         onClick={onClick}
         disabled={disabled}
+        id={id}
         className={`button-section ${className}`}
       >
         {children}

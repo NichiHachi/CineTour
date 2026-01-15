@@ -6,7 +6,7 @@
 }
 
 :root {
-    --border-radius: 1rem;
+    --border-radius: 0.75rem;
     --border-width: 1px;
     --color-primary: hsl(292, 100%, 75%);
     --color-primary-highlight: hsl(248, 100%, 66%);

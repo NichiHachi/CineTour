@@ -1,18 +1,18 @@
 .button {
     /* border: 1px dashed red; */
     display: flex;
-    padding: 1px;
-    z-index: 100;
+    padding: var(--border-width);
     position: relative;
     z-index: 1;
-    padding: 1px !important;
     border-radius: var(--border-radius);
     background-color: var(--color-border);
     cursor: pointer;
+    height: 2.5rem;
 }
 
 .button-section {
     display: flex;
+    width: 100%;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;

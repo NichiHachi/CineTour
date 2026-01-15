@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_ENDPOINTS from "../../resources/api-links";
 import { LocationContext } from "../../context/LocationContext";
+import RevealText from "../../components/TextEffects/RevealText/RevealText";
 
 const Searchbar = () => {
   const [filteredData, setFilteredData] = useState([]);
@@ -115,7 +116,14 @@ const Searchbar = () => {
             onClick={() => handleMovieClick(value.idImdb)}
             key={key}
           >
-            <p>{value.title}</p>
+            <RevealText delay={key * 0.05} speed={0.005}>
+              {value.title}
+            </RevealText>
+            <div className="left-side">
+              <RevealText delay={key * 0.05} speed={0.05}>
+                {value.releaseYear}
+              </RevealText>
+            </div>
           </div>
         ))}
       </div>

@@ -8,6 +8,7 @@
     padding-bottom: var(--border-width);
     background-color: var(--color-border);
     height: 4rem;
+    overflow: visible;
 }
 
 .navbar a {
@@ -39,13 +40,47 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    height: 4rem;
+}
+
+.navbar-left {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-right: 2rem;
+    padding-left: 2rem;
+    height: 100%;
+}
+
+.icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0rem;
 }
 
 .navbar-left .logo {
     font-size: 1.5rem;
     font-weight: bold;
     color: #fff;
-    padding-left: 2rem;
+}
+
+.navbar-center {
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.navbar-searchbar {
+    position: fixed;
+    top: 0.75rem; /* manually calculated */
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .navbar-right {
@@ -58,12 +93,7 @@
 }
 
 @media (max-width: 600px) {
-    .navbar-left {
+    .navbar-left h1 {
         display: none;
-    }
-
-    .navbar-right {
-        padding-left: 2rem;
-        width: 100%;
     }
 }
