@@ -160,16 +160,6 @@ public class GeocodingService {
             return null;
         }
         
-        // Firefox peut afficher le JSON dans différents conteneurs
-        String[] patterns = {
-            // Format Firefox JSON viewer: <pre class="...">JSON</pre>
-            "<pre[^>]*>", "</pre>",
-            // Format simple body
-            "<body[^>]*>", "</body>",
-            // Format avec div
-            "<div[^>]*id=\"json\"[^>]*>", "</div>"
-        };
-        
         String content = pageSource;
         
         // Essayer d'extraire le contenu du <pre> en premier (format JSON viewer de Firefox)
