@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +24,9 @@ public class ImdbDirectorsService {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private List<Director> parseDirectorsTsvFile(String tsvFilePath) throws IOException {
         List<Director> directors = new ArrayList<>();
@@ -75,9 +79,11 @@ public class ImdbDirectorsService {
             int end = Math.min(i + batchSize, directors.size());
             List<Director> batch = directors.subList(i, end);
 
-            directorRepository.saveAll(batch);
-            entityManager.flush();
-            entityManager.clear();
+            transactionTemplate.executeWithoutResult(status -> {
+                directorRepository.saveAll(batch);
+                entityManager.flush();
+                entityManager.clear();
+            });
 
             System.out.println("Saved " + end + " / " + directors.size() + " directors...");
         }

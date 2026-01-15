@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.polytech.crud.entity.Rating;
 import com.polytech.crud.repository.RatingRepository;
@@ -23,6 +24,9 @@ public class ImdbRatingsService {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private List<Rating> parseRatingsTsvFile(String tsvFilePath) throws IOException {
         List<Rating> ratings = new ArrayList<>();
@@ -80,9 +84,11 @@ public class ImdbRatingsService {
             int end = Math.min(i + batchSize, ratings.size());
             List<Rating> batch = ratings.subList(i, end);
 
-            ratingRepository.saveAll(batch);
-            entityManager.flush();
-            entityManager.clear();
+            transactionTemplate.executeWithoutResult(status -> {
+                ratingRepository.saveAll(batch);
+                entityManager.flush();
+                entityManager.clear();
+            });
 
             System.out.println("Saved " + end + " / " + ratings.size() + " ratings...");
         }

@@ -10,6 +10,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.polytech.crud.entity.Principal;
 import com.polytech.crud.repository.PrincipalRepository;
@@ -24,6 +25,9 @@ public class ImdbPrincipalsService {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private List<Principal> parsePrincipalsTsvFile(String tsvFilePath) throws IOException {
         List<Principal> principals = new ArrayList<>();
@@ -96,9 +100,11 @@ public class ImdbPrincipalsService {
             int end = Math.min(i + batchSize, principals.size());
             List<Principal> batch = principals.subList(i, end);
 
-            principalRepository.saveAll(batch);
-            entityManager.flush();
-            entityManager.clear();
+            transactionTemplate.executeWithoutResult(status -> {
+                principalRepository.saveAll(batch);
+                entityManager.flush();
+                entityManager.clear();
+            });
 
             System.out.println("Saved " + end + " / " + principals.size() + " principals...");
         }
