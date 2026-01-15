@@ -89,4 +89,13 @@ public class ImdbRatingsService {
 
         System.out.println("Finished importing ratings");
     }
+
+    public Rating getRatingByImdbId(String idImdb) {
+        Rating rating = ratingRepository.findByIdImdb(idImdb);
+        if (rating != null) {
+            return rating;
+        } else {
+            return null;
+        }
+    }
 }

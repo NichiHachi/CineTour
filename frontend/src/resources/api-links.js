@@ -13,6 +13,10 @@ const API_ENDPOINTS = {
     login: isProduction ? '/api/users/login' : '/users/login',
     logout: isProduction ? '/api/users/logout' : '/users/logout',
     profile: (cookiesUsername) => isProduction ? `/api/users/profile/${cookiesUsername}` : `/users/profile/${cookiesUsername}`,
+    rating: (imdbId) => isProduction ? `/api/ratingByImdbId/${imdbId}` : `/ratingByImdbId/${imdbId}`,
+    directors: (imdbId) => isProduction ? `/api/directorsByImdbId/${imdbId}` : `/directorsByImdbId/${imdbId}`,
+    principals: (imdbId) => isProduction ? `/api/principalsByImdbId/${imdbId}` : `/principalsByImdbId/${imdbId}`,
+    person: (nconst) => isProduction ? `/api/personByNconst/${nconst}` : `/personByNconst/${nconst}`,
 };
 
 export default API_ENDPOINTS;

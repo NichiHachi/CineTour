@@ -114,4 +114,9 @@ public class ImdbPersonService {
 
         System.out.println("Finished importing Persons");
     }
+
+    @Transactional(readOnly = true)
+    public Person getPersonByNconst(String nconst) {
+        return personRepository.findByNconst(nconst);
+    }
 }

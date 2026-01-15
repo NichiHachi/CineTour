@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.polytech.crud.entity.Principal;
 import com.polytech.crud.repository.PrincipalRepository;
@@ -103,5 +104,10 @@ public class ImdbPrincipalsService {
         }
 
         System.out.println("Finished importing principals");
+    }
+
+    @Transactional(readOnly = true)
+    public List<Principal> getPrincipalsByImdbId(String idImdb) {
+        return principalRepository.findByIdImdb(idImdb);
     }
 }

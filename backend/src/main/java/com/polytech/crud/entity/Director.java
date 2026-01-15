@@ -17,6 +17,6 @@ public class Director {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String idImdb; // idImdb of the movie
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> directors; // nconst of directors
 }

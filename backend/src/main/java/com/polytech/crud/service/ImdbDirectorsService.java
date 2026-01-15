@@ -66,11 +66,6 @@ public class ImdbDirectorsService {
         return parseDirectorsTsvFile(tsvFileName);
     }
 
-    @Transactional(readOnly = true)
-    public List<Director> getAllDirectors() {
-        return directorRepository.findAll();
-    }
-
     public void importDirectors(List<Director> directors) {
         System.out.println("Saving directors to database");
 
@@ -88,5 +83,10 @@ public class ImdbDirectorsService {
         }
 
         System.out.println("Finished importing directors");
+    }
+
+    @Transactional(readOnly = true)
+    public Director getDirectorsByImdbId(String idImdb) {
+        return directorRepository.findByIdImdb(idImdb);
     }
 }
