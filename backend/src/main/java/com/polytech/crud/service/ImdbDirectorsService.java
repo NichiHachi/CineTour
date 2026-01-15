@@ -71,7 +71,6 @@ public class ImdbDirectorsService {
         return directorRepository.findAll();
     }
 
-    @Transactional
     public void importDirectors(List<Director> directors) {
         System.out.println("Saving directors to database");
 
