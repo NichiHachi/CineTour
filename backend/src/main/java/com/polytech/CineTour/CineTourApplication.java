@@ -91,7 +91,7 @@ public class CineTourApplication implements CommandLineRunner {
             Console.warnln("Persons importation started\n");
             List<Person> persons = imdbPersons.getPersons();
             imdbPersons.importPersons(persons);
-            Console.warnln(persons.size() + " Directors imported\n");
+            Console.warnln(persons.size() + " Persons imported\n");
 
             System.exit(0); // Clean exit after import
         } else {
