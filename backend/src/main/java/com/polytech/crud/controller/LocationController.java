@@ -24,8 +24,10 @@ public class LocationController {
 
     /**
      * Method GET with a path variable.
-     * Get locations by idImdb from the database, if not found, import locations from
+     * Get locations by idImdb from the database, if not found, import locations
+     * from
      * IMDB if they exist.
+     * 
      * @param idImdb
      * @return
      */
@@ -109,5 +111,11 @@ public class LocationController {
             logger.info("No locations found in database");
         }
         return locations;
+    }
+
+    @GetMapping("/locations/migrate")
+    public String migrateLocations() throws InterruptedException {
+        imdbLocationsService.migrateExistingLocations();
+        return "Migration triggered";
     }
 }

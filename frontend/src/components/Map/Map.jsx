@@ -69,6 +69,7 @@ import fortIcon from '../../assets/icons/fort.png'
 import cityGateIcon from '../../assets/icons/city_gate.png'
 import stateData from './custom.geo.json'
 import countries from 'i18n-iso-countries'
+import enLocale from 'i18n-iso-countries/langs/en.json'
 import defaultLeisureIcon from '../../assets/icons/default_leisure.png'
 import defaultNaturalIcon from '../../assets/icons/default_natural.png'
 import defaultHistoricIcon from '../../assets/icons/default_historic.png'
@@ -80,6 +81,24 @@ import './Map.css'
 
 import { LocationContext } from '../../context/LocationContext'
 import GlowContainer from '../GlowContainer/GlowContainer'
+
+// Enregistrer les noms de pays en anglais
+countries.registerLocale(enLocale)
+
+// Fonction pour convertir un code pays en nom de pays
+const getCountryName = (countryCode) => {
+  if (!countryCode) return 'Unknown'
+  // Essayer avec le code tel quel (2 lettres)
+  let name = countries.getName(countryCode.toUpperCase(), 'en')
+  if (name) return name
+  // Si c'est un code 3 lettres, le convertir
+  const alpha2 = countries.alpha3ToAlpha2(countryCode.toUpperCase())
+  if (alpha2) {
+    name = countries.getName(alpha2, 'en')
+    if (name) return name
+  }
+  return countryCode // Retourner le code si pas de nom trouvé
+}
 
 const Map = ({ height, width }) => {
   const [markers, setMarkers] = useState([])
@@ -117,51 +136,45 @@ const Map = ({ height, width }) => {
 
   useEffect(() => {
     const idFilm = imdbId
-    const geocodeAddresses = async () => {
-      const locations = await fetchLocations(idFilm)
+    const loadLocations = async () => {
+      let locations = await fetchLocations(idFilm)
       console.log('locations', locations)
-      console.log('locationData', locationData)
+
       while (locationData.length === 0 && locations.length === 0) {
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
       if (locationData.length > 0) {
         locations = await fetchLocations(idFilm)
       }
+
       const newMarkers = []
       const newPays = {}
-      for (const location of locations) {
-        console.log('location', location)
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            location.locationString
-          )}`
-        )
-        const data = await response.json()
-        if (data.length > 0) {
-          const { lat, lon, display_name } = data[0]
-          newMarkers.push([lat, lon])
-          const country = display_name
-            .split(',')
-            [display_name.split(',').length - 1].trim()
 
-          if (!newPays[country]) {
-            newPays[country] = []
+      for (const location of locations) {
+        // Utiliser directement les coordonnées de la base de données
+        if (location.latitude && location.longitude) {
+          newMarkers.push([location.latitude, location.longitude])
+
+          // Convertir le code pays en nom de pays
+          const countryName = getCountryName(location.countryCode)
+
+          if (!newPays[countryName]) {
+            newPays[countryName] = []
           }
-          newPays[country].push({
-            address: display_name,
-            coordinates: [lat, lon],
+          newPays[countryName].push({
+            address: location.displayName || location.locationString,
+            coordinates: [location.latitude, location.longitude],
           })
         }
       }
-      setMarkers(newMarkers)
 
+      setMarkers(newMarkers)
       console.log('newMarkers', newMarkers)
 
       await fetchCountryCoordinates(newPays)
-
       await updateCountryCodes(newMarkers)
     }
-    geocodeAddresses()
+    loadLocations()
   }, [imdbId, locationData])
 
   const fetchCountryCoordinates = async (newPays) => {

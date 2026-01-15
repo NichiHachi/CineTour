@@ -23,4 +23,9 @@ public class Location {
     private String locationString;
     @Column(length = 1000)
     private String description;
+    private Double latitude;
+    private Double longitude;
+    private String displayName;
+    private String countryCode;
+    private Boolean geocodingFailed = false; 
 }

@@ -44,6 +44,9 @@ public class ImdbLocationsService {
     @Autowired
     private MovieRepository movieRepository;
 
+    @Autowired
+    private GeocodingService geocodingService;
+
     @Value("${selenium.remote.url}")
     private String seleniumRemoteUrl;
 
@@ -137,6 +140,7 @@ public class ImdbLocationsService {
                     location.setIdImdb(movieIdImdb);
                     location.setLocationString(locationString);
                     location.setDescription(description);
+                    location.setGeocodingFailed(false);
                     locations.add(location);
                     logger.info("Found location: {} with description: {}", locationString, description);
                 }
@@ -186,25 +190,6 @@ public class ImdbLocationsService {
     /**
      * Imports filming locations for a movie from IMDb and saves them to the
      * database.
-     * 
-     * This method performs the following steps:
-     * 1. Validates if the movie exists in the database
-     * 2. Checks if locations have already been searched for this movie (using
-     * locationsChecked flag)
-     * 3. If not previously checked:
-     * - Scrapes locations from IMDb using Selenium
-     * - Marks the movie as checked in database
-     * - If locations are found, saves them to database
-     * 
-     * The method is idempotent - multiple calls with the same movieIdImdb will only
-     * scrape locations once. Subsequent calls will be skipped if the movie is
-     * marked
-     * as checked or if locations already exist.
-     * 
-     * @param movieIdImdb The IMDb ID of the movie (e.g., "tt0068646" for The
-     *                    Godfather)
-     * @throws Exception If an error occurs during web scraping or database
-     *                   operations
      */
     @Transactional
     public void importLocations(String movieIdImdb) throws Exception {
@@ -221,7 +206,7 @@ public class ImdbLocationsService {
 
         try {
             List<Location> locations = scrapeLocations(movieIdImdb);
-            movie.setLocationsChecked(true); // Mark as checked regardless of result
+            movie.setLocationsChecked(true);
             String image = getMovieImage(movieIdImdb);
             movie.setImage(image);
             movieRepository.save(movie);
@@ -239,14 +224,157 @@ public class ImdbLocationsService {
     }
 
     /**
-     * Import filming locations for a list of movies from IMDb and save them to the
-     * database.
-     * Checks if locations already exist in the database before importing (to avoid
-     * having to import them again).
-     * 
-     * @param movies List of Movie
-     * @throws Exception
+     * Geocode a single location and update its coordinates.
+     * Skips already geocoded locations and those that previously failed.
+     *
+     * @param location The location to geocode
+     * @return true if location was modified (geocoded or marked as failed), false otherwise
      */
+    public boolean geocodeLocation(Location location) {
+        if (location == null || location.getLocationString() == null) {
+            logger.warn("Cannot geocode null location or location without address");
+            return false;
+        }
+
+        // Skip si déjà géocodé
+        if (location.getLatitude() != null && location.getLongitude() != null) {
+            logger.debug("Location already geocoded: {}", location.getLocationString());
+            return false;
+        }
+
+        // Skip si géocodage déjà échoué
+        if (Boolean.TRUE.equals(location.getGeocodingFailed())) {
+            logger.debug("Location geocoding previously failed, skipping: {}", location.getLocationString());
+            return false;
+        }
+
+        logger.info("Geocoding location: {}", location.getLocationString());
+        GeocodingService.GeocodingResult result = geocodingService.geocode(location.getLocationString());
+
+        if (result == null) {
+            logger.warn("Geocoding failed for location: {}", location.getLocationString());
+            location.setGeocodingFailed(true);
+            return true; // Modifié pour sauvegarder le flag
+        }
+
+        location.setLatitude(result.getLatitude());
+        location.setLongitude(result.getLongitude());
+        location.setDisplayName(result.getDisplayName());
+        if (result.getCountryCode() != null) {
+            location.setCountryCode(result.getCountryCode());
+        }
+        location.setGeocodingFailed(false);
+
+        logger.info("Geocoded: {} -> ({}, {}) [{}]", 
+            location.getLocationString(), 
+            result.getLatitude(), 
+            result.getLongitude(),
+            result.getCountryCode());
+
+        return true;
+    }
+
+    /**
+     * Geocode and update filming locations for a given movie.
+     * Only updates locations missing latitude/longitude.
+     */
+    @Transactional
+    public int geocodeLocationsForMovie(String movieIdImdb) {
+        List<Location> locations = locationRepository.findByIdImdb(movieIdImdb);
+        if (locations.isEmpty()) {
+            logger.info("No locations found for movie {}", movieIdImdb);
+            return 0;
+        }
+
+        int updatedCount = 0;
+        for (Location location : locations) {
+            if (geocodeLocation(location)) {
+                updatedCount++;
+            }
+
+            try {
+                Thread.sleep(1100); // Respecter les limites de l'API Nominatim (1 req/sec)
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warn("Geocoding sleep interrupted");
+                break;
+            }
+        }
+
+        locationRepository.saveAll(locations);
+        logger.info("Updated {} location(s) for movie {}", updatedCount, movieIdImdb);
+        return updatedCount;
+    }
+
+    /**
+     * Migrate all existing locations by geocoding them.
+     * Only updates locations missing coordinates and not previously failed.
+     */
+    public void migrateExistingLocations() throws InterruptedException {
+        List<Location> locations = locationRepository.findAll();
+        logger.info("Found {} locations to check", locations.size());
+        int geocoded = 0;
+        int skipped = 0;
+        int failed = 0;
+
+        for (Location location : locations) {
+            // Skip si déjà géocodé
+            if (location.getLatitude() != null && location.getLongitude() != null) {
+                skipped++;
+                continue;
+            }
+            // Skip si déjà échoué
+            if (Boolean.TRUE.equals(location.getGeocodingFailed())) {
+                skipped++;
+                continue;
+            }
+
+            if (geocodeLocation(location)) {
+                locationRepository.save(location);
+                if (location.getLatitude() != null) {
+                    geocoded++;
+                    logger.info("Geocoded {}: {} -> ({}, {})", geocoded, location.getLocationString(), location.getLatitude(), location.getLongitude());
+                } else {
+                    failed++;
+                }
+            }
+
+            Thread.sleep(1100); // Respecter les limites de l'API (1 req/sec)
+        }
+
+        logger.info("Migration completed: {} geocoded, {} failed, {} skipped", geocoded, failed, skipped);
+    }
+
+    /**
+     * Get locations by IMDb ID, geocoding on demand if needed.
+     */
+    @Transactional
+    public List<Location> getLocationsByImdbId(String movieIdImdb) {
+        List<Location> locations = locationRepository.findByIdImdb(movieIdImdb);
+        
+        // Géocoder les locations qui n'ont pas encore de coordonnées
+        boolean needsSave = false;
+        for (Location location : locations) {
+            if (location.getLatitude() == null && !Boolean.TRUE.equals(location.getGeocodingFailed())) {
+                if (geocodeLocation(location)) {
+                    needsSave = true;
+                }
+                try {
+                    Thread.sleep(1100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+        
+        if (needsSave) {
+            locationRepository.saveAll(locations);
+        }
+        
+        return locations;
+    }
+
     @Transactional
     public void importLocationsOfMovies(List<Movie> movies) {
         for (Movie movie : movies) {
@@ -277,20 +405,6 @@ public class ImdbLocationsService {
     }
 
     @Transactional(readOnly = true)
-    public List<Location> getLocationsByImdbId(String movieIdImdb) {
-        return locationRepository.findByIdImdb(movieIdImdb);
-    }
-
-    /**
-     * Retrieves a list of locations by their ID.
-     * 
-     * Uses `Optional` to safely and explicitly handle the absence of a result.
-     * 
-     * @param movieId The unique identifier of the location in the database.
-     * @return A list containing a list of locations if it exists, an empty list
-     *         otherwise.
-     */
-    @Transactional(readOnly = true)
     public List<Location> getLocationsById(Long movieId) {
         Movie movie = movieRepository.findById(movieId.intValue())
                 .orElse(null);
@@ -300,22 +414,9 @@ public class ImdbLocationsService {
             return Collections.emptyList();
         }
 
-        List<Location> locations = locationRepository.findByIdImdb(movie.getIdImdb());
-        return locations;
+        return locationRepository.findByIdImdb(movie.getIdImdb());
     }
 
-    /**
-     * Retrieves a list of locations by their title.
-     * 
-     * This method searches for movies by their title, then retrieves the filming
-     * locations for each movie.
-     * If no locations are found for a movie in database, it attempts to import the
-     * locations from IMDb.
-     * 
-     * @param title The title of the location in the database.
-     * @return A list containing a list of locations if it exists, an empty list
-     *         otherwise.
-     */
     @Transactional
     public List<Location> getLocationsByTitle(String title) {
         List<Movie> movies = movieRepository.findByTitle(title);
