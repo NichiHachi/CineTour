@@ -29,10 +29,9 @@ public class Location {
 
     @Property("description")
     private String description;
-
-    @Property("longitude")
-    private Double longitude;
-
-    @Property("latitude")
     private Double latitude;
+    private Double longitude;
+    private String displayName;
+    private String countryCode;
+    private Boolean geocodingFailed = false; 
 }

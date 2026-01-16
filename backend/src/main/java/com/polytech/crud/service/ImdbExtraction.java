@@ -1,18 +1,28 @@
 package com.polytech.crud.service;
 
 import com.polytech.utils.ImdbDatasets;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
+@Service
 public class ImdbExtraction {
-    public static void downloadFile(String urlString, String filePath) throws Exception {
-        System.out.println("Downloading file from " + urlString + " to " + filePath);
+
+    @Value("${imdb.download.path:/tmp}")
+    private String downloadPath;
+
+    public void downloadFile(String urlString, String fileName) throws Exception {
+        Path targetPath = Paths.get(downloadPath, fileName);
+        System.out.println("Downloading file from " + urlString + " to " + targetPath);
         URL url = new URI(urlString).toURL();
         try (InputStream in = url.openStream();
-             OutputStream out = new FileOutputStream(filePath)) {
+             OutputStream out = new FileOutputStream(targetPath.toFile())) {
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
@@ -21,16 +31,19 @@ public class ImdbExtraction {
         }
     }
 
-    public static void downloadAllDatasets() throws Exception {
+    public void downloadAllDatasets() throws Exception {
         for (ImdbDatasets dataset : ImdbDatasets.values()) {
             downloadFile(dataset.getUrl(), dataset.getFileName());
         }
     }
 
-    public static void extractGzFile(String gzFileName) throws IOException {
-        try (FileInputStream fis = new FileInputStream(gzFileName);
+    public void extractGzFile(String gzFileName) throws IOException {
+        Path gzPath = Paths.get(downloadPath, gzFileName);
+        Path outputPath = Paths.get(downloadPath, gzFileName.replace(".gz", ""));
+
+        try (FileInputStream fis = new FileInputStream(gzPath.toFile());
              GZIPInputStream gis = new GZIPInputStream(fis);
-             FileOutputStream fos = new FileOutputStream(gzFileName.replace(".gz", ""))) {
+             FileOutputStream fos = new FileOutputStream(outputPath.toFile())) {
 
             byte[] buffer = new byte[1024];
             int len;
@@ -38,5 +51,9 @@ public class ImdbExtraction {
                 fos.write(buffer, 0, len);
             }
         }
+    }
+
+    public String getFilePath(String fileName) {
+        return Paths.get(downloadPath, fileName).toString();
     }
 }

@@ -37,24 +37,33 @@ public class MovieService {
         return repository.findById(id).orElse(null);
     }
 
+    @Transactional
     public Movie getMovieByImdbId(String id) {
-        return repository.findByIdImdb(id);
+        Movie movie = repository.findByIdImdb(id);
+        incrementMovieCount(movie);
+        return movie;
     }
 
+    @Transactional
     public List<Movie> getMoviesByTitle(String title) {
         List<Movie> movies = repository.findByTitle(title);
-        incrementMovieCount(movies);
+        incrementMoviesCount(movies);
         return movies;
     }
 
     @Transactional
-    private void incrementMovieCount(List<Movie> movies) {
+    protected void incrementMovieCount(Movie movie) {
+        movie.setMovieSearchCount(movie.getMovieSearchCount() + 1);
+        repository.save(movie);
+        logger.debug("Incremented search locations count for movie {} to {}",
+                movie.getIdImdb(),
+                movie.getLocationSearchCount());
+    }
+
+    @Transactional
+    protected void incrementMoviesCount(List<Movie> movies) {
         for (Movie movie : movies) {
-            movie.setMovieSearchCount(movie.getMovieSearchCount() + 1);
-            repository.save(movie);
-            logger.debug("Incremented search locations count for movie {} to {}",
-                    movie.getIdImdb(),
-                    movie.getLocationSearchCount());
+            incrementMovieCount(movie);
         }
     }
 
@@ -73,6 +82,7 @@ public class MovieService {
 
     public Movie updateMovie(Movie movie) {
         Movie existingMovie = repository.findById(movie.getId()).orElse(null);
+        assert existingMovie != null;
         existingMovie.setTitle(movie.getTitle());
         return repository.save(existingMovie);
     }

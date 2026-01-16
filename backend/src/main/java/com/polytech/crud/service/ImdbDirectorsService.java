@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +24,12 @@ public class ImdbDirectorsService {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private ImdbExtraction imdbExtraction;
 
     private List<Director> parseDirectorsTsvFile(String tsvFilePath) throws IOException {
         List<Director> directors = new ArrayList<>();
@@ -55,23 +62,17 @@ public class ImdbDirectorsService {
         String tsvFileName = gzFileName.replace(".gz", "");
 
         try {
-            ImdbExtraction.downloadFile(ImdbDatasets.CREW.getUrl(), gzFileName);
+            imdbExtraction.downloadFile(ImdbDatasets.CREW.getUrl(), gzFileName);
         } catch (Exception e) {
             System.out.println("Failed to download file: " + e.getMessage());
             return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
-        ImdbExtraction.extractGzFile(gzFileName);
+        imdbExtraction.extractGzFile(gzFileName);
         System.out.println("Parsing IMDb dataset");
-        return parseDirectorsTsvFile(tsvFileName);
+        return parseDirectorsTsvFile(imdbExtraction.getFilePath(tsvFileName));
     }
 
-    @Transactional(readOnly = true)
-    public List<Director> getAllDirectors() {
-        return directorRepository.findAll();
-    }
-
-    @Transactional
     public void importDirectors(List<Director> directors) {
         System.out.println("Saving directors to database");
 
@@ -81,13 +82,20 @@ public class ImdbDirectorsService {
             int end = Math.min(i + batchSize, directors.size());
             List<Director> batch = directors.subList(i, end);
 
-            directorRepository.saveAll(batch);
-            entityManager.flush();
-            entityManager.clear();
+            transactionTemplate.executeWithoutResult(status -> {
+                directorRepository.saveAll(batch);
+                entityManager.flush();
+                entityManager.clear();
+            });
 
             System.out.println("Saved " + end + " / " + directors.size() + " directors...");
         }
 
         System.out.println("Finished importing directors");
+    }
+
+    @Transactional(readOnly = true)
+    public Director getDirectorsByImdbId(String idImdb) {
+        return directorRepository.findByIdImdb(idImdb);
     }
 }
