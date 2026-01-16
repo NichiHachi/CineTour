@@ -1,4 +1,4 @@
-FROM gradle:jdk23
+FROM gradle:jdk25
 
 WORKDIR /cinetour_backend
 
