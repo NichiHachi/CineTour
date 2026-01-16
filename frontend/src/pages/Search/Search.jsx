@@ -9,7 +9,7 @@ const Search = () => {
   return (
     <>
       <GlowContainer className="search-page">
-        <Navbar />
+        <Navbar advancedSearch="true" />
       </GlowContainer>
     </>
   );

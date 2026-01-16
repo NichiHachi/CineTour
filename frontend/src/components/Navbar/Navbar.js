@@ -9,51 +9,60 @@ import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import SearchIcon from "@mui/icons-material/Search";
 import Searchbar from "../Searchbar/Searchbar";
 
-function Navbar() {
+function Navbar({ advancedSearch = false }) {
   const [cookies] = useCookies(["username"]);
   return (
     <Glow className="navbar">
       <div className="navbar-section">
         <div className="navbar-left">
-          <Button
-            children={
-              <div className="icon">
-                <MenuOpenIcon />
-              </div>
-            }
-            onClick="toggleLeftBar()"
-            id="toggle-left-bar-button"
-          />
+          <div className={`${!advancedSearch && "hidden"}`}>
+            <Button
+              children={
+                <div className="icon advanced-search">
+                  <MenuOpenIcon />
+                </div>
+              }
+              onClick="toggleLeftBar()"
+              id="toggle-left-bar-button"
+            />
+          </div>
+
           <h1 className="logo">
             <a href="/">CineTour</a>
           </h1>
         </div>
 
         <div className="navbar-center">
-          <div className="navbar-searchbar">
-            <Searchbar />
+          <div className={`${!advancedSearch && "hidden"}`}>
+            <div className="navbar-searchbar">
+              <Searchbar />
+            </div>
           </div>
         </div>
 
         <div className="navbar-right">
-          <Button
-            children={
-              <div className="icon">
-                <SearchIcon />
-              </div>
-            }
-            onClick="toggleSearchbar()"
-            id="toggle-searchbar-button"
-          />
-          <Button
-            children={
-              <div className="icon">
-                <MenuOpenIcon />
-              </div>
-            }
-            onClick="toggleRightbar()"
-            id="toggle-rightbar-button"
-          />
+          <div
+            className={`navbar-right-advancedSearch ${!advancedSearch && "hidden"}`}
+          >
+            <Button
+              children={
+                <div className="icon">
+                  <SearchIcon />
+                </div>
+              }
+              onClick="toggleSearchbar()"
+              id="toggle-searchbar-button"
+            />
+            <Button
+              children={
+                <div className="icon advanced-search">
+                  <MenuOpenIcon />
+                </div>
+              }
+              onClick="toggleRightbar()"
+              id="toggle-rightbar-button"
+            />
+          </div>
           {cookies.username ? (
             <a href="/profile" className="navbar-user">
               <Glow className="navbar-user-icon">

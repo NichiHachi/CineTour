@@ -44,7 +44,7 @@ const Searchbar = () => {
 
   const handleSearchSubmit = () => {
     if (searchQuery.trim()) {
-      navigate(`/search-results?q=${encodeURIComponent(searchQuery)}`);
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
       setFilteredData([]);
     }
   };
