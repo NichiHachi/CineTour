@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.polytech.cinetour'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Neo4j Driver
+    implementation 'org.neo4j.driver:neo4j-java-driver:5.15.0'
+    
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
+    
+    // Commons
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+}
+
+application {
+    mainClass = 'com.polytech.cinetour.migration.Neo4jImporter'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Créer un JAR exécutable
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.polytech.cinetour.migration.Neo4jImporter'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

@@ -1,18 +1,11 @@
 package com.polytech.crud.service;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,38 +15,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.polytech.crud.entity.Movie;
 import com.polytech.crud.repository.MovieRepository;
 
+import com.polytech.utils.ImdbDatasets;
+
+import jakarta.persistence.EntityManager;
+
 @Service
 public class ImdbMoviesService {
-    private final String imdbTitleBasicsUrl = "https://datasets.imdbws.com/title.basics.tsv.gz";
-
     @Autowired
     private MovieRepository movieRepository;
 
-    private void downloadFile(String filePath) throws Exception {
-        System.out.println("Downloading file from " + imdbTitleBasicsUrl + " to " + filePath);
-        URL url = new URI(imdbTitleBasicsUrl).toURL();
-        try (InputStream in = url.openStream();
-                OutputStream out = new FileOutputStream(filePath)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
-            }
-        }
-    }
+    @Autowired
+    private EntityManager entityManager;
 
-    private void extractGzFile(String gzFilePath, String tsvFilePath) throws IOException {
-        try (GZIPInputStream gzipIn = new GZIPInputStream(new FileInputStream(gzFilePath));
-                OutputStream out = new FileOutputStream(tsvFilePath)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = gzipIn.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
-            }
-        }
-    }
-
-    private List<Movie> parseTsvFile(String tsvFilePath) throws IOException {
+    private List<Movie> parseMoviesTsvFile(String tsvFilePath) throws IOException {
         List<Movie> movies = new ArrayList<>();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(tsvFilePath))) {
             // Skip header
@@ -93,17 +67,19 @@ public class ImdbMoviesService {
         return movies;
     }
 
-    public List<Movie> getMovies(String gzFilePath, String tsvFilePath) throws IOException {
+    public List<Movie> getMovies() throws IOException {
+        String gzFileName = ImdbDatasets.MOVIE_BASICS.getFileName();
+        String tsvFileName = gzFileName.replace(".gz", "");
         try {
-            downloadFile(gzFilePath);
+            ImdbExtraction.downloadFile(ImdbDatasets.MOVIE_BASICS.getUrl(), gzFileName);
         } catch (Exception e) {
             System.out.println("Failed to download file: " + e.getMessage());
             return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
-        extractGzFile(gzFilePath, tsvFilePath);
+        ImdbExtraction.extractGzFile(gzFileName);
         System.out.println("Parsing IMDb dataset");
-        return parseTsvFile(tsvFilePath);
+        return parseMoviesTsvFile(tsvFileName);
     }
 
     @Transactional(readOnly = true)
@@ -111,14 +87,25 @@ public class ImdbMoviesService {
         return movieRepository.findAll();
     }
 
+    @Transactional
     public void importMovies(List<Movie> movies) {
         saveMovies(movies);
     }
 
-    @Transactional
     protected void saveMovies(List<Movie> movies) {
         System.out.println("Saving movies to database");
-        movieRepository.saveAll(movies);
+        int batchSize = 10000;
+
+        for (int i = 0; i < movies.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, movies.size());
+            List<Movie> batch = movies.subList(i, end);
+
+            movieRepository.saveAll(batch);
+            entityManager.flush();
+            entityManager.clear();
+
+            System.out.println("Saved " + end + " / " + movies.size() + " movies...");
+        }
         System.out.println("Finished importing movies");
     }
 

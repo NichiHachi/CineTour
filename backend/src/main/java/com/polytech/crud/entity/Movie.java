@@ -30,20 +30,8 @@ public class Movie {
 
     @Property("title")
     private String title;
-
-    @Property("releaseYear")
     private Integer releaseYear;
-
-    @Property("runtimeMinutes")
     private Integer runtimeMinutes;
-
-    @Property("duration")
-    private Integer duration;
-
-    @Property("reviewScore")
-    private Integer reviewScore;
-
-    @Property("genres")
     private String genres;
 
     @Property("locationsChecked")

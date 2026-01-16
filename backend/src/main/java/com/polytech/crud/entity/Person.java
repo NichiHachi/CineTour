@@ -1,33 +1,28 @@
 package com.polytech.crud.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Property;
-import org.springframework.data.neo4j.core.schema.Relationship;
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Year;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Node("Person")
+@Entity
+@Table(name = "persons")
 public class Person {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Property("name")
-    private String name;
-
-    @Relationship(type = "ACTED_IN", direction = Relationship.Direction.OUTGOING)
-    private List<Movie> actedIn = new ArrayList<>();
-
-    @Relationship(type = "DIRECTED", direction = Relationship.Direction.OUTGOING)
-    private List<Movie> directed = new ArrayList<>();
+    private String nconst;
+    private String primaryName;
+    private Year birthYear;
+    private Year deathYear;
+    @ElementCollection
+    private List<String> primaryProfessions;
+    @ElementCollection
+    private List<String> knownForTitles; // idImdb of movies
 }
