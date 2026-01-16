@@ -29,6 +29,9 @@ public class ImdbPrincipalsService {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    private ImdbExtraction imdbExtraction;
+
     private List<Principal> parsePrincipalsTsvFile(String tsvFilePath) throws IOException {
         List<Principal> principals = new ArrayList<>();
 
@@ -80,15 +83,15 @@ public class ImdbPrincipalsService {
         String tsvFileName = gzFileName.replace(".gz", "");
 
         try {
-            ImdbExtraction.downloadFile(ImdbDatasets.PRINCIPALS.getUrl(), gzFileName);
+            imdbExtraction.downloadFile(ImdbDatasets.PRINCIPALS.getUrl(), gzFileName);
         } catch (Exception e) {
             System.out.println("Failed to download file: " + e.getMessage());
             return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
-        ImdbExtraction.extractGzFile(gzFileName);
+        imdbExtraction.extractGzFile(gzFileName);
         System.out.println("Parsing IMDb dataset");
-        return parsePrincipalsTsvFile(tsvFileName);
+        return parsePrincipalsTsvFile(imdbExtraction.getFilePath(tsvFileName));
     }
 
     public void importPrincipals(List<Principal> principals) {

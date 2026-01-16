@@ -31,6 +31,9 @@ public class ImdbPersonService {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    private ImdbExtraction imdbExtraction;
+
     private List<Person> parsePersonsTsvFile(String tsvFilePath) throws IOException {
         List<Person> Persons = new ArrayList<>();
 
@@ -78,15 +81,15 @@ public class ImdbPersonService {
         String tsvFileName = gzFileName.replace(".gz", "");
 
         try {
-            ImdbExtraction.downloadFile(ImdbDatasets.NAMES.getUrl(), gzFileName);
+            imdbExtraction.downloadFile(ImdbDatasets.NAMES.getUrl(), gzFileName);
         } catch (Exception e) {
             System.out.println("Failed to download file: " + e.getMessage());
             return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
-        ImdbExtraction.extractGzFile(gzFileName);
+        imdbExtraction.extractGzFile(gzFileName);
         System.out.println("Parsing IMDb dataset");
-        return parsePersonsTsvFile(tsvFileName);
+        return parsePersonsTsvFile(imdbExtraction.getFilePath(tsvFileName));
     }
 
     @Transactional(readOnly = true)

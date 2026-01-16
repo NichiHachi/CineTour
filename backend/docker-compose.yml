@@ -27,6 +27,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=dbpassword
       - SELENIUM_REMOTE_URL=http://selenium-firefox:4444/wd/hub
+      - IMDB_DOWNLOAD_PATH=/cinetour_backend/imdb_data
   mysql:
     image: mysql:8.0
     container_name: cinetour-mysql

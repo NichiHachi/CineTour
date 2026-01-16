@@ -31,6 +31,9 @@ public class ImdbMoviesService {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    private ImdbExtraction imdbExtraction;
+
     private List<Movie> parseMoviesTsvFile(String tsvFilePath) throws IOException {
         List<Movie> movies = new ArrayList<>();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(tsvFilePath))) {
@@ -75,15 +78,15 @@ public class ImdbMoviesService {
         String gzFileName = ImdbDatasets.MOVIE_BASICS.getFileName();
         String tsvFileName = gzFileName.replace(".gz", "");
         try {
-            ImdbExtraction.downloadFile(ImdbDatasets.MOVIE_BASICS.getUrl(), gzFileName);
+            imdbExtraction.downloadFile(ImdbDatasets.MOVIE_BASICS.getUrl(), gzFileName);
         } catch (Exception e) {
             System.out.println("Failed to download file: " + e.getMessage());
             return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
-        ImdbExtraction.extractGzFile(gzFileName);
+        imdbExtraction.extractGzFile(gzFileName);
         System.out.println("Parsing IMDb dataset");
-        return parseMoviesTsvFile(tsvFileName);
+        return parseMoviesTsvFile(imdbExtraction.getFilePath(tsvFileName));
     }
 
     @Transactional(readOnly = true)

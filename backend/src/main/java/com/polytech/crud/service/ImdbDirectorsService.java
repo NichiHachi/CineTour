@@ -28,6 +28,9 @@ public class ImdbDirectorsService {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    private ImdbExtraction imdbExtraction;
+
     private List<Director> parseDirectorsTsvFile(String tsvFilePath) throws IOException {
         List<Director> directors = new ArrayList<>();
 
@@ -59,15 +62,15 @@ public class ImdbDirectorsService {
         String tsvFileName = gzFileName.replace(".gz", "");
 
         try {
-            ImdbExtraction.downloadFile(ImdbDatasets.CREW.getUrl(), gzFileName);
+            imdbExtraction.downloadFile(ImdbDatasets.CREW.getUrl(), gzFileName);
         } catch (Exception e) {
             System.out.println("Failed to download file: " + e.getMessage());
             return new ArrayList<>();
         }
         System.out.println("Extracting IMDb dataset");
-        ImdbExtraction.extractGzFile(gzFileName);
+        imdbExtraction.extractGzFile(gzFileName);
         System.out.println("Parsing IMDb dataset");
-        return parseDirectorsTsvFile(tsvFileName);
+        return parseDirectorsTsvFile(imdbExtraction.getFilePath(tsvFileName));
     }
 
     public void importDirectors(List<Director> directors) {
