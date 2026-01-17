@@ -35,6 +35,9 @@ dependencies {
     // Java Persistence API
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
+    // Neo4j
+    implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
+
     // Datasource Proxy for logging SQL queries
     implementation 'com.github.gavlyukovskiy:datasource-proxy-spring-boot-starter:1.9.1'
 
@@ -79,4 +82,21 @@ test {
     ]
 
     useJUnitPlatform()
+}
+
+// Tâche pour exécuter des classes Java avec des arguments
+task execute(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    
+    // Augmenter la mémoire pour la migration
+    maxHeapSize = '4g'
+    jvmArgs = ['-Xms2g', '-Xmx4g']
+    
+    if (project.hasProperty('mainClass')) {
+        mainClass = project.property('mainClass')
+    }
+    
+    if (project.hasProperty('args')) {
+        args project.property('args').split(' ')
+    }
 }

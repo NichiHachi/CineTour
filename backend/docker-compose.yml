@@ -19,6 +19,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      neo4j:
+        condition: service_healthy
       selenium-firefox: 
         condition: service_started
     environment:
@@ -46,6 +48,29 @@ services:
       timeout: 3s
       retries: 30
       start_period: 20s
+  neo4j:
+    image: neo4j:5.15
+    container_name: cinetour-neo4j
+    restart: always
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    environment:
+      NEO4J_AUTH: neo4j/cinetour_neo4j_password
+      NEO4J_dbms_memory_pagecache_size: 512M
+      NEO4J_dbms_memory_heap_initial__size: 512M
+      NEO4J_dbms_memory_heap_max__size: 1G
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
 
 volumes:
   mysql-data:
+  neo4j-data:
+  neo4j-logs:

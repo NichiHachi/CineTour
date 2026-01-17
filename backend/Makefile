@@ -47,3 +47,24 @@ stop:
 
 logs:
 	docker compose -p cinetour logs -f
+
+dumpSSH:
+	./scripts/db-dump-ssh.sh -e -L 3307
+
+startNeo4j:
+	docker compose -p cinetour up -d neo4j
+
+stopNeo4j:
+	docker compose -p cinetour stop neo4j
+
+restartNeo4j:
+	docker compose -p cinetour restart neo4j
+
+logsNeo4j:
+	docker compose -p cinetour logs -f neo4j
+
+cleanNeo4j:
+	docker compose -p cinetour down --volumes neo4j
+
+neo4jShell:
+	docker exec -it cinetour-neo4j cypher-shell -u neo4j -p cinetour_neo4j_password

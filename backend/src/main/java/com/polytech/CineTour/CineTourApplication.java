@@ -20,11 +20,12 @@ import com.polytech.utils.Console;
 import jakarta.annotation.PostConstruct;
 
 @SpringBootApplication
-@EntityScan(basePackages = "com.polytech.crud.entity")
+@EntityScan(basePackages = { "com.polytech.crud.entity", "com.polytech.crud.neo4j.entity" })
 @EnableJpaRepositories(basePackages = "com.polytech.crud.repository")
 @ComponentScan(basePackages = {
         "com.polytech.crud.controller",
         "com.polytech.crud.service",
+        "com.polytech.crud.neo4j"
 })
 @RestController
 public class CineTourApplication implements CommandLineRunner {
