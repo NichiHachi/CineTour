@@ -141,6 +141,11 @@ const Search = () => {
 
         <div className={`right-panel ${!showRightPanel && "hidden"}`}>
           <div className="film-list">
+            <FilmCard
+              key={"tt1160419"}
+              imdbId={"tt1160419"}
+              onClick={() => handleMovieClick("tt1160419")}
+            />
             {results.map((movie) => (
               <FilmCard
                 key={movie.idImdb}
