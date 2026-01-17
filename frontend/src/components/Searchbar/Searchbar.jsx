@@ -89,6 +89,10 @@ const Searchbar = () => {
     }
   };
 
+  const handleBlur = () => {
+    setFilteredData([]);
+  };
+
   return (
     <Glow className="searchbar">
       <div className="search-section">
@@ -97,6 +101,7 @@ const Searchbar = () => {
           placeholder="Rechercher un film"
           onChange={handleFilter}
           onKeyPress={handleKeyPress}
+          onBlur={handleBlur}
         />
         <div
           className="search-icon"
