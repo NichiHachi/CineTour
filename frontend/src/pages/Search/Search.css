@@ -11,7 +11,7 @@
 .dashboard {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
     width: 100vw;
     height: calc(100vh - 4rem);
@@ -25,12 +25,13 @@
 }
 
 .center-panel {
-    width: 100%;
     height: 100%;
 }
 
 .globe {
     position: absolute;
+    top: 4rem;
+    left: 0;
     width: 100vw;
     height: calc(100vh - 4rem);
 }
