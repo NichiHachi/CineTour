@@ -21,9 +21,18 @@
 }
 
 .left-panel {
-    max-width: 20vw;
+    height: 100%;
+}
+
+.center-panel {
     width: 100%;
     height: 100%;
+}
+
+.globe {
+    position: absolute;
+    width: 100vw;
+    height: calc(100vh - 4rem);
 }
 
 .right-panel {

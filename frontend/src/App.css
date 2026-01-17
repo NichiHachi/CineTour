@@ -13,6 +13,8 @@
     --color-error: hsl(0, 80%, 60%);
     --color-error-light: hsl(0, 100%, 80%);
 
+    --color-point: hsl(0, 80%, 60%);
+
     --color-bg-dark: hsl(0, 0%, 0%);
     --color-bg: hsl(0, 0%, 10%);
     --color-bg-light: hsl(0, 0%, 20%);

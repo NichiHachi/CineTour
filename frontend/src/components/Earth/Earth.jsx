@@ -12,6 +12,15 @@ import "./Earth.css";
 const GlobeUpdater = ({ width, height, points }) => {
   const orbitRef = useRef(null);
 
+  const [color, setColor] = useState("#000");
+
+  useEffect(() => {
+    const cssColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--color-bg-light")
+      .trim();
+    setColor(cssColor);
+  }, []);
+
   return (
     <>
       <OrbitControls
@@ -19,11 +28,12 @@ const GlobeUpdater = ({ width, height, points }) => {
         enableRotate={true}
         enableZoom={true}
         enablePan={false}
-        maxDistance={3}
+        maxDistance={5}
         minDistance={1.5}
       />
-      <ambientLight intensity={1.3} />
-      <pointLight position={[-10, -10, -10]} intensity={0.4} />
+      <ambientLight intensity={3} />
+      <pointLight position={[0, 2, 0]} intensity={20} color={color} />
+      <pointLight position={[0, -2, 0]} intensity={20} color={color} />
       <ThreeMesh />
       <ThreeGraticule />
       <ThreeCountry />
