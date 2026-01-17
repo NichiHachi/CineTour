@@ -9,3 +9,10 @@
     border-radius: var(--border-radius);
     z-index: 0;
 }
+
+.panel-section {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 0.5rem;
+}
