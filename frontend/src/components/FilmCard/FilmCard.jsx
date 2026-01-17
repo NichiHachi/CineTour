@@ -106,7 +106,7 @@ const FilmCard = ({ imdbId, className = "" }) => {
           </div>
 
           <div className="movie-genres">
-            {isLoading
+            {isLoading || movie.genres === null
               ? Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="skeleton skeleton-genre" />
                 ))
