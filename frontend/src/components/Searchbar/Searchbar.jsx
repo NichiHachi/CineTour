@@ -45,7 +45,7 @@ const Searchbar = () => {
         console.error("Error searching films:", error);
         setFilteredData([]);
       }
-    }, 500);
+    }, 100);
   };
 
   const handleSearchSubmit = () => {

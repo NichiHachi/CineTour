@@ -39,8 +39,8 @@
 .movie-genres {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 1rem;
-    max-height: 2rem;
     overflow-y: auto; /* Allow vertical scrolling */
     overflow-x: hidden; /* Hide horizontal overflow if any */
 }

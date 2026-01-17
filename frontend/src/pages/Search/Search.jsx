@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import "./Search.css";
 import GlowContainer from "../../components/GlowContainer/GlowContainer";
 import Panel from "../../components/Panel/Panel";
@@ -6,12 +6,16 @@ import Navbar from "../../components/Navbar/Navbar";
 import FilmCard from "../../components/FilmCard/FilmCard";
 import ThreeGlobe from "../../components/Earth/Earth";
 
-import MultiSelectDropdown from "../../components/MultiSelectDropdown/MultiSelectDropdown";
 import MultiSelectButtons from "../../components/MultiSelectButtons/MultiSelectButtons";
 import RangeSlider from "../../components/RangeSlider/RangeSlider";
 import StarRating from "../../components/StarRating/StarRating";
 
 import getMovieCoordinates from "../../utils/getMovieCoordinates";
+
+import { useLocation } from "react-router-dom";
+import axios from "axios";
+import API_ENDPOINTS from "../../resources/api-links";
+import { LocationContext } from "../../context/LocationContext";
 
 const Search = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
@@ -31,107 +35,123 @@ const Search = () => {
     actors: [],
   });
 
-  const toggleLeftBar = () => {
-    setShowLeftPanel(!showLeftPanel);
+  const { setLocationData, setImageData } = useContext(LocationContext);
+
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const query = searchParams.get("q");
+
+  const timer = useRef(null);
+
+  const fetchMovies = async (q) => {
+    if (!q) return;
+
+    try {
+      const response = await axios.get(API_ENDPOINTS.search(q), {
+        withCredentials: true,
+      });
+      if (!Array.isArray(response.data)) return;
+
+      setResults(response.data);
+
+      // Fetch coordinates in parallel
+      const coordinates = await Promise.all(
+        response.data.map((movie) => getMovieCoordinates(movie.idImdb)),
+      );
+      setMovieCoordinates(coordinates.flat());
+
+      // Extract filters
+      setCountries([...new Set(response.data.map((m) => m.country))]);
+      setGenres([...new Set(response.data.flatMap((m) => m.genres))]);
+      setProducers([...new Set(response.data.flatMap((m) => m.producers))]);
+      setActors([...new Set(response.data.flatMap((m) => m.actors))]);
+    } catch (err) {
+      console.error(err);
+      setResults([]);
+      setMovieCoordinates([]);
+    }
   };
 
-  const toggleRightbar = () => {
-    setShowRightPanel(!showRightPanel);
-  };
-
-  const searchMovies = async () => {
-    const fetchedCoordinates = await getMovieCoordinates("tt1160419");
-    setMovieCoordinates(fetchedCoordinates);
-  };
-
+  // Debounced query effect
   useEffect(() => {
-    searchMovies();
-  }, []);
+    if (!query) return;
+
+    if (timer.current) clearTimeout(timer.current);
+
+    timer.current = setTimeout(() => {
+      fetchMovies(query);
+    }, 100);
+
+    return () => clearTimeout(timer.current);
+  }, [query]);
+
+  const toggleLeftBar = () => setShowLeftPanel(!showLeftPanel);
+  const toggleRightbar = () => setShowRightPanel(!showRightPanel);
+
+  const handleMovieClick = async (imdbId) => {
+    try {
+      const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
+      const responseLocation = await fetch(
+        API_ENDPOINTS.importLocationByImdbId(imdbId),
+      );
+
+      setImageData(responseImage);
+      setLocationData(responseLocation);
+    } catch (err) {
+      console.error("Error fetching movie details:", err);
+    }
+  };
 
   return (
-    <>
-      <GlowContainer className="search-page">
-        <Navbar
-          advancedSearch="true"
-          toggleLeftBar={toggleLeftBar}
-          toggleRightbar={toggleRightbar}
-        />
-        <div className="dashboard">
-          <div className={`left-panel ${!showLeftPanel && "hidden"}`}>
-            <Panel>
-              <MultiSelectDropdown
-                label="Pays"
-                options={countries}
-                selectedValues={filters.countries}
-                onChange={(values) =>
-                  setFilters({ ...filters, countries: values })
-                }
-              />
+    <GlowContainer className="search-page">
+      <Navbar
+        advancedSearch="true"
+        toggleLeftBar={toggleLeftBar}
+        toggleRightbar={toggleRightbar}
+      />
+      <div className="dashboard">
+        <div className={`left-panel ${!showLeftPanel && "hidden"}`}>
+          <Panel>
+            <MultiSelectButtons
+              label="Genres"
+              options={genres}
+              selectedValues={filters.genres}
+              onChange={(values) => setFilters({ ...filters, genres: values })}
+            />
+            <RangeSlider
+              label="Année de sortie"
+              min={1900}
+              max={2024}
+              value={filters.yearRange}
+              onChange={(range) => setFilters({ ...filters, yearRange: range })}
+            />
+            <StarRating
+              label="Popularité minimum"
+              value={filters.rating}
+              onChange={(rating) => setFilters({ ...filters, rating })}
+            />
+          </Panel>
+        </div>
 
-              <MultiSelectButtons
-                label="Genres"
-                options={genres}
-                selectedValues={filters.genres}
-                onChange={(values) =>
-                  setFilters({ ...filters, genres: values })
-                }
-              />
+        <div className="center-panel"></div>
 
-              <RangeSlider
-                label="Année de sortie"
-                min={1900}
-                max={2024}
-                value={filters.yearRange}
-                onChange={(range) =>
-                  setFilters({ ...filters, yearRange: range })
-                }
-              />
+        <div className="globe">
+          <ThreeGlobe points={movieCoordinates} />
+        </div>
 
-              <StarRating
-                label="Popularité minimum"
-                value={filters.rating}
-                onChange={(rating) => setFilters({ ...filters, rating })}
+        <div className={`right-panel ${!showRightPanel && "hidden"}`}>
+          <div className="film-list">
+            {results.map((movie) => (
+              <FilmCard
+                key={movie.idImdb}
+                imdbId={movie.idImdb}
+                onClick={() => handleMovieClick(movie.idImdb)}
               />
-
-              <MultiSelectDropdown
-                label="Producteur"
-                options={producers}
-                selectedValues={filters.producers}
-                onChange={(values) =>
-                  setFilters({ ...filters, producers: values })
-                }
-              />
-
-              <MultiSelectDropdown
-                label="Acteur"
-                options={actors}
-                selectedValues={filters.actors}
-                onChange={(values) =>
-                  setFilters({ ...filters, actors: values })
-                }
-              />
-            </Panel>
-          </div>
-          <div className="center-panel"></div>
-          <div className="globe">
-            <ThreeGlobe points={movieCoordinates} />
-          </div>
-          <div className={`right-panel ${!showRightPanel && "hidden"}`}>
-            <div className="film-list">
-              <FilmCard imdbId={"tt1757678"}></FilmCard>
-              <FilmCard imdbId={"tt1630029"}></FilmCard>
-              <FilmCard imdbId={"tt1160419"}></FilmCard>
-              <FilmCard imdbId={"tt15239678"}></FilmCard>
-              <FilmCard imdbId={"tt175767"}></FilmCard>
-              <FilmCard imdbId={"tt163002"}></FilmCard>
-              <FilmCard imdbId={"tt116041"}></FilmCard>
-              <FilmCard imdbId={"tt1523968"}></FilmCard>
-              <FilmCard imdbId={"tt3137850"}></FilmCard>
-            </div>
+            ))}
           </div>
         </div>
-      </GlowContainer>
-    </>
+      </div>
+    </GlowContainer>
   );
 };
 
