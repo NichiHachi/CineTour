@@ -16,13 +16,19 @@ const Searchbar = () => {
   const navigate = useNavigate();
   const { setLocationData, setImageData } = useContext(LocationContext);
 
-  const handleFilter = async (event) => {
+  const timer = useRef(null);
+
+  const handleFilter = (event) => {
     const searchWord = event.target.value;
     setSearchQuery(searchWord);
 
-    if (searchWord.length === 0) {
-      setFilteredData([]);
-    } else {
+    if (timer.current) clearTimeout(timer.current);
+
+    timer.current = setTimeout(async () => {
+      if (searchWord.length === 0) {
+        setFilteredData([]);
+        return;
+      }
       try {
         const response = await axios.get(API_ENDPOINTS.search(searchWord), {
           withCredentials: true,
@@ -39,7 +45,7 @@ const Searchbar = () => {
         console.error("Error searching films:", error);
         setFilteredData([]);
       }
-    }
+    }, 500);
   };
 
   const handleSearchSubmit = () => {
@@ -105,7 +111,7 @@ const Searchbar = () => {
         />
         <div
           className="search-icon"
-          onClick={handleSearchSubmit}
+          onMouseDown={handleSearchSubmit}
           style={{ cursor: "pointer" }}
         >
           <SearchIcon />
@@ -118,7 +124,7 @@ const Searchbar = () => {
         {filteredData.slice(0, 10).map((value, key) => (
           <div
             className="result"
-            onClick={() => handleMovieClick(value.idImdb)}
+            onMouseDown={() => handleMovieClick(value.idImdb)}
             key={key}
           >
             <RevealText delay={key * 0.05} speed={0.005}>
