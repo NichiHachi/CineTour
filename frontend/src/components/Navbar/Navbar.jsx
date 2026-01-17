@@ -5,11 +5,12 @@ import Glow from "../Glow/Glow";
 import StaggeredText from "../TextEffects/StaggeredText/StaggeredText";
 import { useCookies } from "react-cookie";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import MenuOpenIcon from "@mui/icons-material/MenuOpen";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import SearchIcon from "@mui/icons-material/Search";
 import Searchbar from "../Searchbar/Searchbar";
 
-function Navbar({ advancedSearch = false }) {
+function Navbar({ advancedSearch = false, toggleLeftBar, toggleRightbar }) {
   const [cookies] = useCookies(["username"]);
   return (
     <Glow className="navbar">
@@ -19,10 +20,10 @@ function Navbar({ advancedSearch = false }) {
             <Button
               children={
                 <div className="icon advanced-search">
-                  <MenuOpenIcon />
+                  <FilterAltIcon />
                 </div>
               }
-              onClick="toggleLeftBar()"
+              onClick={toggleLeftBar}
               id="toggle-left-bar-button"
             />
           </div>
@@ -53,15 +54,6 @@ function Navbar({ advancedSearch = false }) {
               onClick="toggleSearchbar()"
               id="toggle-searchbar-button"
             />
-            <Button
-              children={
-                <div className="icon advanced-search">
-                  <MenuOpenIcon />
-                </div>
-              }
-              onClick="toggleRightbar()"
-              id="toggle-rightbar-button"
-            />
           </div>
           {cookies.username ? (
             <a href="/profile" className="navbar-user">
@@ -91,6 +83,19 @@ function Navbar({ advancedSearch = false }) {
               />
             </>
           )}
+          <div
+            className={`navbar-right-advancedSearch ${!advancedSearch && "hidden"}`}
+          >
+            <Button
+              children={
+                <div className="icon advanced-search">
+                  <FormatListBulletedIcon />
+                </div>
+              }
+              onClick={toggleRightbar}
+              id="toggle-rightbar-button"
+            />
+          </div>
         </div>
       </div>
     </Glow>

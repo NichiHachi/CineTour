@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_ENDPOINTS from "../../resources/api-links";
 import { LocationContext } from "../../context/LocationContext";
-import RevealText from "../../components/TextEffects/RevealText/RevealText";
+import RevealText from "../TextEffects/RevealText/RevealText";
 
 const Searchbar = () => {
   const [filteredData, setFilteredData] = useState([]);

@@ -7,3 +7,31 @@
     height: 100vh;
     gap: 1.5rem;
 }
+
+.dashboard {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 100vw;
+    height: calc(100vh - 4rem);
+    margin-top: 4rem; /* navbar clearance */
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+.left-panel {
+    max-width: 20vw;
+    width: 100%;
+    height: 100%;
+}
+
+.right-panel {
+    max-width: 20vw;
+    width: 100%;
+    height: 100%;
+}
+
+.hidden * {
+    display: none;
+}

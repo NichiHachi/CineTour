@@ -1,0 +1,11 @@
+.panel {
+    /* border: 1px dashed red; */
+    display: flex;
+    width: 100%;
+    padding: var(--border-width);
+    background-color: var(--color-border);
+    height: 100%;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    z-index: 0;
+}
