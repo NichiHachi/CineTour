@@ -71,16 +71,16 @@ const Searchbar = () => {
         withCredentials: true,
       });
       console.log("handleMovieClick - Response received", response.data);
-      if (response.data) {
-        navigate(`/movie/${imdbId}`);
-      }
-      const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
-      console.log("handleMovieClick - Image response received", responseImage);
+      // if (response.data) {
+      //   navigate(`/movie/${imdbId}`);
+      // }
+      // const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
+      // console.log("handleMovieClick - Image response received", responseImage);
       const responseLocation = await fetch(
         API_ENDPOINTS.importLocationByImdbId(imdbId),
         {},
       );
-      setImageData(responseImage);
+      // setImageData(responseImage);
       setLocationData(responseLocation);
 
       console.log(

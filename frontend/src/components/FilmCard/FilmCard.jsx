@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./FilmCard.css";
 import axios from "axios";
 import Glow from "../../components/Glow/Glow";
 import API_ENDPOINTS from "../../resources/api-links";
+import { LocationContext } from "../../context/LocationContext";
 
 const FilmCard = ({ imdbId, className = "" }) => {
   const [movie, setMovie] = useState(null);
   const [imageValid, setImageValid] = useState(false);
   const desiredWidth = 380;
   const desiredHeight = 214;
+  const { setLocationData, setImageData } = useContext(LocationContext);
 
   const formatRuntime = (totalMinutes) => {
     if (
@@ -45,7 +47,9 @@ const FilmCard = ({ imdbId, className = "" }) => {
         }
       };
       img.onerror = () => setImageValid(false);
+      console.log(movie.image);
     }
+    console.log("Test");
   }, [movie]);
 
   useEffect(() => {
@@ -54,6 +58,11 @@ const FilmCard = ({ imdbId, className = "" }) => {
         const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId), {
           withCredentials: true, // Important for sending cookies
         });
+        const responseLocation = await fetch(
+          API_ENDPOINTS.importLocationByImdbId(imdbId),
+          {},
+        );
+        setLocationData(responseLocation);
         setMovie(response.data);
       } catch (err) {
         console.error("Error fetching movie details:", err);

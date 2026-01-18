@@ -88,20 +88,6 @@ const Search = () => {
   const toggleLeftBar = () => setShowLeftPanel(!showLeftPanel);
   const toggleRightbar = () => setShowRightPanel(!showRightPanel);
 
-  const handleMovieClick = async (imdbId) => {
-    try {
-      const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
-      const responseLocation = await fetch(
-        API_ENDPOINTS.importLocationByImdbId(imdbId),
-      );
-
-      setImageData(responseImage);
-      setLocationData(responseLocation);
-    } catch (err) {
-      console.error("Error fetching movie details:", err);
-    }
-  };
-
   return (
     <GlowContainer className="search-page">
       <Navbar
@@ -142,11 +128,7 @@ const Search = () => {
         <div className={`right-panel ${!showRightPanel && "hidden"}`}>
           <div className="film-list">
             {results.map((movie) => (
-              <FilmCard
-                key={movie.idImdb}
-                imdbId={movie.idImdb}
-                onClick={() => handleMovieClick(movie.idImdb)}
-              />
+              <FilmCard key={movie.idImdb} imdbId={movie.idImdb} />
             ))}
           </div>
         </div>

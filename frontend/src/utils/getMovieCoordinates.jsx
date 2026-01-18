@@ -1,21 +1,6 @@
 import axios from "axios";
 import API_ENDPOINTS from "../resources/api-links";
 
-/**
- * Minimal helper to get geocoded coordinates for a movie's shooting locations.
- *
- * Returns an array like:
- * [
- *   { latitude: 34.0522, longitude: -118.2437 },
- *   { latitude: 51.5074, longitude: -0.1278 }
- * ]
- *
- * Notes:
- * - Uses your existing API endpoint: API_ENDPOINTS.locationsByImdbId(imdbId)
- * - Geocodes each locationString via Nominatim (first result only).
- * - Adds a tiny delay between requests to be polite to Nominatim (adjust as needed).
- * - Returns [] on error or when no locations found.
- */
 export default async function getMovieCoordinates(imdbId) {
   if (!imdbId) return [];
 
@@ -47,18 +32,12 @@ export default async function getMovieCoordinates(imdbId) {
             longitude: Number(geo.lon),
           });
         }
-      } catch (geocodeErr) {
-        // ignore individual geocode failures and continue
-        // console.warn('geocode failed for', q, geocodeErr)
-      }
-
-      // small delay to avoid hammering Nominatim (increase if you have many locations)
+      } catch (geocodeErr) {}
       await new Promise((r) => setTimeout(r, 150));
     }
 
     return points;
   } catch (err) {
-    // console.error('failed to fetch movie locations', err)
     return [];
   }
 }
