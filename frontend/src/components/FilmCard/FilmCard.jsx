@@ -28,7 +28,6 @@ const FilmCard = ({ movie, className = "" }) => {
       runtimeString += `${hours}h `;
     }
     if (minutes > 0 || hours === 0) {
-      // If there are no hours, still show minutes if they exist
       runtimeString += `${minutes}min`;
     }
 
@@ -108,15 +107,17 @@ const FilmCard = ({ movie, className = "" }) => {
           </div>
 
           <div className="movie-genres">
-            {isLoading || movie.genres === null
+            {isLoading
               ? Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="skeleton skeleton-genre" />
                 ))
-              : movie.genres.split(",").map((genre) => (
-                  <Glow className="genre" key={genre}>
-                    <div className="genre-section">{genre}</div>
-                  </Glow>
-                ))}
+              : movie.genres === null
+                ? ""
+                : movie.genres.split(",").map((genre) => (
+                    <Glow className="genre" key={genre}>
+                      <div className="genre-section">{genre}</div>
+                    </Glow>
+                  ))}
           </div>
         </div>
       </div>
