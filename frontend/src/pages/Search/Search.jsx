@@ -128,7 +128,7 @@ const Search = () => {
         <div className={`right-panel ${!showRightPanel && "hidden"}`}>
           <div className="film-list">
             {results.map((movie) => (
-              <FilmCard key={movie.idImdb} imdbId={movie.idImdb} />
+              <FilmCard key={movie.idImdb} movie={movie} />
             ))}
           </div>
         </div>

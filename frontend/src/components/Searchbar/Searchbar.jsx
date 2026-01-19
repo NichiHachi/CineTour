@@ -45,7 +45,7 @@ const Searchbar = () => {
         console.error("Error searching films:", error);
         setFilteredData([]);
       }
-    }, 100);
+    }, 250);
   };
 
   const handleSearchSubmit = () => {
@@ -71,11 +71,11 @@ const Searchbar = () => {
         withCredentials: true,
       });
       console.log("handleMovieClick - Response received", response.data);
-      // if (response.data) {
-      //   navigate(`/movie/${imdbId}`);
-      // }
-      // const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
-      // console.log("handleMovieClick - Image response received", responseImage);
+      if (response.data) {
+        navigate(`/movie/${imdbId}`);
+      }
+      const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
+      console.log("handleMovieClick - Image response received", responseImage);
       const responseLocation = await fetch(
         API_ENDPOINTS.importLocationByImdbId(imdbId),
         {},
@@ -106,7 +106,7 @@ const Searchbar = () => {
           type="text"
           placeholder="Rechercher un film"
           onChange={handleFilter}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           onBlur={handleBlur}
         />
         <div
