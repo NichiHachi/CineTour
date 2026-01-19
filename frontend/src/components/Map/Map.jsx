@@ -81,24 +81,6 @@ import "./Map.css";
 import { LocationContext } from "../../context/LocationContext";
 import GlowContainer from "../GlowContainer/GlowContainer";
 
-// Enregistrer les noms de pays en anglais
-countries.registerLocale(enLocale)
-
-// Fonction pour convertir un code pays en nom de pays
-const getCountryName = (countryCode) => {
-  if (!countryCode) return 'Unknown'
-  // Essayer avec le code tel quel (2 lettres)
-  let name = countries.getName(countryCode.toUpperCase(), 'en')
-  if (name) return name
-  // Si c'est un code 3 lettres, le convertir
-  const alpha2 = countries.alpha3ToAlpha2(countryCode.toUpperCase())
-  if (alpha2) {
-    name = countries.getName(alpha2, 'en')
-    if (name) return name
-  }
-  return countryCode // Retourner le code si pas de nom trouvé
-}
-
 const Map = ({ height, width }) => {
   const [markers, setMarkers] = useState([]);
   const [paysToHighlight, setPaysToHighlight] = useState([]);
@@ -490,7 +472,6 @@ const Map = ({ height, width }) => {
             />
           ))}
       </GlowContainer>
-
     </div>
   );
 };
