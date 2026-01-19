@@ -9,6 +9,7 @@ const FilmCard = ({ movie, className = "" }) => {
   const [imageValid, setImageValid] = useState(false);
   const desiredWidth = 380;
   const desiredHeight = 214;
+  const [copied, setCopied] = useState(false);
   const { setLocationData, setImageData } = useContext(LocationContext);
 
   const formatRuntime = (totalMinutes) => {
@@ -32,6 +33,14 @@ const FilmCard = ({ movie, className = "" }) => {
     }
 
     return runtimeString.trim();
+  };
+
+  const handleCopyImdbId = () => {
+    if (movie?.idImdb) {
+      navigator.clipboard.writeText(movie.idImdb);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    }
   };
 
   useEffect(() => {
@@ -66,11 +75,19 @@ const FilmCard = ({ movie, className = "" }) => {
         </div>
 
         <div className="movie-content">
-          <div className="movie-title">
+          <div className="movie-header">
             {isLoading ? (
               <div className="skeleton skeleton-title" />
             ) : (
-              movie.title
+              <>
+                <div className="movie-title">{movie.title}</div>
+                <button
+                  className={`movie-imdbid ${copied ? "copied" : ""}`}
+                  onClick={handleCopyImdbId}
+                >
+                  {movie.idImdb}
+                </button>
+              </>
             )}
           </div>
 
