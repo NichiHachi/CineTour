@@ -41,11 +41,3 @@ export default async function getMovieCoordinates(imdbId) {
     return [];
   }
 }
-
-/*
-Example usage:
-
-import getMovieCoordinates from 'src/utils/getMovieCoordinates'
-
-const myPoints = await getMovieCoordinates('tt1234567')
-*/

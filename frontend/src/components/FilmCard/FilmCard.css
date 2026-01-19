@@ -5,6 +5,11 @@
     flex-shrink: 0;
 }
 
+.active {
+    background-color: var(--color-border-light);
+    flex-shrink: 0;
+}
+
 .filmcard-section {
     display: flex;
     flex-direction: row;
@@ -80,6 +85,13 @@
     padding: 0.25rem 0.5rem;
 }
 
+/* Align left */
+.movies-coordinates {
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: row-reverse;
+}
+
 /* Skeleton */
 
 .skeleton {
@@ -123,4 +135,9 @@
 .skeleton-genre {
     height: 1.5rem;
     width: 70px;
+}
+
+.skeleton-coordinates {
+    height: 1rem;
+    width: 2.5rem;
 }

@@ -4,35 +4,21 @@ import axios from "axios";
 import Glow from "../../components/Glow/Glow";
 import API_ENDPOINTS from "../../resources/api-links";
 import { LocationContext } from "../../context/LocationContext";
+import getMovieCoordinates from "../../utils/getMovieCoordinates";
+import formatTime from "../../utils/formatTime";
 
-const FilmCard = ({ movie, className = "" }) => {
+const FilmCard = ({
+  movie,
+  onSelect,
+  loadingCoordinates,
+  coordinates,
+  className = "",
+}) => {
   const [imageValid, setImageValid] = useState(false);
   const desiredWidth = 380;
   const desiredHeight = 214;
   const [copied, setCopied] = useState(false);
-  const { setLocationData, setImageData } = useContext(LocationContext);
-
-  const formatRuntime = (totalMinutes) => {
-    if (
-      totalMinutes === null ||
-      totalMinutes === undefined ||
-      totalMinutes < 0
-    ) {
-      return "";
-    }
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    let runtimeString = "";
-    if (hours > 0) {
-      runtimeString += `${hours}h `;
-    }
-    if (minutes > 0 || hours === 0) {
-      runtimeString += `${minutes}min`;
-    }
-
-    return runtimeString.trim();
-  };
+  const [active, setActive] = useState(false);
 
   const handleCopyImdbId = () => {
     if (movie?.idImdb) {
@@ -61,8 +47,14 @@ const FilmCard = ({ movie, className = "" }) => {
   const isLoading = !movie;
 
   return (
-    <Glow className={`filmcard ${className}`}>
-      <div className="filmcard-section">
+    <Glow className={`filmcard ${className} ${active ? "active" : ""}`}>
+      <div
+        className={`filmcard-section`}
+        onClick={() => {
+          setActive(!active);
+          onSelect && onSelect(movie);
+        }}
+      >
         <div className="movie-image">
           {isLoading ? (
             <div className="skeleton skeleton-image" />
@@ -100,7 +92,7 @@ const FilmCard = ({ movie, className = "" }) => {
               <>
                 <div className="movie-date">{movie.releaseYear}</div>
                 <div className="movie-runtime">
-                  {formatRuntime(movie.runtimeMinutes)}
+                  {formatTime(movie.runtimeMinutes)}
                 </div>
               </>
             )}
@@ -118,6 +110,22 @@ const FilmCard = ({ movie, className = "" }) => {
                       <div className="genre-section">{genre}</div>
                     </Glow>
                   ))}
+          </div>
+
+          <div className={`movies-coordinates`}>
+            <div
+              className={`${
+                loadingCoordinates
+                  ? "skeleton skeleton-coordinates"
+                  : "coordinates"
+              }`}
+            >
+              {coordinates
+                ? coordinates.length === 0
+                  ? "Aucun lieu"
+                  : coordinates.length + " lieux"
+                : ""}
+            </div>
           </div>
         </div>
       </div>

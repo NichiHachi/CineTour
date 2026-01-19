@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Search.css";
 import GlowContainer from "../../components/GlowContainer/GlowContainer";
 import Panel from "../../components/Panel/Panel";
@@ -15,13 +15,16 @@ import getMovieCoordinates from "../../utils/getMovieCoordinates";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import API_ENDPOINTS from "../../resources/api-links";
-import { LocationContext } from "../../context/LocationContext";
 
 const Search = () => {
+  // Panels
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
-  const [movieCoordinates, setMovieCoordinates] = useState([]);
-  const [results, setResults] = useState([]);
+
+  const toggleLeftBar = () => setShowLeftPanel(!showLeftPanel);
+  const toggleRightbar = () => setShowRightPanel(!showRightPanel);
+
+  // Filters
   const [countries, setCountries] = useState([]);
   const [genres, setGenres] = useState([]);
   const [producers, setProducers] = useState([]);
@@ -35,44 +38,66 @@ const Search = () => {
     actors: [],
   });
 
-  const { setLocationData, setImageData } = useContext(LocationContext);
+  // Coordinates
+  const [selectedMovies, setSelectedMovies] = useState([]);
+  const [results, setResults] = useState([]);
 
+  const [allCoordinates, setAllCoordinates] = useState({});
+  const [loadingCoordinates, setLoadingCoordinates] = useState({});
+
+  useEffect(() => {
+    if (!results.length) return;
+
+    const loadAllCoordinates = async () => {
+      const loadingMap = {};
+      results.forEach((m) => (loadingMap[m.idImdb] = true));
+      setLoadingCoordinates(loadingMap);
+
+      results.forEach(async (movie) => {
+        try {
+          const coords = await getMovieCoordinates(movie.idImdb);
+          setAllCoordinates((prev) => ({
+            ...prev,
+            [movie.idImdb]: coords,
+          }));
+        } catch {
+          setAllCoordinates((prev) => ({
+            ...prev,
+            [movie.idImdb]: [],
+          }));
+        } finally {
+          setLoadingCoordinates((prev) => ({
+            ...prev,
+            [movie.idImdb]: false,
+          }));
+        }
+      });
+    };
+
+    loadAllCoordinates();
+  }, [results]);
+
+  // Show coordinates on filmcard clicked
+  const handleCardClick = (movie) => {
+    setSelectedMovies((prev) =>
+      prev.includes(movie.idImdb)
+        ? prev.filter((id) => id !== movie.idImdb)
+        : [...prev, movie.idImdb],
+    );
+  };
+
+  const movieCoordinates = selectedMovies.flatMap(
+    (id) => allCoordinates[id] || [],
+  );
+
+  // Query
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const query = searchParams.get("q");
 
+  // Debounced query effect
   const timer = useRef(null);
 
-  const fetchMovies = async (q) => {
-    if (!q) return;
-
-    try {
-      const response = await axios.get(API_ENDPOINTS.search(q), {
-        withCredentials: true,
-      });
-      if (!Array.isArray(response.data)) return;
-
-      setResults(response.data);
-
-      // Fetch coordinates in parallel
-      const coordinates = await Promise.all(
-        response.data.map((movie) => getMovieCoordinates(movie.idImdb)),
-      );
-      setMovieCoordinates(coordinates.flat());
-
-      // Extract filters
-      setCountries([...new Set(response.data.map((m) => m.country))]);
-      setGenres([...new Set(response.data.flatMap((m) => m.genres))]);
-      setProducers([...new Set(response.data.flatMap((m) => m.producers))]);
-      setActors([...new Set(response.data.flatMap((m) => m.actors))]);
-    } catch (err) {
-      console.error(err);
-      setResults([]);
-      setMovieCoordinates([]);
-    }
-  };
-
-  // Debounced query effect
   useEffect(() => {
     if (!query) return;
 
@@ -85,8 +110,29 @@ const Search = () => {
     return () => clearTimeout(timer.current);
   }, [query]);
 
-  const toggleLeftBar = () => setShowLeftPanel(!showLeftPanel);
-  const toggleRightbar = () => setShowRightPanel(!showRightPanel);
+  // Fetch movies
+  const fetchMovies = async (q) => {
+    if (!q) return;
+
+    try {
+      const response = await axios.get(API_ENDPOINTS.search(q), {
+        withCredentials: true,
+      });
+      if (!Array.isArray(response.data)) return;
+
+      setResults(response.data);
+
+      // Extract filters
+      setCountries([...new Set(response.data.map((m) => m.country))]);
+      setGenres([...new Set(response.data.flatMap((m) => m.genres))]);
+      setProducers([...new Set(response.data.flatMap((m) => m.producers))]);
+      setActors([...new Set(response.data.flatMap((m) => m.actors))]);
+    } catch (err) {
+      console.error(err);
+      setResults([]);
+      setSelectedMovies([]);
+    }
+  };
 
   return (
     <GlowContainer className="search-page">
@@ -128,7 +174,13 @@ const Search = () => {
         <div className={`right-panel ${!showRightPanel && "hidden"}`}>
           <div className="film-list">
             {results.map((movie) => (
-              <FilmCard key={movie.idImdb} movie={movie} />
+              <FilmCard
+                key={movie.idImdb}
+                movie={movie}
+                onSelect={handleCardClick}
+                loadingCoordinates={loadingCoordinates[movie.idImdb]}
+                coordinates={allCoordinates[movie.idImdb]}
+              />
             ))}
           </div>
         </div>
