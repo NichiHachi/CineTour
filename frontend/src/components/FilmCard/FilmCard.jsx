@@ -3,15 +3,17 @@ import "./FilmCard.css";
 import Glow from "../../components/Glow/Glow";
 import formatTime from "../../utils/formatTime";
 
+import axios from "axios";
+import API_ENDPOINTS from "../../resources/api-links";
+
 const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
-  const [imageValid, setImageValid] = useState(false);
-  const desiredWidth = 380;
-  const desiredHeight = 214;
   const [copied, setCopied] = useState(false);
   const [active, setActive] = useState(false);
 
+  const [updatedMovie, setUpdatedMovie] = useState();
+
   const handleCopyImdbId = () => {
-    if (movie?.idImdb) {
+    if (movie.idImdb) {
       navigator.clipboard.writeText(movie.idImdb);
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
@@ -19,18 +21,18 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
   };
 
   useEffect(() => {
-    if (movie && movie.image) {
-      const img = new window.Image();
-      img.src = movie.image;
-      img.onload = () => {
-        if (img.width === desiredWidth && img.height === desiredHeight) {
-          setImageValid(false);
-        } else {
-          setImageValid(true);
-        }
-      };
-      img.onerror = () => setImageValid(false);
-      console.log(movie.image);
+    const getMovieByImdbId = async (imdbId) => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId));
+        setUpdatedMovie(response.data);
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        return [];
+      }
+    };
+
+    if (movie && !movie.posterPath) {
+      getMovieByImdbId(movie.idImdb);
     }
   }, [movie]);
 
@@ -48,8 +50,13 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
         <div className="movie-image">
           {isLoading ? (
             <div className="skeleton skeleton-image" />
-          ) : imageValid ? (
-            <img src={movie.image} alt={movie.title} />
+          ) : movie && movie.posterPath ? (
+            <img src={movie.posterPath} alt={movie.title} />
+          ) : movie &&
+            !movie.posterPath &&
+            updatedMovie &&
+            updatedMovie.posterPath ? (
+            <img src={updatedMovie.posterPath} alt={updatedMovie.posterPath} />
           ) : (
             <div className="skeleton skeleton-image" />
           )}
