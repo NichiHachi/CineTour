@@ -10,8 +10,6 @@ import MultiSelectButtons from "../../components/MultiSelectButtons/MultiSelectB
 import RangeSlider from "../../components/RangeSlider/RangeSlider";
 import StarRating from "../../components/StarRating/StarRating";
 
-import getMovieCoordinates from "../../utils/getMovieCoordinates";
-
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import API_ENDPOINTS from "../../resources/api-links";
@@ -50,7 +48,22 @@ const Search = () => {
     const loadAllCoordinates = async () => {
       results.forEach(async (movie) => {
         try {
-          const coords = await getMovieCoordinates(movie.idImdb);
+          const response = await axios.get(
+            API_ENDPOINTS.locationsByImdbId(movie.idImdb),
+          );
+
+          const locations = Array.isArray(response.data) ? response.data : [];
+          const coords = [];
+
+          for (const location of locations) {
+            if (location && location.latitude && location.longitude) {
+              coords.push({
+                latitude: Number(location.latitude),
+                longitude: Number(location.longitude),
+              });
+            }
+          }
+          console.log(response.data);
           setAllCoordinates((prev) => ({
             ...prev,
             [movie.idImdb]: coords,
