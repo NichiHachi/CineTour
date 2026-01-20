@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.polytech.crud.dto.TmdbMovieInfo;
 import com.polytech.crud.entity.Movie;
 import com.polytech.crud.repository.MovieRepository;
-
 import com.polytech.utils.ImdbDatasets;
 
 import jakarta.persistence.EntityManager;
@@ -130,19 +129,26 @@ public class ImdbMoviesService {
 
     // From TMDB API to get additional movie info (backdrop, poster, overview)
     public TmdbMovieInfo getTmdbAdditionalInfo(String movieIdImdb) {
+        System.out.println("[TMDB] Token configured: " + (tmdbApiToken != null && !tmdbApiToken.isEmpty()));
+
         if (tmdbApiToken == null || tmdbApiToken.isEmpty()) {
-            System.err.println("TMDB API token is not configured");
+            System.err.println("[TMDB] API token is not configured!");
             return null;
         }
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.themoviedb.org/3/find/" + movieIdImdb + "?external_source=imdb_id&language=en-US"))
-                .header("accept", "application/json")
-                .header("Authorization", "Bearer " + tmdbApiToken)
-                .GET()
-                .build();
+        String url = "https://api.themoviedb.org/3/find/" + movieIdImdb + "?external_source=imdb_id&language=en-US";
+        System.out.println("[TMDB] Calling API for: " + movieIdImdb);
+
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).header("accept", "application/json").header("Authorization", "Bearer " + tmdbApiToken).GET().build();
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("[TMDB] Response status for " + movieIdImdb + ": " + response.statusCode());
+
+            if (response.statusCode() != 200) {
+                System.err.println("[TMDB] API error for " + movieIdImdb + ": " + response.body());
+                return null;
+            }
 
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response.body());
@@ -151,17 +157,17 @@ public class ImdbMoviesService {
             if (movieResults != null && movieResults.isArray() && !movieResults.isEmpty()) {
                 JsonNode movie = movieResults.get(0);
 
-                String backdropPath = movie.has("backdrop_path") && !movie.get("backdrop_path").isNull()
-                    ? movie.get("backdrop_path").asText() : null;
-                String posterPath = movie.has("poster_path") && !movie.get("poster_path").isNull()
-                    ? movie.get("poster_path").asText() : null;
-                String overview = movie.has("overview") && !movie.get("overview").isNull()
-                    ? movie.get("overview").asText() : null;
+                String backdropPath = movie.has("backdrop_path") && !movie.get("backdrop_path").isNull() ? movie.get("backdrop_path").asText() : null;
+                String posterPath = movie.has("poster_path") && !movie.get("poster_path").isNull() ? movie.get("poster_path").asText() : null;
+                String overview = movie.has("overview") && !movie.get("overview").isNull() ? movie.get("overview").asText() : null;
 
+                System.out.println("[TMDB] Found for " + movieIdImdb + " - backdrop: " + backdropPath + ", poster: " + posterPath);
                 return new TmdbMovieInfo(backdropPath, posterPath, overview);
+            } else {
+                System.out.println("[TMDB] No movie_results for " + movieIdImdb);
             }
         } catch (Exception e) {
-            System.err.println("Failed to fetch movie info from TMDB API: " + e.getMessage());
+            System.err.println("[TMDB] Failed for " + movieIdImdb + ": " + e.getMessage());
         }
 
         return null;
@@ -181,18 +187,52 @@ public class ImdbMoviesService {
                 movie.setBackdropPath(tmdbInfo.getFullBackdropUrl());
                 movie.setPosterPath(tmdbInfo.getFullPosterUrl());
                 movie.setOverview(tmdbInfo.getOverview());
-            }
-            // Marquer comme vérifié dans tous les cas (même si pas de résultat)
-            movie.setTmdbInfoChecked(true);
-            movieRepository.save(movie);
-
-            if (tmdbInfo != null) {
                 System.out.println("Updated TMDB info for movie: " + movie.getTitle());
             } else {
                 System.out.println("No TMDB info found for movie with IMDb ID " + idImdb);
             }
+//
+//            // Fallback: si pas d'image TMDB, essayer de scraper depuis IMDb
+//            if (movie.getPosterPath() == null && movie.getBackdropPath() == null) {
+//                System.out.println("[FALLBACK] Trying to scrape image from IMDb for: " + idImdb);
+//                try {
+//                    String imdbImage = getMovieImage(idImdb);
+//                    if (imdbImage != null && !imdbImage.isEmpty()) {
+//                        movie.setImage(imdbImage);
+//                        System.out.println("[FALLBACK] Got IMDb image for: " + movie.getTitle());
+//                    }
+//                } catch (Exception e) {
+//                    System.err.println("[FALLBACK] Failed to scrape IMDb image for " + idImdb + ": " + e.getMessage());
+//                }
+//            }
+//
+            movie.setTmdbInfoChecked(true);
+            movieRepository.save(movie);
         } catch (Exception e) {
             System.err.println("Failed to import TMDB info for movie with IMDb ID " + idImdb + ": " + e.getMessage());
         }
     }
+//
+//    /**
+//     * Scrape movie image from IMDb.
+//     */
+//    public String getMovieImage(String movieIdImdb) throws IOException {
+//        String url = String.format(ImdbLocationsService.imdbLocationsUrl, movieIdImdb);
+//        WebDriver driver = null;
+//
+//        try {
+//            driver = ImdbLocationsService.createWebDriver();
+//            driver.get(url);
+//            String pageSource = driver.getPageSource();
+//            Document doc = Jsoup.parse(pageSource);
+//            return doc.select("img[class='ipc-image']").attr("src");
+//        } catch (Exception e) {
+//            System.err.println("Failed to scrape image for movie " + movieIdImdb + e.getMessage() + e);
+//            throw new IOException("Failed to scrape image", e);
+//        } finally {
+//            if (driver != null) {
+//                driver.quit();
+//            }
+//        }
+//    }
 }

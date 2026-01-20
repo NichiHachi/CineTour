@@ -32,7 +32,6 @@ import com.polytech.crud.entity.Location;
 import com.polytech.crud.entity.Movie;
 import com.polytech.crud.repository.LocationRepository;
 import com.polytech.crud.repository.MovieRepository;
-import com.polytech.utils.Console;
 
 @Service
 public class ImdbLocationsService {
@@ -51,14 +50,14 @@ public class ImdbLocationsService {
     private GeocodingService geocodingService;
 
     @Value("${selenium.remote.url}")
-    private String seleniumRemoteUrl;
+    static private String seleniumRemoteUrl;
 
-    private final String imdbLocationsUrl = "https://www.imdb.com/title/%s/locations";
+    public final static String imdbLocationsUrl = "https://www.imdb.com/title/%s/locations";
 
     /**
      * Crée un WebDriver Firefox configuré pour le scraping.
      */
-    private WebDriver createWebDriver() throws Exception {
+    static WebDriver createWebDriver() throws Exception {
         FirefoxOptions options = new FirefoxOptions();
         options.addArguments("--headless", "--disable-gpu", "--no-sandbox");
         options.addArguments("--window-size=1920,1080");
@@ -246,10 +245,8 @@ public class ImdbLocationsService {
 
     /**
      * Geocode locations that need it, with rate limiting.
-     *
-     * @return number of locations modified
      */
-    private int geocodeLocationsWithRateLimit(List<Location> locations) {
+    private void geocodeLocationsWithRateLimit(List<Location> locations) {
         int updatedCount = 0;
         for (Location location : locations) {
             if (location.getLatitude() == null && !Boolean.TRUE.equals(location.getGeocodingFailed())) {
@@ -270,7 +267,6 @@ public class ImdbLocationsService {
             locationRepository.saveAll(locations);
             logger.info("Updated {} location(s)", updatedCount);
         }
-        return updatedCount;
     }
 
     /**

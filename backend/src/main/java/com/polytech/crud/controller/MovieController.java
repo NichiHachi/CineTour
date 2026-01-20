@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.polytech.crud.entity.Movie;
-import com.polytech.crud.service.ImdbMoviesService;
 import com.polytech.crud.service.MovieService;
 import com.polytech.crud.service.MovieSearchHistoryService;
 
@@ -29,7 +28,6 @@ public class MovieController {
 
     @Autowired
     private MovieService service;
-    private ImdbMoviesService imdbMoviesService;
 
     @Autowired
     private MovieSearchHistoryService movieSearchHistoryService;
@@ -97,7 +95,7 @@ public class MovieController {
      * @param id String
      * @return
      */
-    @GetMapping("/movieByImdbId/{id}")
+    @GetMapping("/movieByImdbId/{id}") // TODO : lent ??
     public ResponseEntity<Movie> findMovieByImdbId(@PathVariable String id,
             @CookieValue(value = "username", defaultValue = "") String username) {
         logger.info("findMovieByImdbId called with id: {}", id);
@@ -138,7 +136,7 @@ public class MovieController {
      * @return List of movies matching the search term, ordered by search counts
      */
     @GetMapping("/search")
-    public List<Movie> searchMovies(@RequestParam String title) {
+    public List<Movie> searchMovies(@RequestParam String title) { // TODO : rapide
         logger.info("Searching movies with title: {}", title);
         return service.searchMoviesOrderByPopularity(title);
     }

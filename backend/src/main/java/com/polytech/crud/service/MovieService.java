@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,31 +48,31 @@ public class MovieService {
             imdbMoviesService.enrichMovieWithTmdbInfo(idImdb);
             movie = repository.findByIdImdb(idImdb);
         }
-        incrementMovieCount(movie);
+        incrementMovieCountAsync(movie.getId());
         return movie;
     }
 
+    /**
+     * Incrémente le compteur de recherche de façon asynchrone.
+     */
+    @Async
     @Transactional
+    public void incrementMovieCountAsync(int movieId) {
+        Movie movie = repository.findById(movieId).orElse(null);
+        if (movie != null) {
+            movie.setMovieSearchCount(movie.getMovieSearchCount() + 1);
+            repository.save(movie);
+            logger.debug("Incremented search count for movie {} to {}", movie.getIdImdb(), movie.getMovieSearchCount());
+        }
+    }
+
     public List<Movie> getMoviesByTitle(String title) {
         List<Movie> movies = repository.findByTitle(title);
-        incrementMoviesCount(movies);
-        return movies;
-    }
-
-    @Transactional
-    protected void incrementMovieCount(Movie movie) {
-        movie.setMovieSearchCount(movie.getMovieSearchCount() + 1);
-        repository.save(movie);
-        logger.debug("Incremented search locations count for movie {} to {}",
-                movie.getIdImdb(),
-                movie.getLocationSearchCount());
-    }
-
-    @Transactional
-    protected void incrementMoviesCount(List<Movie> movies) {
+        // Incrémenter les compteurs de façon asynchrone
         for (Movie movie : movies) {
-            incrementMovieCount(movie);
+            incrementMovieCountAsync(movie.getId());
         }
+        return movies;
     }
 
     public List<Movie> searchMoviesOrderByPopularity(String query) {

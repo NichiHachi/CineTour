@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,6 +21,7 @@ import com.polytech.utils.Console;
 import jakarta.annotation.PostConstruct;
 
 @SpringBootApplication
+@EnableAsync
 @EntityScan(basePackages = { "com.polytech.crud.entity", "com.polytech.crud.neo4j.entity" })
 @EnableJpaRepositories(basePackages = "com.polytech.crud.repository")
 @ComponentScan(basePackages = {
