@@ -28,5 +28,7 @@ public class Movie {
     private Boolean locationsChecked = false;
     private int locationSearchCount = 0;
     private int movieSearchCount = 0;
-    private String image = "";
+    private String posterPath;
+    private String backdropPath;
+    private String overview;
 }

@@ -37,8 +37,14 @@ public class MovieNode {
     @Property("genres")
     private String genres;
 
-    @Property("image")
-    private String image;
+    @Property("posterPath")
+    private String posterPath;
+
+    @Property("backdropPath")
+    private String backdropPath;
+
+    @Property("overview")
+    private String overview;
 
     @Property("locationsChecked")
     private Boolean locationsChecked = false;

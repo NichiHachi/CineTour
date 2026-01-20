@@ -45,6 +45,9 @@ public class ImdbLocationsService {
     private MovieRepository movieRepository;
 
     @Autowired
+    private ImdbMoviesService imdbMoviesService;
+
+    @Autowired
     private GeocodingService geocodingService;
 
     @Value("${selenium.remote.url}")
@@ -160,30 +163,6 @@ public class ImdbLocationsService {
     }
 
     /**
-     * Scrape movie image from IMDb.
-     */
-    public String getMovieImage(String movieIdImdb) throws IOException {
-        String url = String.format(imdbLocationsUrl, movieIdImdb);
-        WebDriver driver = null;
-        try {
-            driver = createWebDriver();
-            driver.get(url);
-
-            String pageSource = driver.getPageSource();
-            Document doc = Jsoup.parse(pageSource);
-            return doc.select("img[class='ipc-image']").attr("src");
-
-        } catch (Exception e) {
-            logger.error("Failed to scrape image for movie {}: {}", movieIdImdb, e.getMessage(), e);
-            throw new IOException("Failed to scrape image", e);
-        } finally {
-            if (driver != null) {
-                driver.quit();
-            }
-        }
-    }
-
-    /**
      * Imports filming locations for a movie from IMDb and saves them to the database.
      */
     @Transactional
@@ -202,8 +181,6 @@ public class ImdbLocationsService {
         try {
             List<Location> locations = scrapeLocations(movieIdImdb);
             movie.setLocationsChecked(true);
-            String image = getMovieImage(movieIdImdb);
-            movie.setImage(image);
             movieRepository.save(movie);
 
             if (locations.isEmpty()) {

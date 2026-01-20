@@ -2,13 +2,21 @@ package com.polytech.crud.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -33,6 +41,9 @@ public class ImdbMoviesService {
 
     @Autowired
     private ImdbExtraction imdbExtraction;
+
+    @Value("${tmdb.api.token:}")
+    private String tmdbApiToken;
 
     private List<Movie> parseMoviesTsvFile(String tsvFilePath) throws IOException {
         List<Movie> movies = new ArrayList<>();
@@ -117,6 +128,30 @@ public class ImdbMoviesService {
         System.out.println("Finished importing movies");
     }
 
+    // From TMDB API to get movie images
+    public String getMovieImage(String movieIdImdb) throws IOException {
+        if (tmdbApiToken == null || tmdbApiToken.isEmpty()) {
+            System.err.println("TMDB API token is not configured");
+            return null;
+        }
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.themoviedb.org/3/find/" + movieIdImdb + "?external_source=imdb_id&language=en-US"))
+                .header("accept", "application/json")
+                .header("Authorization", "Bearer " + tmdbApiToken)
+                .method("GET", HttpRequest.BodyPublishers.noBody())
+                .build();
+        try {
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            // TODO: Parse JSON response to extract image URL
+            return response.body();
+        } catch (Exception e) {
+            System.err.println("Failed to fetch movie image from TMDB API: " + e.getMessage());
+        }
+
+        return null;
+    }
+
     public void importMovieImage(String idImdb) {
         Movie movie = movieRepository.findByIdImdb(idImdb);
         if (movie == null) {
@@ -125,8 +160,10 @@ public class ImdbMoviesService {
         }
         try {
             ImdbLocationsService imdbLocationsService = new ImdbLocationsService();
-            String image = imdbLocationsService.getMovieImage(idImdb);
-            movie.setImage(image);
+            String image = getMovieImage(idImdb);
+
+            // TODO
+
             movieRepository.save(movie);
         } catch (Exception e) {
             System.err.println("Failed to import image for movie with IMDb ID " + idImdb + ": " + e.getMessage());

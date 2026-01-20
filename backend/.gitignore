@@ -38,3 +38,7 @@ out/
 
 csv-export/*
 dumps/*
+
+### Environment files ###
+.env
+*.env.local
