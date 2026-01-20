@@ -4,7 +4,7 @@ import GlowContainer from "../../components/GlowContainer/GlowContainer";
 import Panel from "../../components/Panel/Panel";
 import Navbar from "../../components/Navbar/Navbar";
 import FilmCard from "../../components/FilmCard/FilmCard";
-import ThreeGlobe from "../../components/Earth/Earth";
+import ThreeGlobe from "../../components/ThreeGlobe/ThreeGlobe";
 
 import MultiSelectButtons from "../../components/MultiSelectButtons/MultiSelectButtons";
 import RangeSlider from "../../components/RangeSlider/RangeSlider";

@@ -3,23 +3,41 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import ThreeMesh from "../../components/ThreeMesh/ThreeMesh";
-import ThreeGraticule from "../../components/ThreeGraticule/ThreeGraticule";
-import ThreeCountry from "../../components/ThreeCountry/ThreeCountry";
-import ThreePoints from "../../components/ThreePoints/ThreePoints";
-import "./Earth.css";
+import ThreeMesh from "../ThreeMesh/ThreeMesh";
+import ThreeGraticule from "../ThreeGraticule/ThreeGraticule";
+import ThreeCountry from "../ThreeCountry/ThreeCountry";
+import ThreePoints from "../ThreePoints/ThreePoints";
+import "./ThreeGlobe.css";
 
-const GlobeUpdater = ({ width, height, points }) => {
+const GlobeUpdater = ({ points }) => {
   const orbitRef = useRef(null);
+  const topLightRef = useRef(null);
+  const bottomLightRef = useRef(null);
 
   const [color, setColor] = useState("#000");
 
+  // Update color when prefers-color-scheme changes
   useEffect(() => {
-    const cssColor = getComputedStyle(document.documentElement)
-      .getPropertyValue("--color-bg-light")
-      .trim();
-    setColor(cssColor);
+    const updateColor = () => {
+      const cssColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--color-bg-light")
+        .trim();
+      setColor(cssColor);
+    };
+
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+
+    updateColor();
+    mq.addEventListener("change", updateColor);
+
+    return () => mq.removeEventListener("change", updateColor);
   }, []);
+
+  // Update Three.js lights when color changes
+  useEffect(() => {
+    if (topLightRef.current) topLightRef.current.color.set(color);
+    if (bottomLightRef.current) bottomLightRef.current.color.set(color);
+  }, [color]);
 
   return (
     <>
@@ -32,8 +50,18 @@ const GlobeUpdater = ({ width, height, points }) => {
         minDistance={1.5}
       />
       <ambientLight intensity={3} />
-      <pointLight position={[0, 2, 0]} intensity={20} color={color} />
-      <pointLight position={[0, -2, 0]} intensity={20} color={color} />
+      <pointLight
+        ref={topLightRef}
+        position={[0, 2, 0]}
+        intensity={20}
+        color={color}
+      />
+      <pointLight
+        ref={bottomLightRef}
+        position={[0, -2, 0]}
+        intensity={20}
+        color={color}
+      />
       <ThreeMesh />
       <ThreeGraticule />
       <ThreeCountry />
