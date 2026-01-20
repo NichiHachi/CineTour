@@ -3,8 +3,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 const API_ENDPOINTS = {
     search: (searchWord) => isProduction ? `/api/search?title=${searchWord}` : `/search?title=${searchWord}`,
     movieByImdbId: (imdbId) => isProduction ? `/api/movieByImdbId/${imdbId}` : `/movieByImdbId/${imdbId}`,
-    importLocationByImdbId: (imdbId) => isProduction ? `/api/importLocationByImdbId/${imdbId}` : `/importLocationByImdbId/${imdbId}`,
     locationsByImdbId: (imdbId) => isProduction ? `/api/locationByImdbId/${imdbId}` : `/locationByImdbId/${imdbId}`,
+    posterByImdbId: (imdbId) => isProduction ? `/api/posterByImdbId/${imdbId}` : `/posterByImdbId/${imdbId}`,
     allUsers: isProduction ? '/api/users/all' : '/users/all',
     userById: (id) => isProduction ? `/api/users/${id}` : `/users/${id}`,
     addUser: isProduction ? '/api/users/add' : '/users/add',

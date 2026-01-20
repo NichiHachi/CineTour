@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,20 +45,17 @@ public class ImdbLocationsService {
     private MovieRepository movieRepository;
 
     @Autowired
-    private ImdbMoviesService imdbMoviesService;
-
-    @Autowired
     private GeocodingService geocodingService;
 
     @Value("${selenium.remote.url}")
-    static private String seleniumRemoteUrl;
+    private String seleniumRemoteUrl;
 
     public final static String imdbLocationsUrl = "https://www.imdb.com/title/%s/locations";
 
     /**
      * Crée un WebDriver Firefox configuré pour le scraping.
      */
-    static WebDriver createWebDriver() throws Exception {
+    WebDriver createWebDriver() throws Exception {
         FirefoxOptions options = new FirefoxOptions();
         options.addArguments("--headless", "--disable-gpu", "--no-sandbox");
         options.addArguments("--window-size=1920,1080");
@@ -144,6 +142,7 @@ public class ImdbLocationsService {
                     location.setLocationString(locationString);
                     location.setDescription(description);
                     location.setGeocodingFailed(false);
+                    location.setLocationsChecked(true);
                     locations.add(location);
                     logger.info("Found location: {} with description: {}", locationString, description);
                 }
@@ -172,20 +171,22 @@ public class ImdbLocationsService {
             return;
         }
 
-        if (Boolean.TRUE.equals(movie.getLocationsChecked())) {
-            logger.info("Movie {} location(s) (if they exist) has been already searched, skipping import", movieIdImdb);
+        List<Location> locations = locationRepository.findByIdImdb(movieIdImdb);
+        if (!locations.isEmpty()) {
+            logger.info("Locations for movie {} already exist in database", movieIdImdb);
             return;
         }
 
         try {
-            List<Location> locations = scrapeLocations(movieIdImdb);
-            movie.setLocationsChecked(true);
-            movieRepository.save(movie);
+            locations = scrapeLocations(movieIdImdb);
 
             if (locations.isEmpty()) {
                 logger.info("No locations found for movie {}", movieIdImdb);
                 return;
             }
+
+            geocodeLocationsWithRateLimit(locations);
+
             locationRepository.saveAll(locations);
             logger.info("Successfully imported {} locations for movie {}", locations.size(), movieIdImdb);
         } catch (Exception e) {
@@ -249,7 +250,7 @@ public class ImdbLocationsService {
     private void geocodeLocationsWithRateLimit(List<Location> locations) {
         int updatedCount = 0;
         for (Location location : locations) {
-            if (location.getLatitude() == null && !Boolean.TRUE.equals(location.getGeocodingFailed())) {
+            if (location.getLatitude() == null && location.getLongitude() == null && !Boolean.TRUE.equals(location.getGeocodingFailed())) {
                 if (geocodeLocation(location)) {
                     updatedCount++;
                 }
@@ -273,40 +274,9 @@ public class ImdbLocationsService {
      * Migrate all existing locations by geocoding them.
      * Only updates locations missing coordinates and not previously failed.
      */
-    public void migrateExistingLocations() throws InterruptedException {
+    public void migrateExistingLocations() {
         List<Location> locations = locationRepository.findAll();
-        logger.info("Found {} locations to check", locations.size());
-        int geocoded = 0;
-        int skipped = 0;
-        int failed = 0;
-
-        for (Location location : locations) {
-            // Skip si déjà géocodé
-            if (location.getLatitude() != null && location.getLongitude() != null) {
-                skipped++;
-                continue;
-            }
-            // Skip si déjà échoué
-            if (Boolean.TRUE.equals(location.getGeocodingFailed())) {
-                skipped++;
-                continue;
-            }
-
-            if (geocodeLocation(location)) {
-                locationRepository.save(location);
-                if (location.getLatitude() != null) {
-                    geocoded++;
-                    logger.info("Geocoded {}: {} -> ({}, {})", geocoded, location.getLocationString(),
-                            location.getLatitude(), location.getLongitude());
-                } else {
-                    failed++;
-                }
-            }
-
-            Thread.sleep(1100); // Respecter les limites de l'API (1 req/sec)
-        }
-
-        logger.info("Migration completed: {} geocoded, {} failed, {} skipped", geocoded, failed, skipped);
+        geocodeLocationsWithRateLimit(locations);
     }
 
     /**
@@ -321,17 +291,20 @@ public class ImdbLocationsService {
             return Collections.emptyList();
         }
 
-        // Incrémenter le compteur directement (évite self-invocation)
-        movie.setLocationSearchCount(movie.getLocationSearchCount() + 1);
-        movieRepository.save(movie);
-        logger.debug("Incremented location search count for movie {} to {}", movieIdImdb, movie.getLocationSearchCount());
+        incrementLocationCountAsync(movieIdImdb);
 
-        List<Location> locations = locationRepository.findByIdImdb(movieIdImdb);
+        return locationRepository.findByIdImdb(movieIdImdb);
+    }
 
-        // Géocoder les locations qui n'ont pas encore de coordonnées
-        geocodeLocationsWithRateLimit(locations);
-
-        return locations;
+    @Async
+    @Transactional
+    public void incrementLocationCountAsync(String movieIdImdb) {
+        Movie movie = movieRepository.findByIdImdb(movieIdImdb);
+        if (movie != null) {
+            movie.setLocationSearchCount(movie.getLocationSearchCount() + 1);
+            movieRepository.save(movie);
+            logger.debug("Incremented location search count for movie {} to {}", movie.getIdImdb(), movie.getLocationSearchCount());
+        }
     }
 
     /**
@@ -348,36 +321,6 @@ public class ImdbLocationsService {
         }
 
         return locationRepository.findByIdImdb(movie.getIdImdb());
-    }
-
-    /**
-     * Get locations by movie title.
-     * Imports locations from IMDB if not already checked.
-     * Increments the location search count for each movie.
-     */
-    @Transactional
-    public List<Location> getLocationsByTitle(String title) {
-        List<Movie> movies = movieRepository.findByTitle(title);
-        List<Location> allLocations = new ArrayList<>();
-
-        for (Movie movie : movies) {
-            movie.setLocationSearchCount(movie.getLocationSearchCount() + 1);
-            movieRepository.save(movie);
-            logger.debug("Incremented location search count for movie {} to {}", movie.getIdImdb(),
-                    movie.getLocationSearchCount());
-
-            List<Location> locations = locationRepository.findByIdImdb(movie.getIdImdb());
-            if (locations.isEmpty() && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
-                try {
-                    importLocations(movie.getIdImdb());
-                    locations = locationRepository.findByIdImdb(movie.getIdImdb());
-                } catch (Exception e) {
-                    logger.error("Error importing locations for movie {}: {}", movie.getIdImdb(), e.getMessage());
-                }
-            }
-            allLocations.addAll(locations);
-        }
-        return allLocations;
     }
 
     /**

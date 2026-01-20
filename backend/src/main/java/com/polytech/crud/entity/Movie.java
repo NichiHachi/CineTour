@@ -25,11 +25,8 @@ public class Movie {
     private Integer releaseYear;
     private Integer runtimeMinutes;
     private String genres;
-    private Boolean locationsChecked = false;
     private int locationSearchCount = 0;
     private int movieSearchCount = 0;
-//    @Column(length = 500)
-//    private String image;
     @Column(length = 500)
     private String posterPath;
     @Column(length = 500)

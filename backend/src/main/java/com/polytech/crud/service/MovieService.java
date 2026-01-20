@@ -19,9 +19,6 @@ public class MovieService {
     @Autowired
     private MovieRepository repository;
 
-    @Autowired
-    private ImdbMoviesService imdbMoviesService;
-
     public Movie saveMovie(Movie movie) {
         return repository.save(movie);
     }
@@ -44,10 +41,6 @@ public class MovieService {
         if (movie == null) {
             return null;
         }
-        if (!Boolean.TRUE.equals(movie.getTmdbInfoChecked())) {
-            imdbMoviesService.enrichMovieWithTmdbInfo(idImdb);
-            movie = repository.findByIdImdb(idImdb);
-        }
         incrementMovieCountAsync(movie.getId());
         return movie;
     }
@@ -66,6 +59,7 @@ public class MovieService {
         }
     }
 
+    @Transactional
     public List<Movie> getMoviesByTitle(String title) {
         List<Movie> movies = repository.findByTitle(title);
         // Incrémenter les compteurs de façon asynchrone

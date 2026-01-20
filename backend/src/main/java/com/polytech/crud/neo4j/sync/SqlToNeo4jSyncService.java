@@ -115,7 +115,6 @@ public class SqlToNeo4jSyncService {
         movieNode.setPosterPath(sqlMovie.getPosterPath());
         movieNode.setBackdropPath(sqlMovie.getBackdropPath());
         movieNode.setOverview(sqlMovie.getOverview());
-        movieNode.setLocationsChecked(sqlMovie.getLocationsChecked());
         movieNode.setLocationSearchCount(sqlMovie.getLocationSearchCount());
         movieNode.setMovieSearchCount(sqlMovie.getMovieSearchCount());
 

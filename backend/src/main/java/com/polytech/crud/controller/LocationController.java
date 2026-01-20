@@ -17,30 +17,10 @@ import org.slf4j.LoggerFactory;
 @RestController
 public class LocationController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImdbLocationsService.class);
+    private static final Logger logger = LoggerFactory.getLogger(LocationController.class);
 
     @Autowired
     private ImdbLocationsService imdbLocationsService;
-
-    /**
-     * Method GET with a path variable.
-     * Get locations by idImdb from the database, if not found, import locations
-     * from
-     * IMDB if they exist.
-     * 
-     * @param idImdb
-     * @return
-     */
-    @GetMapping("importLocationByImdbId/{idImdb}")
-    public String getMethodName(@PathVariable String idImdb) {
-        try {
-            imdbLocationsService.importLocations(idImdb);
-        } catch (Exception e) {
-            return "Error importing locations for IMDB ID: " + idImdb + e.getStackTrace();
-        }
-
-        return new String();
-    }
 
     /**
      * Method GET with a path variable.
@@ -50,13 +30,26 @@ public class LocationController {
      * @return
      */
     @GetMapping("/locationByImdbId/{idImdb}")
-    public List<Location> findLocationByImdbId(@PathVariable String idImdb) {
+    public List<Location> findLocationByImdbId(@PathVariable String idImdb) throws Exception {
         logger.info("Searching locations for IMDB ID: {}", idImdb);
 
         List<Location> locations = imdbLocationsService.getLocationsByImdbId(idImdb);
-        if (locations.isEmpty()) {
-            logger.info("No locations found for IMDB ID: {}", idImdb);
+
+        boolean needImport = locations.isEmpty();
+        if (!needImport) {
+            for (Location loc : locations) {
+                if (!Boolean.TRUE.equals(loc.getLocationsChecked())) {
+                    needImport = true;
+                    break;
+                }
+            }
         }
+
+        if (needImport) {
+            imdbLocationsService.importLocations(idImdb);
+            locations = imdbLocationsService.getLocationsByImdbId(idImdb);
+        }
+
         return locations;
     }
 
@@ -75,26 +68,6 @@ public class LocationController {
         if (locations.isEmpty()) {
             logger.info("No locations found for ID: {}", id);
         }
-        return locations;
-    }
-
-    /**
-     * Method GET with a path variable.
-     * Get locations by title from the database, if not found, import locations from
-     * IMDB if they exist.
-     *
-     * @param title String
-     * @return
-     */
-    @GetMapping("/location/{title}")
-    public List<Location> findMoviesByLocations(@PathVariable String title) {
-        logger.info("Searching locations for title: {}", title);
-
-        List<Location> locations = imdbLocationsService.getLocationsByTitle(title);
-        if (locations.isEmpty()) {
-            logger.info("No locations found for title: {}", title);
-        }
-
         return locations;
     }
 

@@ -2,6 +2,7 @@ package com.polytech.crud.controller;
 
 import java.util.List;
 
+import com.polytech.crud.service.ImdbMoviesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class MovieController {
 
     @Autowired
     private MovieService service;
+
+    @Autowired
+    private ImdbMoviesService imdbMoviesService;
 
     @Autowired
     private MovieSearchHistoryService movieSearchHistoryService;
@@ -97,7 +101,7 @@ public class MovieController {
      */
     @GetMapping("/movieByImdbId/{id}") // TODO : lent ??
     public ResponseEntity<Movie> findMovieByImdbId(@PathVariable String id,
-            @CookieValue(value = "username", defaultValue = "") String username) {
+                                                   @CookieValue(value = "username", defaultValue = "") String username) {
         logger.info("findMovieByImdbId called with id: {}", id);
         Movie movie = service.getMovieByImdbId(id);
         if (movie == null) {
@@ -108,6 +112,20 @@ public class MovieController {
             movieSearchHistoryService.saveMovieSearchHistoryByImdbId(id, movie.getTitle(), username);
             return ResponseEntity.ok(movie);
         }
+    }
+
+    @GetMapping("/posterByImdbId/{idImdb}")
+    public ResponseEntity<String> getPosterByImdbId(@PathVariable String idImdb) {
+        logger.info("getPosterByImdbId called with idImdb: {}", idImdb);
+        Movie movie = service.getMovieByImdbId(idImdb);
+        if (movie == null) {
+            logger.info("No movie found in database for ID: {}", idImdb);
+            return ResponseEntity.notFound().build();
+        } else if (!Boolean.TRUE.equals(movie.getTmdbInfoChecked())) {
+            imdbMoviesService.enrichMovieWithTmdbInfo(idImdb);
+        }
+
+        return ResponseEntity.ok(movie.getPosterPath());
     }
 
     /**
@@ -147,7 +165,7 @@ public class MovieController {
      *
      * @param movie JSON Body
      * @return ResponseEntity<Movie> A response entity containing the updated movie
-     *         or an error message
+     * or an error message
      */
     @PutMapping("/updateMovie")
     public ResponseEntity<?> updateMovie(@RequestBody Movie movie) {
@@ -166,7 +184,7 @@ public class MovieController {
      *
      * @param id int
      * @return ResponseEntity<String> A response entity containing a success or
-     *         error message
+     * error message
      */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable int id) {

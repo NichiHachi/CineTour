@@ -27,5 +27,6 @@ public class Location {
     private Double longitude;
     private String displayName;
     private String countryCode;
-    private Boolean geocodingFailed = false; 
+    private Boolean geocodingFailed = false;
+    private Boolean locationsChecked = false;
 }
