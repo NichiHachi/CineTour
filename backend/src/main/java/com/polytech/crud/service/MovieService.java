@@ -18,6 +18,9 @@ public class MovieService {
     @Autowired
     private MovieRepository repository;
 
+    @Autowired
+    private ImdbMoviesService imdbMoviesService;
+
     public Movie saveMovie(Movie movie) {
         return repository.save(movie);
     }
@@ -35,8 +38,15 @@ public class MovieService {
     }
 
     @Transactional
-    public Movie getMovieByImdbId(String id) {
-        Movie movie = repository.findByIdImdb(id);
+    public Movie getMovieByImdbId(String idImdb) {
+        Movie movie = repository.findByIdImdb(idImdb);
+        if (movie == null) {
+            return null;
+        }
+        if (!Boolean.TRUE.equals(movie.getTmdbInfoChecked())) {
+            imdbMoviesService.enrichMovieWithTmdbInfo(idImdb);
+            movie = repository.findByIdImdb(idImdb);
+        }
         incrementMovieCount(movie);
         return movie;
     }

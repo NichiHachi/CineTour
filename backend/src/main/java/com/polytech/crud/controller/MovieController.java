@@ -58,15 +58,6 @@ public class MovieController {
         return service.saveMovies(movies);
     }
 
-    @PostMapping("/addMovieImage/{movieIdImdb}")
-    public void addMovieImage(@PathVariable String movieIdImdb) {
-        try {
-            imdbMoviesService.importMovieImage(movieIdImdb);
-        } catch (Exception e) {
-            logger.error("Failed to import movie image: {}", e.getMessage());
-        }
-    }
-
     /**
      * Method GET.
      * Get all movies from the database.

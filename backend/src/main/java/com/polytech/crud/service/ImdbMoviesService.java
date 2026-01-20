@@ -12,15 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.polytech.crud.dto.TmdbMovieInfo;
 import com.polytech.crud.entity.Movie;
 import com.polytech.crud.repository.MovieRepository;
 
@@ -128,8 +128,8 @@ public class ImdbMoviesService {
         System.out.println("Finished importing movies");
     }
 
-    // From TMDB API to get movie images
-    public String getMovieImage(String movieIdImdb) throws IOException {
+    // From TMDB API to get additional movie info (backdrop, poster, overview)
+    public TmdbMovieInfo getTmdbAdditionalInfo(String movieIdImdb) {
         if (tmdbApiToken == null || tmdbApiToken.isEmpty()) {
             System.err.println("TMDB API token is not configured");
             return null;
@@ -139,34 +139,60 @@ public class ImdbMoviesService {
                 .uri(URI.create("https://api.themoviedb.org/3/find/" + movieIdImdb + "?external_source=imdb_id&language=en-US"))
                 .header("accept", "application/json")
                 .header("Authorization", "Bearer " + tmdbApiToken)
-                .method("GET", HttpRequest.BodyPublishers.noBody())
+                .GET()
                 .build();
-        try {
-            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-            // TODO: Parse JSON response to extract image URL
-            return response.body();
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(response.body());
+            JsonNode movieResults = rootNode.get("movie_results");
+
+            if (movieResults != null && movieResults.isArray() && !movieResults.isEmpty()) {
+                JsonNode movie = movieResults.get(0);
+
+                String backdropPath = movie.has("backdrop_path") && !movie.get("backdrop_path").isNull()
+                    ? movie.get("backdrop_path").asText() : null;
+                String posterPath = movie.has("poster_path") && !movie.get("poster_path").isNull()
+                    ? movie.get("poster_path").asText() : null;
+                String overview = movie.has("overview") && !movie.get("overview").isNull()
+                    ? movie.get("overview").asText() : null;
+
+                return new TmdbMovieInfo(backdropPath, posterPath, overview);
+            }
         } catch (Exception e) {
-            System.err.println("Failed to fetch movie image from TMDB API: " + e.getMessage());
+            System.err.println("Failed to fetch movie info from TMDB API: " + e.getMessage());
         }
 
         return null;
     }
 
-    public void importMovieImage(String idImdb) {
+    @Transactional
+    public void enrichMovieWithTmdbInfo(String idImdb) {
         Movie movie = movieRepository.findByIdImdb(idImdb);
         if (movie == null) {
             System.out.println("Movie with IMDb ID " + idImdb + " not found");
             return;
         }
         try {
-            ImdbLocationsService imdbLocationsService = new ImdbLocationsService();
-            String image = getMovieImage(idImdb);
+            TmdbMovieInfo tmdbInfo = getTmdbAdditionalInfo(idImdb);
 
-            // TODO
-
+            if (tmdbInfo != null) {
+                movie.setBackdropPath(tmdbInfo.getFullBackdropUrl());
+                movie.setPosterPath(tmdbInfo.getFullPosterUrl());
+                movie.setOverview(tmdbInfo.getOverview());
+            }
+            // Marquer comme vérifié dans tous les cas (même si pas de résultat)
+            movie.setTmdbInfoChecked(true);
             movieRepository.save(movie);
+
+            if (tmdbInfo != null) {
+                System.out.println("Updated TMDB info for movie: " + movie.getTitle());
+            } else {
+                System.out.println("No TMDB info found for movie with IMDb ID " + idImdb);
+            }
         } catch (Exception e) {
-            System.err.println("Failed to import image for movie with IMDb ID " + idImdb + ": " + e.getMessage());
+            System.err.println("Failed to import TMDB info for movie with IMDb ID " + idImdb + ": " + e.getMessage());
         }
     }
 }
