@@ -43,16 +43,11 @@ const Search = () => {
   const [results, setResults] = useState([]);
 
   const [allCoordinates, setAllCoordinates] = useState({});
-  const [loadingCoordinates, setLoadingCoordinates] = useState({});
 
   useEffect(() => {
     if (!results.length) return;
 
     const loadAllCoordinates = async () => {
-      const loadingMap = {};
-      results.forEach((m) => (loadingMap[m.idImdb] = true));
-      setLoadingCoordinates(loadingMap);
-
       results.forEach(async (movie) => {
         try {
           const coords = await getMovieCoordinates(movie.idImdb);
@@ -64,11 +59,6 @@ const Search = () => {
           setAllCoordinates((prev) => ({
             ...prev,
             [movie.idImdb]: [],
-          }));
-        } finally {
-          setLoadingCoordinates((prev) => ({
-            ...prev,
-            [movie.idImdb]: false,
           }));
         }
       });
@@ -178,7 +168,6 @@ const Search = () => {
                 key={movie.idImdb}
                 movie={movie}
                 onSelect={handleCardClick}
-                loadingCoordinates={loadingCoordinates[movie.idImdb]}
                 coordinates={allCoordinates[movie.idImdb]}
               />
             ))}

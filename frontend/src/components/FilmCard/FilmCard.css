@@ -19,6 +19,8 @@
 
 .movie-image img {
     border-radius: calc(var(--border-radius) - 0.5rem);
+    width: 99px;
+    height: 146px;
 }
 
 .movie-content {
@@ -26,6 +28,11 @@
     flex-direction: column;
     gap: 1rem;
     width: 100%;
+}
+
+/* Last element stick to end */
+.movie-content :last-child {
+    margin-top: auto;
 }
 
 .movie-header {
@@ -117,8 +124,8 @@
 
 /* Sizes matching your layout */
 .skeleton-image {
-    width: 90px;
-    height: 133px;
+    width: 99px;
+    height: 146px;
     border-radius: calc(var(--border-radius) - 0.5rem);
 }
 
@@ -139,5 +146,6 @@
 
 .skeleton-coordinates {
     height: 1rem;
-    width: 2.5rem;
+    width: 4.5rem;
+    border-radius: calc(var(--border-radius) - 0.5rem);
 }

@@ -1,19 +1,9 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import "./FilmCard.css";
-import axios from "axios";
 import Glow from "../../components/Glow/Glow";
-import API_ENDPOINTS from "../../resources/api-links";
-import { LocationContext } from "../../context/LocationContext";
-import getMovieCoordinates from "../../utils/getMovieCoordinates";
 import formatTime from "../../utils/formatTime";
 
-const FilmCard = ({
-  movie,
-  onSelect,
-  loadingCoordinates,
-  coordinates,
-  className = "",
-}) => {
+const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
   const [imageValid, setImageValid] = useState(false);
   const desiredWidth = 380;
   const desiredHeight = 214;
@@ -115,9 +105,7 @@ const FilmCard = ({
           <div className={`movies-coordinates`}>
             <div
               className={`${
-                loadingCoordinates
-                  ? "skeleton skeleton-coordinates"
-                  : "coordinates"
+                !coordinates ? "skeleton skeleton-coordinates" : "coordinates"
               }`}
             >
               {coordinates
