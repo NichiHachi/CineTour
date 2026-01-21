@@ -49,7 +49,12 @@ logs:
 	docker compose -p cinetour logs -f
 
 dumpSSH:
-	./scripts/db-dump-ssh.sh -e -L 3307
+	@if [ -f .env ]; then \
+		export $$(cat .env | grep NETWORK_DB_PASSWORD | xargs) && ./scripts/db-dump-ssh.sh -e -L 3307; \
+	else \
+		echo "Erreur: fichier .env non trouvé"; \
+		exit 1; \
+	fi
 
 startNeo4j:
 	docker compose -p cinetour up -d neo4j
