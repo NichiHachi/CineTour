@@ -324,6 +324,7 @@ const Search = () => {
     <GlowContainer className="search-page">
       <Navbar
         advancedSearch="true"
+        searchBar="true"
         toggleLeftBar={toggleLeftBar}
         toggleRightbar={toggleRightbar}
       />

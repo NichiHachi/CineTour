@@ -10,7 +10,12 @@ import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import SearchIcon from "@mui/icons-material/Search";
 import Searchbar from "../Searchbar/Searchbar";
 
-function Navbar({ advancedSearch = false, toggleLeftBar, toggleRightbar }) {
+function Navbar({
+  advancedSearch = false,
+  searchBar = false,
+  toggleLeftBar,
+  toggleRightbar,
+}) {
   const [cookies] = useCookies(["username"]);
   return (
     <Glow className="navbar">
@@ -34,7 +39,7 @@ function Navbar({ advancedSearch = false, toggleLeftBar, toggleRightbar }) {
         </div>
 
         <div className="navbar-center">
-          <div className={`${!advancedSearch && "hidden"}`}>
+          <div className={`${!searchBar && "hidden"}`}>
             <div className="navbar-searchbar">
               <Searchbar />
             </div>
