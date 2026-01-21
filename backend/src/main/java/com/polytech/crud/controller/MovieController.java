@@ -1,11 +1,13 @@
 package com.polytech.crud.controller;
 
+import java.time.Year;
 import java.util.List;
 
 import com.polytech.crud.service.ImdbMoviesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -99,7 +101,7 @@ public class MovieController {
      * @param id String
      * @return
      */
-    @GetMapping("/movieByImdbId/{id}") // TODO : lent ??
+    @GetMapping("/movieByImdbId/{id}")
     public ResponseEntity<Movie> findMovieByImdbId(@PathVariable String id,
                                                    @CookieValue(value = "username", defaultValue = "") String username) {
         logger.info("findMovieByImdbId called with id: {}", id);
@@ -154,9 +156,18 @@ public class MovieController {
      * @return List of movies matching the search term, ordered by search counts
      */
     @GetMapping("/search")
-    public List<Movie> searchMovies(@RequestParam String title) { // TODO : rapide
-        logger.info("Searching movies with title: {}", title);
-        return service.searchMoviesOrderByPopularity(title);
+    public Page<Movie> searchMovies(
+            @RequestParam String title,
+            @RequestParam(required = false) Year fromYear,
+            @RequestParam(required = false) Year toYear,
+            @RequestParam(required = false) List<String> genres,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) Double maxRating,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        logger.info("Searching movies with title: {}, page: {}, size: {}", title, page, size);
+        return service.searchMoviesWithFilters(title, fromYear, toYear, genres, minRating, maxRating, page, size);
     }
 
     /**

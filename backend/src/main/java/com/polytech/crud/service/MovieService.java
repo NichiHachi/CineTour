@@ -1,10 +1,14 @@
 package com.polytech.crud.service;
 
+import java.time.Year;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,8 +73,22 @@ public class MovieService {
         return movies;
     }
 
-    public List<Movie> searchMoviesOrderByPopularity(String query) {
-        return repository.searchByTitleContainingOrderBySearchCount(query);
+    public Page<Movie> searchMoviesWithFilters(String title, Year fromYear, Year toYear,
+                                               List<String> genres, Double minRating,
+                                               Double maxRating, int page, int size) {
+        
+        String genre1 = (genres != null && genres.size() > 0) ? genres.get(0) : null;
+        String genre2 = (genres != null && genres.size() > 1) ? genres.get(1) : null;
+        String genre3 = (genres != null && genres.size() > 2) ? genres.get(2) : null;
+
+        Integer fromYearInt = (fromYear != null) ? fromYear.getValue() : null;
+        Integer toYearInt = (toYear != null) ? toYear.getValue() : null;
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return repository.searchMoviesWithFilters(
+                title, fromYearInt, toYearInt, genre1, genre2, genre3, minRating, maxRating, pageable
+        );
     }
 
     public String deleteMovieById(int id) {
