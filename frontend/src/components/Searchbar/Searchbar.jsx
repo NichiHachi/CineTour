@@ -4,33 +4,26 @@ import Glow from "../Glow/Glow";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import RevealText from "../TextEffects/RevealText/RevealText";
-
 import getMovieByImdbId from "../../utils/getMovieByImdbId";
 import searchByWord from "../../utils/searchByWord";
 
 const Searchbar = () => {
   const [isNavigating, setIsNavigating] = useState(false);
-
   const resultsRef = useRef(null);
   const navigate = useNavigate();
-
   const timer = { current: null };
-
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
   const handleFilter = (event) => {
     const searchWord = event.target.value;
     setSearchQuery(searchWord);
-
     if (timer.current) clearTimeout(timer.current);
-
     timer.current = setTimeout(async () => {
       if (!searchWord) {
         setFilteredData([]);
         return;
       }
-
       const response = await searchByWord(searchWord);
       setFilteredData(response);
     }, 1000);
@@ -47,19 +40,18 @@ const Searchbar = () => {
 
   const handleSearchSubmit = () => {
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      navigate(`/search?title=${encodeURIComponent(searchQuery)}`);
+      setFilteredData([]); // Clear dropdown when navigating
     }
   };
 
   const handleMovieClick = async (imdbId) => {
     if (isNavigating) return;
     setIsNavigating(true);
-
     const response = await getMovieByImdbId(imdbId);
     if (response.data) {
       navigate(`/movie/${imdbId}`);
     }
-
     setIsNavigating(false);
   };
 
@@ -110,4 +102,5 @@ const Searchbar = () => {
     </Glow>
   );
 };
+
 export default Searchbar;
