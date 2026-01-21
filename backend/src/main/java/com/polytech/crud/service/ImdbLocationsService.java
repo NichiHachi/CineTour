@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.polytech.utils.Console;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -85,6 +86,15 @@ public class ImdbLocationsService {
                         By.xpath("//p[contains(text(), \"It looks like we don't have any filming & production\")]"));
                 if (noLocationsMessage != null) {
                     logger.info("No locations available for movie {}", movieIdImdb);
+
+                    Console.warnln("PAS LIEU TROUVE POUR " + movieIdImdb);
+                    Movie movie = movieRepository.findByIdImdb(movieIdImdb);
+                    if (movie != null && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
+                        movie.setLocationsChecked(true);
+                        movieRepository.save(movie);
+                    }
+                    Console.warnln("QUAND MEME SET LOCATION CHECKED TRUE FOR " + movieIdImdb);
+
                     return locations;
                 }
             } catch (NoSuchElementException e) {
@@ -142,7 +152,13 @@ public class ImdbLocationsService {
                     location.setLocationString(locationString);
                     location.setDescription(description);
                     location.setGeocodingFailed(false);
-                    location.setLocationsChecked(true);
+                    Console.warnln("SET LOCATION CHECKED TRUE FOR " + movieIdImdb);
+                    location.setLocationChecked(true);
+                    Movie movie = movieRepository.findByIdImdb(movieIdImdb);
+                    if (movie != null && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
+                        movie.setLocationsChecked(true);
+                        movieRepository.save(movie);
+                    }
                     locations.add(location);
                     logger.info("Found location: {} with description: {}", locationString, description);
                 }
@@ -172,8 +188,8 @@ public class ImdbLocationsService {
         }
 
         List<Location> locations = locationRepository.findByIdImdb(movieIdImdb);
-        if (!locations.isEmpty()) {
-            logger.info("Locations for movie {} already exist in database", movieIdImdb);
+        if (!locations.isEmpty() || Boolean.TRUE.equals(movie.getLocationsChecked())) {
+            logger.info("Locations for movie {} already exist or searched in database", movieIdImdb);
             return;
         }
 

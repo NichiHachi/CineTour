@@ -2,6 +2,7 @@ package com.polytech.crud.controller;
 
 import java.util.List;
 
+import com.polytech.utils.Console;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,7 +39,8 @@ public class LocationController {
         boolean needImport = locations.isEmpty();
         if (!needImport) {
             for (Location loc : locations) {
-                if (!Boolean.TRUE.equals(loc.getLocationsChecked())) {
+                if (!Boolean.TRUE.equals(loc.getLocationChecked())) {
+                    Console.warnln("Location data incomplete for IMDB ID: " + idImdb + ", re-importing locations.");
                     needImport = true;
                     break;
                 }

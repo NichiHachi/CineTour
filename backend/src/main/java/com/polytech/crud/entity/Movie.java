@@ -34,4 +34,5 @@ public class Movie {
     @Column(length = 2000)
     private String overview;
     private Boolean tmdbInfoChecked = false;
+    private Boolean locationsChecked = false;
 }

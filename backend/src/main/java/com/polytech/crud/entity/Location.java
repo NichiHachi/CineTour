@@ -28,5 +28,5 @@ public class Location {
     private String displayName;
     private String countryCode;
     private Boolean geocodingFailed = false;
-    private Boolean locationsChecked = false;
+    private Boolean locationChecked = false;
 }
