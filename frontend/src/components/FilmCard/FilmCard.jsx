@@ -2,41 +2,55 @@ import React, { useState, useEffect } from "react";
 import "./FilmCard.css";
 import Glow from "../../components/Glow/Glow";
 import formatTime from "../../utils/formatTime";
+import { useNavigate } from "react-router-dom";
 
-import axios from "axios";
-import API_ENDPOINTS from "../../resources/api-links";
+import getMovieByImdbId from "../../utils/getMovieByImdbId";
 
 const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
+  // Click redirection
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [active, setActive] = useState(false);
 
-  const [updatedMovie, setUpdatedMovie] = useState();
-
-  const handleCopyImdbId = () => {
+  const handleClick = () => {
     if (movie.idImdb) {
       navigator.clipboard.writeText(movie.idImdb);
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
+      navigate(`/movie/${movie.idImdb}`);
     }
   };
 
+  // Image fetching
+  const [updatedMovie, setUpdatedMovie] = useState(null);
+  const [isFetchingPoster, setIsFetchingPoster] = useState(false);
+
   useEffect(() => {
-    const getMovieByImdbId = async (imdbId) => {
-      try {
-        const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId));
-        setUpdatedMovie(response.data);
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-        return [];
+    let cancelled = false;
+
+    const fetchMovie = async () => {
+      setIsFetchingPoster(true);
+      const data = await getMovieByImdbId(movie.idImdb);
+      if (!cancelled) {
+        setUpdatedMovie(data);
+        setIsFetchingPoster(false);
       }
     };
 
     if (movie && !movie.posterPath) {
-      getMovieByImdbId(movie.idImdb);
+      fetchMovie();
+    } else {
+      setUpdatedMovie(null);
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [movie]);
 
   const isLoading = !movie;
+  const posterSrc = movie?.posterPath || updatedMovie?.posterPath;
+  const showSkeleton = !movie || isFetchingPoster;
 
   return (
     <Glow className={`filmcard ${className} ${active ? "active" : ""}`}>
@@ -48,17 +62,12 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
         }}
       >
         <div className="movie-image">
-          {isLoading ? (
+          {showSkeleton ? (
             <div className="skeleton skeleton-image" />
-          ) : movie && movie.posterPath ? (
-            <img src={movie.posterPath} alt={movie.title} />
-          ) : movie &&
-            !movie.posterPath &&
-            updatedMovie &&
-            updatedMovie.posterPath ? (
-            <img src={updatedMovie.posterPath} alt={updatedMovie.posterPath} />
+          ) : posterSrc ? (
+            <img src={posterSrc} alt={movie.title} />
           ) : (
-            <div className="skeleton skeleton-image" />
+            <div className="empty-image" />
           )}
         </div>
 
@@ -71,7 +80,7 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
                 <div className="movie-title">{movie.title}</div>
                 <button
                   className={`movie-imdbid ${copied ? "copied" : ""}`}
-                  onClick={handleCopyImdbId}
+                  onClick={handleClick}
                 >
                   {movie.idImdb}
                 </button>
