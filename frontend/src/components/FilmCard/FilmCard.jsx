@@ -4,7 +4,7 @@ import Glow from "../../components/Glow/Glow";
 import formatTime from "../../utils/formatTime";
 import { useNavigate } from "react-router-dom";
 
-import getMoviePosterByImdbId from "../../utils/getMoviePosterByImdbId";
+import getPosterByImdbId from "../../utils/getPosterByImdbId";
 
 const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
   // Click redirection
@@ -30,7 +30,7 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
 
     const fetchMovie = async () => {
       setIsFetchingPoster(true);
-      const data = await getMoviePosterByImdbId(movie.idImdb);
+      const data = await getPosterByImdbId(movie.idImdb);
       if (!cancelled) {
         setMoviePoster(data);
         setIsFetchingPoster(false);

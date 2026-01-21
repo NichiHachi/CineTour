@@ -13,6 +13,7 @@ import StarRating from "../../components/StarRating/StarRating";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import API_ENDPOINTS from "../../resources/api-links";
+import getLocationsByImdbId from "../../utils/getLocationsByImdbId";
 
 const Search = () => {
   // Panels
@@ -48,22 +49,7 @@ const Search = () => {
     const loadAllCoordinates = async () => {
       results.forEach(async (movie) => {
         try {
-          const response = await axios.get(
-            API_ENDPOINTS.locationsByImdbId(movie.idImdb),
-          );
-
-          const locations = Array.isArray(response.data) ? response.data : [];
-          const coords = [];
-
-          for (const location of locations) {
-            if (location && location.latitude && location.longitude) {
-              coords.push({
-                latitude: Number(location.latitude),
-                longitude: Number(location.longitude),
-              });
-            }
-          }
-          console.log(response.data);
+          const coords = await getLocationsByImdbId(movie.idImdb);
           setAllCoordinates((prev) => ({
             ...prev,
             [movie.idImdb]: coords,
