@@ -16,12 +16,15 @@ services:
     volumes:
       - ./src:/cinetour_backend/src
     depends_on:
-      selenium-firefox: 
+      selenium-firefox:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: network
       CINETOUR_NETWORK_DB_URL: "jdbc:mysql://127.0.0.1:3307/cinetour?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
       CINETOUR_NETWORK_DB_USER: "cinetour_net"
       NETWORK_DB_PASSWORD: ${NETWORK_DB_PASSWORD:-}
+      SPRING_NEO4J_URI: "bolt://127.0.0.1:7687"
+      SPRING_NEO4J_AUTHENTICATION_USERNAME: "neo4j"
+      SPRING_NEO4J_AUTHENTICATION_PASSWORD: ${NEO4J_PASSWORD:-}
     env_file:
       - .env
