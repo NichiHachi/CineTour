@@ -107,8 +107,9 @@ const Search = () => {
     if (timer.current) clearTimeout(timer.current);
 
     timer.current = setTimeout(() => {
+      setAllCoordinates([]);
       fetchMovies(query);
-    }, 100);
+    }, 0);
 
     return () => clearTimeout(timer.current);
   }, [query]);
@@ -141,6 +142,7 @@ const Search = () => {
     <GlowContainer className="search-page">
       <Navbar
         advancedSearch="true"
+        searchBar="true"
         toggleLeftBar={toggleLeftBar}
         toggleRightbar={toggleRightbar}
       />
