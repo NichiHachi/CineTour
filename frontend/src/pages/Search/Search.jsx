@@ -94,6 +94,110 @@ const Search = () => {
   const timer = useRef(null);
 
   useEffect(() => {
+    // Fetch movies based on current filters
+    const fetchMovies = async () => {
+      try {
+        // Build params object for API
+        const params = {
+          title: filters.title,
+          page: filters.page,
+          size: filters.size,
+        };
+
+        // Only add year parameters if they differ from defaults
+        if (filters.yearRange[0] !== 1900) {
+          params.fromYear = filters.yearRange[0];
+        }
+        if (filters.yearRange[1] !== 2050) {
+          params.toYear = filters.yearRange[1];
+        }
+
+        // Only add minRating if it's greater than 0
+        if (filters.minRating > 0) {
+          params.minRating = filters.minRating;
+        }
+
+        // Add array parameters
+        filters.genres.forEach((genre) => {
+          if (!params.genres) params.genres = [];
+          params.genres.push(genre);
+        });
+        filters.countries.forEach((country) => {
+          if (!params.countries) params.countries = [];
+          params.countries.push(country);
+        });
+
+        console.log("Fetching with params:", params);
+
+        const response = await axios.get(API_ENDPOINTS.search(params), {
+          withCredentials: true,
+        });
+
+        // Handle pageable response
+        let moviesArray = [];
+        if (response.data) {
+          // Check if it's a pageable object (Spring Boot Page)
+          if (response.data.content && Array.isArray(response.data.content)) {
+            moviesArray = response.data.content;
+
+            // Extract pagination info
+            setPageInfo({
+              totalPages: response.data.totalPages || 0,
+              totalElements: response.data.totalElements || 0,
+              currentPage: response.data.number || 0,
+              pageSize: response.data.size || 5,
+            });
+          }
+          // Fallback for direct array response
+          else if (Array.isArray(response.data)) {
+            moviesArray = response.data;
+            setPageInfo({
+              totalPages: 1,
+              totalElements: response.data.length,
+              currentPage: 0,
+              pageSize: response.data.length,
+            });
+          }
+        }
+
+        setResults(moviesArray);
+
+        // Extract available filter options from results
+        const allGenres = [
+          ...new Set(
+            moviesArray.flatMap((m) =>
+              (m.genres || "").split(",").map((g) => g.trim()),
+            ),
+          ),
+        ];
+
+        const allCountries = [
+          ...new Set(moviesArray.map((m) => m.country).filter(Boolean)),
+        ];
+        const allProducers = [
+          ...new Set(moviesArray.flatMap((m) => m.producers || [])),
+        ];
+        const allActors = [
+          ...new Set(moviesArray.flatMap((m) => m.actors || [])),
+        ];
+
+        setAvailableGenres(allGenres);
+        setAvailableCountries(allCountries);
+        setAvailableProducers(allProducers);
+        setAvailableActors(allActors);
+      } catch (err) {
+        console.error("Error fetching movies:", err);
+        setResults([]);
+        setSelectedMovies([]);
+        setPageInfo({
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 5,
+        });
+      }
+    };
+
     if (!filters.title) return;
 
     if (timer.current) clearTimeout(timer.current);
@@ -104,105 +208,6 @@ const Search = () => {
 
     return () => clearTimeout(timer.current);
   }, [filters]);
-
-  // Fetch movies based on current filters
-  const fetchMovies = async () => {
-    try {
-      // Build params object for API
-      const params = {
-        title: filters.title,
-        page: filters.page,
-        size: filters.size,
-      };
-
-      // Only add year parameters if they differ from defaults
-      if (filters.yearRange[0] !== 1900) {
-        params.fromYear = filters.yearRange[0];
-      }
-      if (filters.yearRange[1] !== 2050) {
-        params.toYear = filters.yearRange[1];
-      }
-
-      // Only add minRating if it's greater than 0
-      if (filters.minRating > 0) {
-        params.minRating = filters.minRating;
-      }
-
-      // Add array parameters
-      filters.genres.forEach((genre) => {
-        if (!params.genres) params.genres = [];
-        params.genres.push(genre);
-      });
-      filters.countries.forEach((country) => {
-        if (!params.countries) params.countries = [];
-        params.countries.push(country);
-      });
-
-      console.log("Fetching with params:", params);
-
-      const response = await axios.get(API_ENDPOINTS.search(params), {
-        withCredentials: true,
-      });
-
-      // Handle pageable response
-      let moviesArray = [];
-      if (response.data) {
-        // Check if it's a pageable object (Spring Boot Page)
-        if (response.data.content && Array.isArray(response.data.content)) {
-          moviesArray = response.data.content;
-
-          // Extract pagination info
-          setPageInfo({
-            totalPages: response.data.totalPages || 0,
-            totalElements: response.data.totalElements || 0,
-            currentPage: response.data.number || 0,
-            pageSize: response.data.size || 5,
-          });
-        }
-        // Fallback for direct array response
-        else if (Array.isArray(response.data)) {
-          moviesArray = response.data;
-          setPageInfo({
-            totalPages: 1,
-            totalElements: response.data.length,
-            currentPage: 0,
-            pageSize: response.data.length,
-          });
-        }
-      }
-
-      setResults(moviesArray);
-
-      // Extract available filter options from results
-      const allGenres = [
-        ...new Set(moviesArray.flatMap((m) => m.genres || [])),
-      ];
-      const allCountries = [
-        ...new Set(moviesArray.map((m) => m.country).filter(Boolean)),
-      ];
-      const allProducers = [
-        ...new Set(moviesArray.flatMap((m) => m.producers || [])),
-      ];
-      const allActors = [
-        ...new Set(moviesArray.flatMap((m) => m.actors || [])),
-      ];
-
-      setAvailableGenres(allGenres);
-      setAvailableCountries(allCountries);
-      setAvailableProducers(allProducers);
-      setAvailableActors(allActors);
-    } catch (err) {
-      console.error("Error fetching movies:", err);
-      setResults([]);
-      setSelectedMovies([]);
-      setPageInfo({
-        totalPages: 0,
-        totalElements: 0,
-        currentPage: 0,
-        pageSize: 5,
-      });
-    }
-  };
 
   // Update URL when filters change
   const updateURL = (newFilters) => {
@@ -217,7 +222,7 @@ const Search = () => {
     if (newFilters.yearRange[0] !== 1900) {
       params.set("fromYear", newFilters.yearRange[0].toString());
     }
-    if (newFilters.yearRange[1] !== 2024) {
+    if (newFilters.yearRange[1] !== 2050) {
       params.set("toYear", newFilters.yearRange[1].toString());
     }
 
@@ -338,43 +343,6 @@ const Search = () => {
               value={filters.yearRange}
               onChange={(range) => handleFilterChange("yearRange", range)}
             />
-            <StarRating
-              label="Popularité minimum"
-              value={filters.minRating}
-              onChange={(rating) => handleFilterChange("minRating", rating)}
-            />
-
-            {/* Optional: Display pagination info */}
-            {pageInfo.totalElements > 0 && (
-              <div
-                style={{ marginTop: "20px", padding: "10px", color: "#fff" }}
-              >
-                <p>Résultats: {pageInfo.totalElements} films</p>
-                <p>
-                  Page {pageInfo.currentPage + 1} sur {pageInfo.totalPages}
-                </p>
-
-                {/* Simple pagination controls */}
-                <div
-                  style={{ display: "flex", gap: "10px", marginTop: "10px" }}
-                >
-                  <button
-                    onClick={() => handlePageChange(filters.page - 1)}
-                    disabled={filters.page === 0}
-                    style={{ padding: "5px 10px" }}
-                  >
-                    Précédent
-                  </button>
-                  <button
-                    onClick={() => handlePageChange(filters.page + 1)}
-                    disabled={filters.page >= pageInfo.totalPages - 1}
-                    style={{ padding: "5px 10px" }}
-                  >
-                    Suivant
-                  </button>
-                </div>
-              </div>
-            )}
           </Panel>
         </div>
 

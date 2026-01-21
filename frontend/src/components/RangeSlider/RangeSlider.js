@@ -53,7 +53,7 @@ const RangeSlider = ({
       if (onChange) {
         onChange([newMin, newMax]); // Return as array
       }
-    }, 500); // Wait 500ms after user stops dragging
+    }, 1000);
   };
 
   // Handle min value change
@@ -71,44 +71,42 @@ const RangeSlider = ({
   };
 
   return (
-    <Glow className="range-slider-container">
-      <div className="range-slider-content">
-        <div className="range-slider-header">
-          <span className="range-slider-label">{label}</span>
-          <span className="range-slider-values">
-            {minValue} - {maxValue}
-          </span>
-        </div>
-
-        <div className="range-slider-wrapper">
-          <div className="range-slider-track">
-            <div className="range-slider-range" ref={rangeRef}></div>
-          </div>
-
-          <input
-            type="range"
-            ref={minRef}
-            min={min}
-            max={max}
-            step={step}
-            value={minValue}
-            onChange={handleMinChange}
-            className="range-slider-input range-slider-input-min"
-          />
-
-          <input
-            type="range"
-            ref={maxRef}
-            min={min}
-            max={max}
-            step={step}
-            value={maxValue}
-            onChange={handleMaxChange}
-            className="range-slider-input range-slider-input-max"
-          />
-        </div>
+    <div className="range-slider-content">
+      <div className="range-slider-header">
+        <span className="range-slider-label">{label}</span>
+        <span className="range-slider-values">
+          {minValue} - {maxValue}
+        </span>
       </div>
-    </Glow>
+
+      <div className="range-slider-wrapper">
+        <div className="range-slider-track">
+          <div className="range-slider-range" ref={rangeRef}></div>
+        </div>
+
+        <input
+          type="range"
+          ref={minRef}
+          min={min}
+          max={max}
+          step={step}
+          value={minValue}
+          onChange={handleMinChange}
+          className="range-slider-input range-slider-input-min"
+        />
+
+        <input
+          type="range"
+          ref={maxRef}
+          min={min}
+          max={max}
+          step={step}
+          value={maxValue}
+          onChange={handleMaxChange}
+          className="range-slider-input range-slider-input-max"
+        />
+      </div>
+    </div>
   );
 };
 
