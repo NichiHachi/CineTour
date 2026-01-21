@@ -3,14 +3,14 @@ import "./FilmCard.css";
 import Glow from "../../components/Glow/Glow";
 import formatTime from "../../utils/formatTime";
 
-import axios from "axios";
-import API_ENDPOINTS from "../../resources/api-links";
+import getPosterByImdbId from "../../utils/getPosterByImdbId";
 
 const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
   const [copied, setCopied] = useState(false);
   const [active, setActive] = useState(false);
 
-  const [updatedMovie, setUpdatedMovie] = useState();
+  const [poster, setPoster] = useState();
+  const [noPoster, setNoPoster] = useState(false);
 
   const handleCopyImdbId = () => {
     if (movie.idImdb) {
@@ -21,19 +21,16 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
   };
 
   useEffect(() => {
-    const getMovieByImdbId = async (imdbId) => {
-      try {
-        const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId));
-        setUpdatedMovie(response.data);
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-        return [];
+    const fetchPosterByImdbId = async (imdbId) => {
+      const response = await getPosterByImdbId(movie.idImdb);
+      if (response) {
+        setPoster(response);
+      } else {
+        setNoPoster(true);
       }
     };
 
-    if (movie && !movie.posterPath) {
-      getMovieByImdbId(movie.idImdb);
-    }
+    fetchPosterByImdbId(movie.idImdb);
   }, [movie]);
 
   const isLoading = !movie;
@@ -50,13 +47,10 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
         <div className="movie-image">
           {isLoading ? (
             <div className="skeleton skeleton-image" />
-          ) : movie && movie.posterPath ? (
-            <img src={movie.posterPath} alt={movie.title} />
-          ) : movie &&
-            !movie.posterPath &&
-            updatedMovie &&
-            updatedMovie.posterPath ? (
-            <img src={updatedMovie.posterPath} alt={updatedMovie.posterPath} />
+          ) : poster ? (
+            <img src={poster} alt={`Poster of ${movie.title}`} />
+          ) : noPoster ? (
+            <div className="blank" />
           ) : (
             <div className="skeleton skeleton-image" />
           )}

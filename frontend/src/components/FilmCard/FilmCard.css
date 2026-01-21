@@ -129,6 +129,13 @@
     border-radius: calc(var(--border-radius) - 0.5rem);
 }
 
+.blank {
+    background-color: var(--color-border-light);
+    width: 99px;
+    height: 146px;
+    border-radius: calc(var(--border-radius) - 0.5rem);
+}
+
 .skeleton-title {
     height: 2rem;
     width: 200px;
