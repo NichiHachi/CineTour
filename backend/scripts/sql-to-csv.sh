@@ -153,7 +153,7 @@ echo -e "${YELLOW}  → Extraction des ratings...${NC}"
 echo "id:int|average_rating:float|id_imdb|num_votes:int" > "$OUTPUT_DIR/ratings_temp.csv"
 awk '
     /INSERT INTO `ratings` VALUES/ {in_block=1; next}
-    in_block && /^INSERT INTO|^/\*|^--|^$|^LOCK|^UNLOCK|^ALTER|^CREATE|^DROP/ {in_block=0}
+    in_block && /^INSERT INTO|^\/\*|^--|^$|^LOCK|^UNLOCK|^ALTER|^CREATE|^DROP/ {in_block=0}
     in_block && /^\(/ {print}
 ' "$TEMP_SQL" | \
     sed -E 's/\),$/|NEXT_ROW|/g' | \
@@ -161,12 +161,15 @@ awk '
     sed -E 's/\|NEXT_ROW\| /\n/g' | \
     sed -E 's/^\(//g' | \
     sed -E 's/\),?;?\s*$//g' | \
-    sed -E "s/'([^']*)'/'\1/g" | \
     awk -F',' '{
         id = $1
         rating = $2
         id_imdb = $3
         votes = $4
+        # Nettoyer les quotes
+        gsub(/^'\''/, "", id_imdb)
+        gsub(/'\''$/, "", id_imdb)
+        # Gérer les valeurs NULL
         if (rating == "NULL" || rating == "\\\\N") rating = ""
         if (votes == "NULL" || votes == "\\\\N") votes = ""
         print id "|" rating "|" id_imdb "|" votes
@@ -186,11 +189,18 @@ try:
     with open("$OUTPUT_DIR/ratings_temp.csv", "r") as f:
         reader = csv.DictReader(f, delimiter='|')
         for row in reader:
-            id_imdb = row['id_imdb']
+            # Les headers peuvent contenir des types Neo4j (ex: "id_imdb" ou "average_rating:float")
+            # On récupère la clé en supprimant le type si présent
+            keys = list(row.keys())
+            id_imdb_key = [k for k in keys if k.startswith('id_imdb')][0]
+            rating_key = [k for k in keys if k.startswith('average_rating')][0]
+            votes_key = [k for k in keys if k.startswith('num_votes')][0]
+            
+            id_imdb = row[id_imdb_key]
             if id_imdb:
                 ratings_map[id_imdb] = {
-                    'average_rating': row['average_rating'],
-                    'num_votes': row['num_votes']
+                    'average_rating': row[rating_key],
+                    'num_votes': row[votes_key]
                 }
 except Exception as e:
     print(f"Avertissement: Erreur lors de la lecture des ratings: {e}")

@@ -62,7 +62,8 @@ public class MovieRecommendationService {
      */
     public List<MovieNode> getRecommendationsByDirectors(String idImdb, int limit) {
         log.info("Recherche de recommandations par directeurs pour le film: {}", idImdb);
-        return movieNodeRepository.findMoviesBySameDirectors(idImdb, limit);
+        List<MovieNode> movies = movieNodeRepository.findMoviesBySameDirectors(idImdb, limit * 3);
+        return sortByPopularityScore(movies, limit);
     }
 
     /**
@@ -70,7 +71,8 @@ public class MovieRecommendationService {
      */
     public List<MovieNode> getRecommendationsByActors(String idImdb, int limit) {
         log.info("Recherche de recommandations par acteurs pour le film: {}", idImdb);
-        return movieNodeRepository.findMoviesBySameActors(idImdb, limit);
+        List<MovieNode> movies = movieNodeRepository.findMoviesBySameActors(idImdb, limit * 3);
+        return sortByPopularityScore(movies, limit);
     }
 
     /**
@@ -78,7 +80,8 @@ public class MovieRecommendationService {
      */
     public List<MovieNode> getRecommendationsByGenre(String idImdb, double minRating, int limit) {
         log.info("Recherche de recommandations par genre pour le film: {} (rating min: {})", idImdb, minRating);
-        return movieNodeRepository.findMoviesBySameGenre(idImdb, minRating, limit);
+        List<MovieNode> movies = movieNodeRepository.findMoviesBySameGenre(idImdb, minRating, limit * 3);
+        return sortByPopularityScore(movies, limit);
     }
 
     /**
@@ -87,7 +90,8 @@ public class MovieRecommendationService {
     public List<MovieNode> getRecommendationsByEraAndGenre(String idImdb, int yearRange, double minRating, int limit) {
         log.info("Recherche de recommandations par époque et genre pour le film: {} (±{} ans, rating min: {})",
                 idImdb, yearRange, minRating);
-        return movieNodeRepository.findMoviesBySameEraAndGenre(idImdb, yearRange, minRating, limit);
+        List<MovieNode> movies = movieNodeRepository.findMoviesBySameEraAndGenre(idImdb, yearRange, minRating, limit * 3);
+        return sortByPopularityScore(movies, limit);
     }
 
     /**
@@ -154,14 +158,19 @@ public class MovieRecommendationService {
                     int score = calculateSimilarityScore(referenceMovie, movie);
                     result.put("similarityScore", score);
 
+                    // Calculer le score de popularité (note * nombre de votes)
+                    double popularityScore = calculatePopularityScore(movie, score);
+                    result.put("popularityScore", popularityScore);
+
                     return result;
                 })
                 .filter(result -> (int) result.get("similarityScore") > 0) // Filtrer les films sans similarité
                 .sorted((a, b) -> {
-                    // Tri par score de similarité décroissant
-                    int scoreA = (int) a.get("similarityScore");
-                    int scoreB = (int) b.get("similarityScore");
-                    return Integer.compare(scoreB, scoreA);
+                    // Tri par score de popularité décroissant (intègre similarité + popularité du
+                    // film)
+                    double scoreA = (double) a.get("popularityScore");
+                    double scoreB = (double) b.get("popularityScore");
+                    return Double.compare(scoreB, scoreA);
                 })
                 .limit(effectiveLimit)
                 .collect(Collectors.toList());
@@ -199,6 +208,40 @@ public class MovieRecommendationService {
         }
 
         return score;
+    }
+
+    /**
+     * Calcule le score de popularité combinant la similarité et la popularité du
+     * film
+     * Utilise un coefficient basé sur note * nombre de votes pour favoriser les
+     * films connus
+     * 
+     * @param movie           Le film candidat
+     * @param similarityScore Le score de similarité de base
+     * @return Le score de popularité pondéré
+     */
+    private double calculatePopularityScore(MovieNode movie, int similarityScore) {
+        // Si pas de rating, retourner juste le score de similarité
+        if (movie.getAverageRating() == null || movie.getNumVotes() == null) {
+            return (double) similarityScore;
+        }
+
+        try {
+            // Convertir numVotes de String vers long
+            long numVotes = Long.parseLong(movie.getNumVotes());
+
+            // Coefficient de popularité : (note * nombre de votes) / 1000
+            // Division par 1000 pour normaliser les valeurs
+            double popularityCoefficient = (movie.getAverageRating() * numVotes) / 1000.0;
+
+            // Score final = score de similarité * coefficient de popularité
+            // Cela privilégie les films avec de bonnes notes ET beaucoup de votes
+            return similarityScore * popularityCoefficient;
+        } catch (NumberFormatException e) {
+            // En cas d'erreur de conversion, retourner juste le score de similarité
+            log.warn("Impossible de convertir numVotes pour le film {}: {}", movie.getIdImdb(), movie.getNumVotes());
+            return (double) similarityScore;
+        }
     }
 
     /**
@@ -318,6 +361,44 @@ public class MovieRecommendationService {
         }
 
         return String.join(", ", reasons) + " (score: " + String.format("%.1f", similarityScore) + ")";
+    }
+
+    /**
+     * Trie les films par score de popularité (rating * numVotes) et limite les résultats
+     * 
+     * @param movies Liste des films à trier
+     * @param limit  Nombre maximum de résultats
+     * @return Liste triée et limitée
+     */
+    private List<MovieNode> sortByPopularityScore(List<MovieNode> movies, int limit) {
+        return movies.stream()
+                .sorted((m1, m2) -> {
+                    double score1 = getPopularityScore(m1);
+                    double score2 = getPopularityScore(m2);
+                    return Double.compare(score2, score1); // Ordre décroissant
+                })
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Calcule le score de popularité d'un film (rating * numVotes)
+     * 
+     * @param movie Le film à évaluer
+     * @return Le score de popularité
+     */
+    private double getPopularityScore(MovieNode movie) {
+        if (movie.getAverageRating() == null || movie.getNumVotes() == null) {
+            return 0.0;
+        }
+
+        try {
+            long numVotes = Long.parseLong(movie.getNumVotes());
+            return movie.getAverageRating() * numVotes;
+        } catch (NumberFormatException e) {
+            log.warn("Impossible de convertir numVotes pour le film {}: {}", movie.getIdImdb(), movie.getNumVotes());
+            return 0.0;
+        }
     }
 
     /**
