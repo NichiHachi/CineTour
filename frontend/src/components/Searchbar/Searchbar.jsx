@@ -1,103 +1,93 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState } from "react";
 import "./Searchbar.css";
 import Glow from "../Glow/Glow";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_ENDPOINTS from "../../resources/api-links";
-import { LocationContext } from "../../context/LocationContext";
 import RevealText from "../TextEffects/RevealText/RevealText";
 
 const Searchbar = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isNavigating, setIsNavigating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const resultsRef = useRef(null);
   const navigate = useNavigate();
-  const { setLocationData, setImageData } = useContext(LocationContext);
 
-  const timer = useRef(null);
+  const debounceRef = useRef(null);
+  const abortRef = useRef(null);
+  const requestIdRef = useRef(0);
 
   const handleFilter = (event) => {
-    const searchWord = event.target.value;
-    setSearchQuery(searchWord);
+    const value = event.target.value;
+    setSearchQuery(value);
 
-    if (timer.current) clearTimeout(timer.current);
+    // Cancel pending debounce
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    timer.current = setTimeout(async () => {
-      if (searchWord.length === 0) {
-        setFilteredData([]);
-        return;
-      }
+    // Cancel in-flight request
+    if (abortRef.current) abortRef.current.abort();
+
+    if (!value.trim()) {
+      setFilteredData([]);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      const requestId = ++requestIdRef.current;
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       try {
-        const response = await axios.get(API_ENDPOINTS.search(searchWord), {
+        const response = await axios.get(API_ENDPOINTS.search(value), {
           withCredentials: true,
+          signal: controller.signal,
         });
-        console.log("API Response:", response.data);
 
-        if (Array.isArray(response.data)) {
-          setFilteredData(response.data);
-        } else {
-          console.warn("Invalid response format:", response.data);
+        // Ignore stale responses
+        if (requestId !== requestIdRef.current) return;
+
+        setFilteredData(Array.isArray(response.data) ? response.data : []);
+      } catch (err) {
+        if (err.name !== "CanceledError" && err.name !== "AbortError") {
+          console.error("Search error:", err);
           setFilteredData([]);
         }
-      } catch (error) {
-        console.error("Error searching films:", error);
-        setFilteredData([]);
       }
-    }, 250);
+    }, 0);
   };
 
   const handleSearchSubmit = () => {
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setFilteredData([]);
-    }
+    if (!searchQuery.trim()) return;
+    if (abortRef.current) abortRef.current.abort();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setFilteredData([]);
+    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
   const handleKeyPress = (event) => {
-    if (event.key === "Enter") {
-      handleSearchSubmit();
+    if (event.key === "Enter") handleSearchSubmit();
+    if (event.key === "Escape") {
+      if (abortRef.current) abortRef.current.abort();
+      setFilteredData([]);
     }
   };
 
   const handleMovieClick = async (imdbId) => {
     if (isNavigating) return;
     setIsNavigating(true);
-
-    console.log("handleMovieClick called with imdbId:", imdbId);
     try {
       const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId), {
         withCredentials: true,
       });
-      console.log("handleMovieClick - Response received", response.data);
-      if (response.data) {
-        navigate(`/movie/${imdbId}`);
-      }
-      const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
-      console.log("handleMovieClick - Image response received", responseImage);
-      const responseLocation = await fetch(
-        API_ENDPOINTS.importLocationByImdbId(imdbId),
-        {},
-      );
-      // setImageData(responseImage);
-      setLocationData(responseLocation);
-
-      console.log(
-        "handleMovieClick - Location response received",
-        responseLocation,
-      );
+      if (response.data) navigate(`/movie/${imdbId}`);
     } catch (error) {
-      console.error("handleMovieClick - Error:", error);
+      console.error("handleMovieClick error:", error);
     } finally {
       setIsNavigating(false);
-      console.log("handleMovieClick - END");
     }
   };
 
-  const handleBlur = () => {
-    setFilteredData([]);
-  };
+  const handleBlur = () => setFilteredData([]);
 
   return (
     <Glow className="searchbar">
@@ -117,15 +107,13 @@ const Searchbar = () => {
           <SearchIcon />
         </div>
       </div>
-      <div
-        className={`results-section ${filteredData.length !== 0 ? "show" : ""}`}
-        ref={resultsRef}
-      >
+
+      <div className={`results-section ${filteredData.length ? "show" : ""}`}>
         {filteredData.slice(0, 10).map((value, key) => (
           <div
             className="result"
             onMouseDown={() => handleMovieClick(value.idImdb)}
-            key={key}
+            key={value.idImdb}
           >
             <RevealText delay={key * 0.05} speed={0.005}>
               {value.title}
@@ -141,4 +129,5 @@ const Searchbar = () => {
     </Glow>
   );
 };
+
 export default Searchbar;
