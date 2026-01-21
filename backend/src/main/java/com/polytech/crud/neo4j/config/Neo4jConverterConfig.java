@@ -1,14 +1,14 @@
 package com.polytech.crud.neo4j.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.neo4j.driver.Value;
 import org.neo4j.driver.types.TypeSystem;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.neo4j.core.convert.Neo4jConversions;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Configuration
 public class Neo4jConverterConfig {
@@ -23,17 +23,17 @@ public class Neo4jConverterConfig {
             if (source.isNull()) {
                 return null;
             }
-            
+
             // Si c'est déjà une String, la retourner
             if (source.hasType(TypeSystem.getDefault().STRING())) {
                 return source.asString();
             }
-            
+
             // Si c'est un Integer/Long, le convertir en String
             if (source.hasType(TypeSystem.getDefault().INTEGER())) {
                 return String.valueOf(source.asLong());
             }
-            
+
             // Sinon, tenter une conversion en String
             return source.toString();
         }

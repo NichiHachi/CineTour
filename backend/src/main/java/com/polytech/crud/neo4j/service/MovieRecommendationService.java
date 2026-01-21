@@ -90,7 +90,8 @@ public class MovieRecommendationService {
     public List<MovieNode> getRecommendationsByEraAndGenre(String idImdb, int yearRange, double minRating, int limit) {
         log.info("Recherche de recommandations par époque et genre pour le film: {} (±{} ans, rating min: {})",
                 idImdb, yearRange, minRating);
-        List<MovieNode> movies = movieNodeRepository.findMoviesBySameEraAndGenre(idImdb, yearRange, minRating, limit * 3);
+        List<MovieNode> movies = movieNodeRepository.findMoviesBySameEraAndGenre(idImdb, yearRange, minRating,
+                limit * 3);
         return sortByPopularityScore(movies, limit);
     }
 
@@ -364,7 +365,8 @@ public class MovieRecommendationService {
     }
 
     /**
-     * Trie les films par score de popularité (rating * numVotes) et limite les résultats
+     * Trie les films par score de popularité (rating * numVotes) et limite les
+     * résultats
      * 
      * @param movies Liste des films à trier
      * @param limit  Nombre maximum de résultats
