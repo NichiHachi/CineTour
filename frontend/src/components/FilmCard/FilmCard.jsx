@@ -4,7 +4,7 @@ import Glow from "../../components/Glow/Glow";
 import formatTime from "../../utils/formatTime";
 import { useNavigate } from "react-router-dom";
 
-import getMovieByImdbId from "../../utils/getMovieByImdbId";
+import getMoviePosterByImdbId from "../../utils/getMoviePosterByImdbId";
 
 const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
   // Click redirection
@@ -22,7 +22,7 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
   };
 
   // Image fetching
-  const [updatedMovie, setUpdatedMovie] = useState(null);
+  const [moviePoster, setMoviePoster] = useState(null);
   const [isFetchingPoster, setIsFetchingPoster] = useState(false);
 
   useEffect(() => {
@@ -30,9 +30,9 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
 
     const fetchMovie = async () => {
       setIsFetchingPoster(true);
-      const data = await getMovieByImdbId(movie.idImdb);
+      const data = await getMoviePosterByImdbId(movie.idImdb);
       if (!cancelled) {
-        setUpdatedMovie(data);
+        setMoviePoster(data);
         setIsFetchingPoster(false);
       }
     };
@@ -40,7 +40,7 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
     if (movie && !movie.posterPath) {
       fetchMovie();
     } else {
-      setUpdatedMovie(null);
+      setMoviePoster(null);
     }
 
     return () => {
@@ -49,7 +49,7 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
   }, [movie]);
 
   const isLoading = !movie;
-  const posterSrc = movie?.posterPath || updatedMovie?.posterPath;
+  const posterSrc = movie?.posterPath || moviePoster?.posterPath;
   const showSkeleton = !movie || isFetchingPoster;
 
   return (
