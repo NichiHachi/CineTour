@@ -84,6 +84,12 @@ public class CineTourApplication implements CommandLineRunner {
             imdbMovies.importMovies(movies);
             Console.warnln(movies.size() + " Movies imported\n");
 
+            // Ratings
+            Console.warnln("Ratings importation started");
+            List<Rating> ratings = imdbRatings.getRatings();
+            imdbRatings.importRatings(ratings);
+            Console.warnln(ratings.size() + " Ratings imported\n");
+
             // Import locations for a SHAWSHANK REDEMPTION (Les évadés)
             imdbLocations.importLocations("tt0111161");
 
@@ -104,15 +110,9 @@ public class CineTourApplication implements CommandLineRunner {
 
             // Principals
             Console.warnln("Principals importation started");
-            List<Principal> principals = imdbPrincipals.getPrincipals();
-            imdbPrincipals.importPrincipals(principals);
-            Console.warnln(principals.size() + " Principals imported\n");
-
-            // Ratings
-            Console.warnln("Ratings importation started");
-            List<Rating> ratings = imdbRatings.getRatings();
-            imdbRatings.importRatings(ratings);
-            Console.warnln(ratings.size() + " Ratings imported\n");
+            int batchSizePrincipals = 1000;
+            imdbPrincipals.importPrincipalsStreamingFromDataset(batchSizePrincipals);
+            Console.warnln("Principals importation finished\n");
 
             System.exit(0); // Clean exit after import
         } else {

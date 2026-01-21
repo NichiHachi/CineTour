@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "principals")
 public class Principal {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "principal_seq")
+    @SequenceGenerator(name = "principal_seq", sequenceName = "principal_sequence", allocationSize = 50)
     private Long id;
     private String idImdb;
     private Integer ordering;

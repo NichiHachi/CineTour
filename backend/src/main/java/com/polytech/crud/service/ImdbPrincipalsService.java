@@ -119,4 +119,70 @@ public class ImdbPrincipalsService {
     public List<Principal> getPrincipalsByImdbId(String idImdb) {
         return principalRepository.findByIdImdb(idImdb);
     }
+
+    public void importPrincipalsStreamingFromDataset(int batchSize) throws IOException {
+        String gzFileName = ImdbDatasets.PRINCIPALS.getFileName();
+        String tsvFileName = gzFileName.replace(".gz", "");
+
+        try {
+            imdbExtraction.downloadFile(ImdbDatasets.PRINCIPALS.getUrl(), gzFileName);
+        } catch (Exception e) {
+            System.out.println("Failed to download file: " + e.getMessage());
+            return;
+        }
+
+        System.out.println("Extracting IMDb dataset");
+        imdbExtraction.extractGzFile(gzFileName);
+        System.out.println("Streaming parse and import of IMDb Principals dataset");
+
+        List<Principal> batch = new ArrayList<>(batchSize);
+        long totalSaved = 0L;
+
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(imdbExtraction.getFilePath(tsvFileName)))) {
+            // Skip header
+            String line = reader.readLine();
+
+            while ((line = reader.readLine()) != null) {
+                try {
+                    String[] fields = line.split("\t", -1);
+                    Principal principal = new Principal();
+
+                    if (fields.length > 0) principal.setIdImdb(fields[0]);
+                    if (fields.length > 1 && !fields[1].equals("\\N")) {
+                        try { principal.setOrdering(Integer.valueOf(fields[1])); } catch (Exception e) {}
+                    }
+                    if (fields.length > 2) principal.setNconst(fields[2].equals("\\N") ? null : fields[2]);
+                    if (fields.length > 3) principal.setCategory(fields[3].equals("\\N") ? null : fields[3]);
+                    if (fields.length > 4) principal.setJob(fields[4].equals("\\N") ? null : fields[4]);
+                    if (fields.length > 5) principal.setCharacters(fields[5].equals("\\N") ? null : fields[5]);
+
+                    batch.add(principal);
+                } catch (Exception e) {
+                    System.err.println("Skipping malformed line: " + line);
+                }
+
+                if (batch.size() >= batchSize) {
+                    persistBatchPrincipals(batch);
+                    totalSaved += batch.size();
+                    System.out.println("Saved " + totalSaved + " Principals...");
+                    batch.clear();
+                }
+            }
+
+            if (!batch.isEmpty()) {
+                persistBatchPrincipals(batch);
+                totalSaved += batch.size();
+                System.out.println("Saved " + totalSaved + " Principals (final)...");
+            }
+        }
+    }
+
+    private void persistBatchPrincipals(List<Principal> batch) {
+        transactionTemplate.executeWithoutResult(status -> {
+            principalRepository.saveAll(batch);
+            entityManager.flush();
+            entityManager.clear();
+        });
+    }
+
 }
