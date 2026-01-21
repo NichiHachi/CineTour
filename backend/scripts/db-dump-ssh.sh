@@ -12,8 +12,8 @@ SSH_USER="${SSH_USER:-}"
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-3307}"
 DB_NAME="${DB_NAME:-cinetour}"
-DB_USER="${DB_USER:-dbuser}"
-DB_PASSWORD="${DB_PASSWORD:-dbpassword}"
+DB_USER="cinetour_net"
+DB_PASSWORD="${NETWORK_DB_PASSWORD:-dbpassword}"
 DUMP_DIR="${DUMP_DIR:-./dumps}"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 DUMP_FILE="${DUMP_DIR}/cinetour_dump_${TIMESTAMP}.sql"
@@ -212,6 +212,7 @@ if mysqldump -h 127.0.0.1 -P "${LOCAL_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" 
     --routines \
     --triggers \
     --events \
+    --no-tablespaces \
     "${DB_NAME}" > "${DUMP_FILE}"; then
     
     # Compression du dump
