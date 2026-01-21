@@ -34,10 +34,13 @@ import com.polytech.crud.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.context.annotation.Profile;
+
 /**
  * Service pour synchroniser les données entre MySQL et Neo4j
  */
 @Service
+@Profile("!import")
 @RequiredArgsConstructor
 @Slf4j
 public class SqlToNeo4jSyncService {

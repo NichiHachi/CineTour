@@ -15,7 +15,7 @@ services:
     ports:
       - "9001:8080"
     volumes:
-      - ./src:/cinetour_backend/src
+      - /mnt/cinetour/imdb_cache:/cinetour_backend/imdb_cache 
     depends_on:
       mysql:
         condition: service_healthy
@@ -29,7 +29,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=dbpassword
       - SELENIUM_REMOTE_URL=http://selenium-firefox:4444/wd/hub
-      - IMDB_DOWNLOAD_PATH=/cinetour_backend/imdb_data
+      - IMDB_DOWNLOAD_PATH=/cinetour_backend/imdb_cache
       - TMDB_API_TOKEN=${TMDB_API_TOKEN:-}
       - JAVA_OPTS=-Xms2g -Xmx8g
   mysql:
@@ -44,6 +44,8 @@ services:
       MYSQL_DATABASE: cinetour
       MYSQL_USER: dbuser
       MYSQL_PASSWORD: dbpassword
+    volumes:
+      - /mnt/cinetour/data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysql", "-u", "dbuser", "-pdbpassword", "-e", "USE cinetour;"]
       interval: 1s

@@ -12,7 +12,10 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.context.annotation.Profile;
+
 @Data
+@Profile("!import")
 @AllArgsConstructor
 @NoArgsConstructor
 @Node("User")

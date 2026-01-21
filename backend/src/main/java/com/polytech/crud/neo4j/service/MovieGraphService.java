@@ -9,11 +9,13 @@ import com.polytech.crud.neo4j.repository.PersonNodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Profile;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Profile("!import")
 @RequiredArgsConstructor
 @Transactional
 public class MovieGraphService {

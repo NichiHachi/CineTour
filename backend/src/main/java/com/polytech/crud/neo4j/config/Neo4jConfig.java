@@ -10,8 +10,10 @@ import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
+@Profile("!import")
 @EnableNeo4jRepositories(basePackages = "com.polytech.crud.neo4j.repository", transactionManagerRef = "neo4jTransactionManager")
 @EnableTransactionManagement
 public class Neo4jConfig {

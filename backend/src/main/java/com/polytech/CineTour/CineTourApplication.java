@@ -79,34 +79,34 @@ public class CineTourApplication implements CommandLineRunner {
             Console.warnln("Import mode activated\n");
 
             // Movies
-            Console.warnln("Movies importation started\n");
-            List<Movie> movies = imdbMovies.getMovies();
-            imdbMovies.importMovies(movies);
-            Console.warnln(movies.size() + " Movies imported\n");
+            //Console.warnln("Movies importation started\n");
+            //List<Movie> movies = imdbMovies.getMovies();
+            //imdbMovies.importMovies(movies);
+            //Console.warnln(movies.size() + " Movies imported\n");
 
             // Ratings
-            Console.warnln("Ratings importation started");
-            List<Rating> ratings = imdbRatings.getRatings();
-            imdbRatings.importRatings(ratings);
-            Console.warnln(ratings.size() + " Ratings imported\n");
+            //Console.warnln("Ratings importation started");
+            //List<Rating> ratings = imdbRatings.getRatings();
+            //imdbRatings.importRatings(ratings);
+            //Console.warnln(ratings.size() + " Ratings imported\n");
 
             // Import locations for a SHAWSHANK REDEMPTION (Les évadés)
-            imdbLocations.importLocations("tt0111161");
+            //imdbLocations.importLocations("tt0111161");
 
             // Directors
-            Console.warnln("Directors importation started\n");
-            List<Director> directors = imdbDirectors.getDirectors();
-            imdbDirectors.importDirectors(directors);
-            Console.warnln(directors.size() + " Directors imported\n");
+            //Console.warnln("Directors importation started\n");
+            //List<Director> directors = imdbDirectors.getDirectors();
+            //imdbDirectors.importDirectors(directors);
+            //Console.warnln(directors.size() + " Directors imported\n");
 
             // Persons : Actors + Directors informations
-            Console.warnln("Persons importation started\n");
+            //Console.warnln("Persons importation started\n");
             //List<Person> persons = imdbPersons.getPersons();
             //imdbPersons.importPersons(persons);
             //Console.warnln(persons.size() + " Persons imported\n");
-            int batchSize = 10000; // Adjust as needed for your memory constraints
-            imdbPersons.importPersonsStreamingFromDataset(batchSize);
-            Console.warnln("Persons importation finished\n");
+            //int batchSize = 10000; // Adjust as needed for your memory constraints
+            //imdbPersons.importPersonsStreamingFromDataset(batchSize);
+            //Console.warnln("Persons importation finished\n");
 
             // Principals
             Console.warnln("Principals importation started");

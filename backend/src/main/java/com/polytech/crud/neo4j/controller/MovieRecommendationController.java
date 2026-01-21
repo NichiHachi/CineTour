@@ -16,7 +16,10 @@ import com.polytech.crud.neo4j.service.MovieRecommendationService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.context.annotation.Profile;
+
 @RestController
+@Profile("!import")
 @RequestMapping("/api/neo4j/recommendations")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")

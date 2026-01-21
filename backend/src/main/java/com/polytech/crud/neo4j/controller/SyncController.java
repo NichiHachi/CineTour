@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.context.annotation.Profile;
+
 /**
  * Contrôleur pour gérer la synchronisation entre SQL et Neo4j
  */
 @RestController
+@Profile("!import")
 @RequestMapping("/api/neo4j/sync")
 @RequiredArgsConstructor
 @Slf4j

@@ -8,7 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+import org.springframework.context.annotation.Profile;
+
 @Repository
+@Profile("!import")
 public interface UserNodeRepository extends Neo4jRepository<UserNode, Long> {
 
     Optional<UserNode> findByUsername(String username);

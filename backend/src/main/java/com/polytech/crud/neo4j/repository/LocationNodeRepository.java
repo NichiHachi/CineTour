@@ -8,7 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import org.springframework.context.annotation.Profile;
+
 @Repository
+@Profile("!import")
 public interface LocationNodeRepository extends Neo4jRepository<LocationNode, Long> {
 
     List<LocationNode> findByIdImdb(String idImdb);

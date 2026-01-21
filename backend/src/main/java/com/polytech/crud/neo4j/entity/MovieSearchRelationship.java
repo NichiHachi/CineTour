@@ -11,7 +11,10 @@ import org.springframework.data.neo4j.core.schema.TargetNode;
 
 import java.time.LocalDateTime;
 
+import org.springframework.context.annotation.Profile;
+
 @Data
+@Profile("!import")
 @AllArgsConstructor
 @NoArgsConstructor
 @RelationshipProperties

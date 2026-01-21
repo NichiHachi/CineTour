@@ -12,7 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.context.annotation.Profile;
+
 @Service
+@Profile("!import")
 @RequiredArgsConstructor
 @Transactional
 public class UserGraphService {

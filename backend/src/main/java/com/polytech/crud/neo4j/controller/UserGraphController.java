@@ -6,7 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.context.annotation.Profile;
+
 @RestController
+@Profile("!import")
 @RequestMapping("/api/neo4j/users")
 @RequiredArgsConstructor
 public class UserGraphController {

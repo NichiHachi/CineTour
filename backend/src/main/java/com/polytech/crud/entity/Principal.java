@@ -20,5 +20,7 @@ public class Principal {
     private String nconst;
     private String category;
     private String job;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String characters;
 }

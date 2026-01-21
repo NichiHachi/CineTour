@@ -12,6 +12,7 @@ restartWithImport: stopOtherServices cleanOnlyCinetour runImport
 
 clean:
 	docker compose -p cinetour down --volumes --rmi all || true
+	sudo rm -rf /mnt/cinetour/data/*
 	./gradlew clean
 
 cleanOnlyCinetour:
@@ -19,7 +20,7 @@ cleanOnlyCinetour:
 	./gradlew clean
 
 stopOtherServices:
-	docker compose -p cinetour stop cinetour-mysql selenium-firefox
+	docker compose -p cinetour stop cinetour-backend
 
 test:
 	./gradlew clean build

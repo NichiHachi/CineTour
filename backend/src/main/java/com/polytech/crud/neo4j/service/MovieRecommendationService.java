@@ -22,8 +22,11 @@ import com.polytech.crud.neo4j.repository.MovieNodeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.context.annotation.Profile;
+
 @Slf4j
 @Service
+@Profile("!import")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MovieRecommendationService {

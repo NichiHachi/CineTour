@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import org.springframework.context.annotation.Profile;
+
 @RestController
+@Profile("!import")
 @RequestMapping("/api/neo4j/movies")
 @RequiredArgsConstructor
 public class MovieGraphController {

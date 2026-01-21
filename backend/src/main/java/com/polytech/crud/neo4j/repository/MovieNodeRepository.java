@@ -10,7 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import com.polytech.crud.neo4j.entity.MovieNode;
 
+import org.springframework.context.annotation.Profile;
+
 @Repository
+@Profile("!import")
 public interface MovieNodeRepository extends Neo4jRepository<MovieNode, Long> {
 
     Optional<MovieNode> findByIdImdb(String idImdb);

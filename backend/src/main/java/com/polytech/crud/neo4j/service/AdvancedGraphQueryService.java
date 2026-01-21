@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
 
 import lombok.RequiredArgsConstructor;
 
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
  * Exploite pleinement les capacités de graphe de Neo4j
  */
 @Service
+@Profile("!import")
 @RequiredArgsConstructor
 public class AdvancedGraphQueryService {
 

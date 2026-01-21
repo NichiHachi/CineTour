@@ -9,7 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.annotation.Profile;
+
 @Repository
+@Profile("!import")
 public interface RatingNodeRepository extends Neo4jRepository<RatingNode, Long> {
 
     Optional<RatingNode> findByIdImdb(String idImdb);

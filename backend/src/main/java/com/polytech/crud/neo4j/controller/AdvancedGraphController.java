@@ -8,10 +8,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.annotation.Profile;
+
 /**
  * Contrôleur pour les requêtes avancées sur le graphe Neo4j
  */
 @RestController
+@Profile("!import")
 @RequestMapping("/api/neo4j/advanced")
 @RequiredArgsConstructor
 public class AdvancedGraphController {
