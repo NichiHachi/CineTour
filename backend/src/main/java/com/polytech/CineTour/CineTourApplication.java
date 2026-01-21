@@ -93,9 +93,12 @@ public class CineTourApplication implements CommandLineRunner {
 
             // Persons : Actors + Directors informations
             Console.warnln("Persons importation started\n");
-            List<Person> persons = imdbPersons.getPersons();
-            imdbPersons.importPersons(persons);
-            Console.warnln(persons.size() + " Persons imported\n");
+            //List<Person> persons = imdbPersons.getPersons();
+            //imdbPersons.importPersons(persons);
+            //Console.warnln(persons.size() + " Persons imported\n");
+            int batchSize = 10000; // Adjust as needed for your memory constraints
+            imdbPersons.importPersonsStreamingFromDataset(batchSize);
+            Console.warnln("Persons importation finished\n");
 
             // Principals
             Console.warnln("Principals importation started");

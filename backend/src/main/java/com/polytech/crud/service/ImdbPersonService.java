@@ -118,6 +118,85 @@ public class ImdbPersonService {
         System.out.println("Finished importing Persons");
     }
 
+    public void importPersonsStreamingFromDataset(int batchSize) throws IOException {
+        String gzFileName = ImdbDatasets.NAMES.getFileName();
+        String tsvFileName = gzFileName.replace(".gz", "");
+
+        try {
+            imdbExtraction.downloadFile(ImdbDatasets.NAMES.getUrl(), gzFileName);
+        } catch (Exception e) {
+            System.out.println("Failed to download file: " + e.getMessage());
+            return;
+        }
+
+        System.out.println("Extracting IMDb dataset");
+        imdbExtraction.extractGzFile(gzFileName);
+        System.out.println("Streaming parse and import of IMDb dataset");
+
+        List<Person> batch = new ArrayList<>(Math.max(1000, batchSize));
+        long totalSaved = 0L;
+
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(imdbExtraction.getFilePath(tsvFileName)))) {
+            // skip header
+            String line = reader.readLine();
+            while ((line = reader.readLine()) != null) {
+                try {
+                    String[] fields = line.split("\t", -1);
+                    Person p = new Person();
+
+                    if (fields.length > 0) p.setNconst(fields[0]);
+                    if (fields.length > 1) p.setPrimaryName(fields[1]);
+
+                    if (fields.length > 2 && fields[2] != null && !fields[2].equals("\\N") && !fields[2].isEmpty()) {
+                        try { p.setBirthYear(Year.of(Integer.parseInt(fields[2]))); } catch (Exception ex) { p.setBirthYear(null); }
+                    } else { p.setBirthYear(null); }
+
+                    if (fields.length > 3 && fields[3] != null && !fields[3].equals("\\N") && !fields[3].isEmpty()) {
+                        try { p.setDeathYear(Year.of(Integer.parseInt(fields[3]))); } catch (Exception ex) { p.setDeathYear(null); }
+                    } else { p.setDeathYear(null); }
+
+                    if (fields.length > 4 && fields[4] != null && !fields[4].equals("\\N") && !fields[4].isEmpty()) {
+                        p.setPrimaryProfessions(Arrays.asList(fields[4].split(",")));
+                    } else {
+                        p.setPrimaryProfessions(new ArrayList<>());
+                    }
+
+                    if (fields.length > 5 && fields[5] != null && !fields[5].equals("\\N") && !fields[5].isEmpty()) {
+                        p.setKnownForTitles(Arrays.asList(fields[5].split(",")));
+                    } else {
+                        p.setKnownForTitles(new ArrayList<>());
+                    }
+
+                    batch.add(p);
+                } catch (Exception e) {
+                    System.err.println("Skipping malformed line: " + line);
+                }
+
+                if (batch.size() >= batchSize) {
+                    persistBatch(batch);
+                    totalSaved += batch.size();
+                    System.out.println("Saved " + totalSaved + " Persons...");
+                    batch.clear();
+                }
+            }
+
+            if (!batch.isEmpty()) {
+                persistBatch(batch);
+                totalSaved += batch.size();
+                System.out.println("Saved " + totalSaved + " Persons (final)...");
+                batch.clear();
+            }
+        }
+    }
+
+    private void persistBatch(List<Person> batch) {
+        transactionTemplate.executeWithoutResult(status -> {
+            personRepository.saveAll(batch);
+            entityManager.flush();
+            entityManager.clear();
+        });
+    }
+
     @Transactional(readOnly = true)
     public Person getPersonByNconst(String nconst) {
         return personRepository.findByNconst(nconst);
