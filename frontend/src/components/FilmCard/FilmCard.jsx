@@ -4,13 +4,16 @@ import Glow from "../../components/Glow/Glow";
 import formatTime from "../../utils/formatTime";
 import { useNavigate } from "react-router-dom";
 
-import getPosterByImdbId from "../../utils/getPosterByImdbId";
+import axios from "axios";
+import API_ENDPOINTS from "../../resources/api-links";
 
 const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
-  // Click redirection
   const navigate = useNavigate();
+
   const [copied, setCopied] = useState(false);
   const [active, setActive] = useState(false);
+
+  const [updatedMovie, setUpdatedMovie] = useState();
 
   const handleClick = () => {
     if (movie.idImdb) {
@@ -21,36 +24,23 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
     }
   };
 
-  // Image fetching
-  const [moviePoster, setMoviePoster] = useState(null);
-  const [isFetchingPoster, setIsFetchingPoster] = useState(false);
-
   useEffect(() => {
-    let cancelled = false;
-
-    const fetchMovie = async () => {
-      setIsFetchingPoster(true);
-      const data = await getPosterByImdbId(movie.idImdb);
-      if (!cancelled) {
-        setMoviePoster(data);
-        setIsFetchingPoster(false);
+    const getMovieByImdbId = async (imdbId) => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId));
+        setUpdatedMovie(response.data);
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        return [];
       }
     };
 
     if (movie && !movie.posterPath) {
-      fetchMovie();
-    } else {
-      setMoviePoster(null);
+      getMovieByImdbId(movie.idImdb);
     }
-
-    return () => {
-      cancelled = true;
-    };
   }, [movie]);
 
   const isLoading = !movie;
-  const posterSrc = movie?.posterPath || moviePoster?.posterPath;
-  const showSkeleton = !movie || isFetchingPoster;
 
   return (
     <Glow className={`filmcard ${className} ${active ? "active" : ""}`}>
@@ -62,12 +52,19 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
         }}
       >
         <div className="movie-image">
-          {showSkeleton ? (
+          {isLoading ? (
             <div className="skeleton skeleton-image" />
-          ) : posterSrc ? (
-            <img src={posterSrc} alt={movie.title} />
+          ) : movie && movie.posterPath ? (
+            <img src={movie.posterPath} alt={movie.title} />
+          ) : movie &&
+            !movie.posterPath &&
+            updatedMovie &&
+            updatedMovie.posterPath ? (
+            <img src={updatedMovie.posterPath} alt={updatedMovie.posterPath} />
+          ) : movie && !movie.posterPath && !updatedMovie ? (
+            ""
           ) : (
-            <div className="empty-image" />
+            <div className="skeleton skeleton-image" />
           )}
         </div>
 
