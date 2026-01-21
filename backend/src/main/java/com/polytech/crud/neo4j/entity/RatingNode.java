@@ -1,12 +1,13 @@
 package com.polytech.crud.neo4j.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
@@ -18,12 +19,12 @@ public class RatingNode {
     @GeneratedValue
     private Long id;
 
-    @Property("idImdb")
+    @Property("id_imdb")
     private String idImdb;
 
-    @Property("averageRating")
+    @Property("average_rating")
     private Double averageRating;
 
-    @Property("numVotes")
+    @Property("num_votes")
     private Integer numVotes;
 }

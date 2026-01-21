@@ -1,16 +1,17 @@
 package com.polytech.crud.neo4j.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
-import java.util.HashSet;
-import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
@@ -25,16 +26,16 @@ public class PersonNode {
     @Property("nconst")
     private String nconst;
 
-    @Property("primaryName")
+    @Property("primary_name")
     private String primaryName;
 
-    @Property("birthYear")
-    private Integer birthYear;
+    @Property("birth_year")
+    private String birthYear;
 
-    @Property("deathYear")
-    private Integer deathYear;
+    @Property("death_year")
+    private String deathYear;
 
-    @Property("primaryProfessions")
+    @Property("primary_professions")
     private Set<String> primaryProfessions = new HashSet<>();
 
     @Relationship(type = "KNOWN_FOR", direction = Relationship.Direction.OUTGOING)

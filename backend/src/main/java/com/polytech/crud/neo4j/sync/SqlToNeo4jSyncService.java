@@ -109,14 +109,15 @@ public class SqlToNeo4jSyncService {
         MovieNode movieNode = new MovieNode();
         movieNode.setIdImdb(sqlMovie.getIdImdb());
         movieNode.setTitle(sqlMovie.getTitle());
-        movieNode.setReleaseYear(sqlMovie.getReleaseYear());
-        movieNode.setRuntimeMinutes(sqlMovie.getRuntimeMinutes());
+        movieNode.setReleaseYear(sqlMovie.getReleaseYear() != null ? sqlMovie.getReleaseYear().toString() : null);
+        movieNode.setRuntimeMinutes(
+                sqlMovie.getRuntimeMinutes() != null ? sqlMovie.getRuntimeMinutes().toString() : null);
         movieNode.setGenres(sqlMovie.getGenres());
         movieNode.setPosterPath(sqlMovie.getPosterPath());
         movieNode.setBackdropPath(sqlMovie.getBackdropPath());
         movieNode.setOverview(sqlMovie.getOverview());
-        movieNode.setLocationSearchCount(sqlMovie.getLocationSearchCount());
-        movieNode.setMovieSearchCount(sqlMovie.getMovieSearchCount());
+        movieNode.setLocationSearchCount(String.valueOf(sqlMovie.getLocationSearchCount()));
+        movieNode.setMovieSearchCount(String.valueOf(sqlMovie.getMovieSearchCount()));
 
         return neo4jMovieRepo.save(movieNode);
     }
@@ -151,11 +152,11 @@ public class SqlToNeo4jSyncService {
         personNode.setPrimaryName(sqlPerson.getPrimaryName());
 
         if (sqlPerson.getBirthYear() != null) {
-            personNode.setBirthYear(sqlPerson.getBirthYear().getValue());
+            personNode.setBirthYear(String.valueOf(sqlPerson.getBirthYear().getValue()));
         }
 
         if (sqlPerson.getDeathYear() != null) {
-            personNode.setDeathYear(sqlPerson.getDeathYear().getValue());
+            personNode.setDeathYear(String.valueOf(sqlPerson.getDeathYear().getValue()));
         }
 
         return neo4jPersonRepo.save(personNode);
@@ -237,21 +238,23 @@ public class SqlToNeo4jSyncService {
      */
     @Transactional
     public RatingNode syncRating(Rating sqlRating) {
-        RatingNode ratingNode = new RatingNode();
-        ratingNode.setAverageRating(sqlRating.getAverageRating());
-        ratingNode.setNumVotes(sqlRating.getNumVotes());
-
-        RatingNode savedRating = neo4jRatingRepo.save(ratingNode);
-
-        // Créer la relation HAS_RATING
+        // Les ratings sont maintenant des propriétés du film, pas des nœuds séparés
         Optional<MovieNode> movieOpt = neo4jMovieRepo.findByIdImdb(sqlRating.getIdImdb());
         if (movieOpt.isPresent()) {
             MovieNode movie = movieOpt.get();
-            movie.setRating(savedRating);
+            movie.setAverageRating(sqlRating.getAverageRating());
+            movie.setNumVotes(sqlRating.getNumVotes() != null ? sqlRating.getNumVotes().toString() : "0");
             neo4jMovieRepo.save(movie);
+
+            // Retourner un nœud rating pour compatibilité
+            RatingNode ratingNode = new RatingNode();
+            ratingNode.setAverageRating(sqlRating.getAverageRating());
+            ratingNode.setNumVotes(sqlRating.getNumVotes());
+            ratingNode.setIdImdb(sqlRating.getIdImdb());
+            return ratingNode;
         }
 
-        return savedRating;
+        return null;
     }
 
     /**
@@ -298,7 +301,7 @@ public class SqlToNeo4jSyncService {
         } else {
             // Pour les acteurs et autres
             PrincipalRelationship relationship = new PrincipalRelationship();
-            relationship.setOrdering(sqlPrincipal.getOrdering());
+            relationship.setOrdering(sqlPrincipal.getOrdering() != null ? sqlPrincipal.getOrdering().toString() : "0");
             relationship.setCategory(sqlPrincipal.getCategory());
             relationship.setJob(sqlPrincipal.getJob());
             relationship.setCharacters(sqlPrincipal.getCharacters());
