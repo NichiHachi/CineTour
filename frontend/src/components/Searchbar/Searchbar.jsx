@@ -46,13 +46,7 @@ const Searchbar = () => {
   };
 
   const handleMovieClick = async (imdbId) => {
-    if (isNavigating) return;
-    setIsNavigating(true);
-    const response = await getMovieByImdbId(imdbId);
-    if (response.data) {
-      navigate(`/movie/${imdbId}`);
-    }
-    setIsNavigating(false);
+    navigate(`/movie/${imdbId}`);
   };
 
   const handleBlur = () => {
