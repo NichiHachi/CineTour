@@ -24,10 +24,13 @@
     --color-border-light: hsl(0, 0%, 70%);
     --color-border-light-highlight: hsl(0, 0%, 90%);
 
+    --color-darken: rgba(0, 0, 0, 0.1);
+
     --color-text: hsl(0, 0%, 95%);
     --color-text-error: hsl(0, 80%, 40%);
     --color-text-light: hsl(0, 0%, 75%);
     --color-text-muted: hsl(0, 0%, 55%);
+    --color-contrast: lighten;
 
     --ff: "Fira Sans", sans-serif;
     --h1: 700 1.6rem/1em var(--ff);
@@ -55,6 +58,9 @@
         --color-text: hsl(0, 0%, 5%);
         --color-text-light: hsl(0, 0%, 25%);
         --color-text-muted: hsl(0, 0%, 45%);
+        --color-contrast: darken;
+
+        --color-darken: rgba(1, 1, 1, 0);
     }
 }
 
