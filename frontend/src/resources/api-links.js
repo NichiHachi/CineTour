@@ -1,10 +1,16 @@
 const isProduction = process.env.NODE_ENV === "production";
 
 const API_ENDPOINTS = {
-  search: (searchWord) =>
-    isProduction
-      ? `/api/search?title=${searchWord}`
-      : `/search?title=${searchWord}`,
+  search: (params) => {
+    const baseUrl = isProduction ? `/api/search` : `/search`;
+    if (typeof params === "string") {
+      // Backward compatibility for simple string queries
+      return `${baseUrl}?title=${params}`;
+    }
+    // Build query string from params object
+    const queryString = new URLSearchParams(params).toString();
+    return `${baseUrl}?${queryString}`;
+  },
   movieByImdbId: (imdbId) =>
     isProduction ? `/api/movieByImdbId/${imdbId}` : `/movieByImdbId/${imdbId}`,
   locationsByImdbId: (imdbId) =>
@@ -114,7 +120,7 @@ const API_ENDPOINTS = {
   },
   nearbyMovies: (locationIds, excludeImdbId, minMovies) => {
     const params = new URLSearchParams();
-    locationIds.forEach(id => params.append("locationIds", id));
+    locationIds.forEach((id) => params.append("locationIds", id));
     params.append("excludeImdbId", excludeImdbId);
     if (minMovies) params.append("minMovies", minMovies);
     const query = params.toString() ? `?${params.toString()}` : "";
@@ -123,5 +129,4 @@ const API_ENDPOINTS = {
       : `/neo4j/locations/rng/nearby${query}`;
   },
 };
-
 export default API_ENDPOINTS;

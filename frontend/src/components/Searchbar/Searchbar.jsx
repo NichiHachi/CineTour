@@ -1,98 +1,52 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState } from "react";
 import "./Searchbar.css";
 import Glow from "../Glow/Glow";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import API_ENDPOINTS from "../../resources/api-links";
-import { LocationContext } from "../../context/LocationContext";
 import RevealText from "../TextEffects/RevealText/RevealText";
+import getMovieByImdbId from "../../utils/getMovieByImdbId";
+import searchByWord from "../../utils/searchByWord";
 
 const Searchbar = () => {
-  const [filteredData, setFilteredData] = useState([]);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const resultsRef = useRef(null);
   const navigate = useNavigate();
-  const { setLocationData, setImageData } = useContext(LocationContext);
-
-  const timer = useRef(null);
+  const timer = { current: null };
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
 
   const handleFilter = (event) => {
     const searchWord = event.target.value;
     setSearchQuery(searchWord);
-
     if (timer.current) clearTimeout(timer.current);
-
     timer.current = setTimeout(async () => {
-      if (searchWord.length === 0) {
+      if (!searchWord) {
         setFilteredData([]);
         return;
       }
-      try {
-        const response = await axios.get(API_ENDPOINTS.search(searchWord), {
-          withCredentials: true,
-        });
-        console.log("API Response:", response.data);
-
-        if (Array.isArray(response.data)) {
-          setFilteredData(response.data);
-        } else {
-          console.warn("Invalid response format:", response.data);
-          setFilteredData([]);
-        }
-      } catch (error) {
-        console.error("Error searching films:", error);
-        setFilteredData([]);
-      }
-    }, 250);
+      const response = await searchByWord(searchWord);
+      setFilteredData(response);
+    }, 1000);
   };
 
-  const handleSearchSubmit = () => {
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
       setFilteredData([]);
     }
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter") {
+    if (e.key === "Enter") {
       handleSearchSubmit();
     }
   };
 
-  const handleMovieClick = async (imdbId) => {
-    if (isNavigating) return;
-    setIsNavigating(true);
-
-    console.log("handleMovieClick called with imdbId:", imdbId);
-    try {
-      const response = await axios.get(API_ENDPOINTS.movieByImdbId(imdbId), {
-        withCredentials: true,
-      });
-      console.log("handleMovieClick - Response received", response.data);
-      if (response.data) {
-        navigate(`/movie/${imdbId}`);
-      }
-      const responseImage = await axios.post(API_ENDPOINTS.movieImage(imdbId));
-      console.log("handleMovieClick - Image response received", responseImage);
-      const responseLocation = await fetch(
-        API_ENDPOINTS.importLocationByImdbId(imdbId),
-        {},
-      );
-      // setImageData(responseImage);
-      setLocationData(responseLocation);
-
-      console.log(
-        "handleMovieClick - Location response received",
-        responseLocation,
-      );
-    } catch (error) {
-      console.error("handleMovieClick - Error:", error);
-    } finally {
-      setIsNavigating(false);
-      console.log("handleMovieClick - END");
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      navigate(`/search?title=${encodeURIComponent(searchQuery)}`);
+      setFilteredData([]); // Clear dropdown when navigating
     }
+  };
+
+  const handleMovieClick = async (imdbId) => {
+    navigate(`/movie/${imdbId}`);
   };
 
   const handleBlur = () => {
@@ -105,8 +59,9 @@ const Searchbar = () => {
         <input
           type="text"
           placeholder="Rechercher un film"
+          value={searchQuery}
           onChange={handleFilter}
-          onKeyDown={handleKeyPress}
+          onKeyDown={handleKeyDown}
           onBlur={handleBlur}
         />
         <div
@@ -141,4 +96,5 @@ const Searchbar = () => {
     </Glow>
   );
 };
+
 export default Searchbar;

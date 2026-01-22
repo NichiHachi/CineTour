@@ -46,12 +46,15 @@
     top: -0.5rem;
     bottom: 0.5rem;
     padding-top: 0.5rem;
+    padding-right: 0.5rem;
+    margin-right: -0.5rem;
     display: flex;
     flex-direction: column;
     height: calc(100% + 1rem);
     overflow-y: auto; /* Allow vertical scrolling */
     overflow-x: hidden; /* Hide horizontal overflow if any */
     gap: 0.5rem;
+    scrollbar-gutter: stable both-edges;
 }
 
 .hidden * {

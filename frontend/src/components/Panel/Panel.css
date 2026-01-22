@@ -12,7 +12,7 @@
 .panel-section {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 2rem;
     z-index: 1;
     padding: 1rem;
 }

@@ -31,7 +31,7 @@
 }
 
 /* Last element stick to end */
-.movie-content :last-child {
+.movie-content .movies-coordinates {
     margin-top: auto;
 }
 
@@ -39,22 +39,26 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .movie-title {
     font-size: 1rem;
-    line-height: 1rem;
+    line-height: 1.25rem;
     color: var(--color-text);
 }
 
 .movie-imdbid {
-    font-size: 0.5rem;
     color: var(--color-text-muted);
     border: 1px solid var(--color-border);
     border-radius: calc(var(--border-radius) - 0.5rem);
     padding: 0.25rem 0.5rem;
     transition: all 0.2s ease-in-out;
+}
+
+.movie-imdbid:hover {
+    border: 1px dashed var(--color-border-light);
+    color: var(--color-text);
 }
 
 .copied {
@@ -124,6 +128,13 @@
 
 /* Sizes matching your layout */
 .skeleton-image {
+    width: 99px;
+    height: 146px;
+    border-radius: calc(var(--border-radius) - 0.5rem);
+}
+
+.blank {
+    background-color: var(--color-border-light);
     width: 99px;
     height: 146px;
     border-radius: calc(var(--border-radius) - 0.5rem);
