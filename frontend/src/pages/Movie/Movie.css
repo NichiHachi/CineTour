@@ -172,6 +172,17 @@
     z-index: 0;
 }
 
+.movie-page-globe {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh; /* or any height */
+}
+.canvas {
+    width: 100%;
+    height: 100%;
+}
+
 .movie-coordinates {
     top: -1rem;
     display: flex;
