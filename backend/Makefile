@@ -74,3 +74,18 @@ cleanNeo4j:
 
 neo4jShell:
 	docker exec -it cinetour-neo4j cypher-shell -u neo4j -p cinetour_neo4j_password
+
+sqlToCsv:
+	@if [ -z "$(DUMP)" ]; then \
+		echo "Usage: make sqlToCsv DUMP=<fichier.sql.gz>"; \
+		echo "Exemple: make sqlToCsv DUMP=dumps/cinetour.sql.gz"; \
+		exit 1; \
+	fi
+	./scripts/sql-to-csv.sh $(DUMP) ./csv-export
+	sudo python3 ./scripts/clean-csv-data.py
+	@echo ""
+	@echo "✓ Export SQL → CSV terminé et nettoyé"
+	@echo "Vous pouvez maintenant lancer: make neo4jImport"
+
+neo4jImport:
+	sudo NEO4J_CONTAINER=cinetour-neo4j ./scripts/neo4j-bulk-import.sh ./csv-export
