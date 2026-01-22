@@ -112,6 +112,16 @@ const API_ENDPOINTS = {
       ? `/api/neo4j/recommendations/relatedMoviesByEra/${imdbId}${query}`
       : `/neo4j/recommendations/relatedMoviesByEra/${imdbId}${query}`;
   },
+  nearbyMovies: (locationIds, excludeImdbId, minMovies) => {
+    const params = new URLSearchParams();
+    locationIds.forEach(id => params.append("locationIds", id));
+    params.append("excludeImdbId", excludeImdbId);
+    if (minMovies) params.append("minMovies", minMovies);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    return isProduction
+      ? `/api/neo4j/locations/rng/nearby${query}`
+      : `/neo4j/locations/rng/nearby${query}`;
+  },
 };
 
 export default API_ENDPOINTS;
