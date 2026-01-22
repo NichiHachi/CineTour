@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +22,6 @@ import com.polytech.crud.neo4j.repository.MovieNodeRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.context.annotation.Profile;
 
 @Slf4j
 @Service
@@ -65,8 +64,8 @@ public class MovieRecommendationService {
      */
     public List<MovieNode> getRecommendationsByDirectors(String idImdb, int limit) {
         log.info("Recherche de recommandations par directeurs pour le film: {}", idImdb);
-        List<MovieNode> movies = movieNodeRepository.findMoviesBySameDirectors(idImdb, limit * 3);
-        return sortByPopularityScore(movies, limit);
+        List<MovieNode> movies = movieNodeRepository.findMoviesBySameDirectors(idImdb, limit);
+        return enrichMoviesWithDetails(movies);
     }
 
     /**
@@ -74,8 +73,8 @@ public class MovieRecommendationService {
      */
     public List<MovieNode> getRecommendationsByActors(String idImdb, int limit) {
         log.info("Recherche de recommandations par acteurs pour le film: {}", idImdb);
-        List<MovieNode> movies = movieNodeRepository.findMoviesBySameActors(idImdb, limit * 3);
-        return sortByPopularityScore(movies, limit);
+        List<MovieNode> movies = movieNodeRepository.findMoviesBySameActors(idImdb, limit);
+        return enrichMoviesWithDetails(movies);
     }
 
     /**
@@ -153,6 +152,28 @@ public class MovieRecommendationService {
                             .collect(java.util.stream.Collectors.toSet());
 
                     movie.setDirectors(directors);
+
+                    // Charger les principals (acteurs) avec leurs informations complètes
+                    List<com.polytech.crud.neo4j.dto.PersonProjection> principalsData = movieNodeRepository
+                            .findPrincipalsByMovieIdImdb(movie.getIdImdb());
+
+                    // Créer des PrincipalRelationship avec PersonNode complet
+                    Set<com.polytech.crud.neo4j.entity.PrincipalRelationship> principals = principalsData.stream()
+                            .filter(data -> data.getNconst() != null)
+                            .map(data -> {
+                                com.polytech.crud.neo4j.entity.PersonNode person = new com.polytech.crud.neo4j.entity.PersonNode();
+                                person.setNconst(data.getNconst());
+                                person.setPrimaryName(data.getPrimaryName());
+                                person.setBirthYear(data.getBirthYear());
+                                person.setDeathYear(data.getDeathYear());
+
+                                com.polytech.crud.neo4j.entity.PrincipalRelationship principal = new com.polytech.crud.neo4j.entity.PrincipalRelationship();
+                                principal.setPerson(person);
+                                return principal;
+                            })
+                            .collect(java.util.stream.Collectors.toSet());
+
+                    movie.setPrincipals(principals);
 
                     Map<String, Object> result = new HashMap<>();
                     result.put("movie", movie);
@@ -365,6 +386,58 @@ public class MovieRecommendationService {
         }
 
         return String.join(", ", reasons) + " (score: " + String.format("%.1f", similarityScore) + ")";
+    }
+
+    /**
+     * Enrichit une liste de films avec les informations de directors et principals
+     * 
+     * @param movies Liste des films à enrichir
+     * @return Liste des films enrichis
+     */
+    private List<MovieNode> enrichMoviesWithDetails(List<MovieNode> movies) {
+        return movies.stream()
+                .map(movie -> {
+                    // Charger les nconst des directors
+                    List<String> directorNconsts = movieNodeRepository
+                            .findDirectorNconstsByMovieIdImdb(movie.getIdImdb());
+
+                    // Créer des PersonNode avec seulement le nconst
+                    Set<com.polytech.crud.neo4j.entity.PersonNode> directors = directorNconsts.stream()
+                            .filter(nconst -> nconst != null && !nconst.isEmpty())
+                            .map(nconst -> {
+                                com.polytech.crud.neo4j.entity.PersonNode person = new com.polytech.crud.neo4j.entity.PersonNode();
+                                person.setNconst(nconst);
+                                return person;
+                            })
+                            .collect(java.util.stream.Collectors.toSet());
+
+                    movie.setDirectors(directors);
+
+                    // Charger les principals (acteurs) avec leurs informations complètes
+                    List<com.polytech.crud.neo4j.dto.PersonProjection> principalsData = movieNodeRepository
+                            .findPrincipalsByMovieIdImdb(movie.getIdImdb());
+
+                    // Créer des PrincipalRelationship avec PersonNode complet
+                    Set<com.polytech.crud.neo4j.entity.PrincipalRelationship> principals = principalsData.stream()
+                            .filter(data -> data.getNconst() != null)
+                            .map(data -> {
+                                com.polytech.crud.neo4j.entity.PersonNode person = new com.polytech.crud.neo4j.entity.PersonNode();
+                                person.setNconst(data.getNconst());
+                                person.setPrimaryName(data.getPrimaryName());
+                                person.setBirthYear(data.getBirthYear());
+                                person.setDeathYear(data.getDeathYear());
+
+                                com.polytech.crud.neo4j.entity.PrincipalRelationship principal = new com.polytech.crud.neo4j.entity.PrincipalRelationship();
+                                principal.setPerson(person);
+                                return principal;
+                            })
+                            .collect(java.util.stream.Collectors.toSet());
+
+                    movie.setPrincipals(principals);
+
+                    return movie;
+                })
+                .collect(Collectors.toList());
     }
 
     /**

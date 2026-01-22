@@ -3,14 +3,14 @@ package com.polytech.crud.neo4j.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.polytech.crud.neo4j.dto.PersonProjection;
 import com.polytech.crud.neo4j.entity.MovieNode;
-
-import org.springframework.context.annotation.Profile;
 
 @Repository
 @Profile("!import")
@@ -47,32 +47,42 @@ public interface MovieNodeRepository extends Neo4jRepository<MovieNode, Long> {
     // ========== Recommandations de films similaires ==========
 
     /**
-     * Trouve des films avec les mêmes directeurs
+     * Trouve des films avec les mêmes directeurs, triés par popularité
      */
     @Query("""
                 MATCH (p:Person)-[:DIRECTED]->(m1:Movie {id_imdb: $idImdb})
                 MATCH (p)-[:DIRECTED]->(m2:Movie)
                 WHERE m1.id_imdb <> m2.id_imdb
-                WITH DISTINCT m2
-                RETURN m2
+                OPTIONAL MATCH (m2)-[:HAS_RATING]->(r:Rating)
+                WITH DISTINCT m2, r,
+                     CASE
+                         WHEN r.average_rating IS NOT NULL AND r.num_votes IS NOT NULL
+                         THEN toFloat(r.average_rating) * toFloat(r.num_votes)
+                         ELSE 0.0
+                     END as popularityScore
+                ORDER BY popularityScore DESC, m2.title ASC
                 LIMIT $limit
+                RETURN m2
             """)
     List<MovieNode> findMoviesBySameDirectors(@Param("idImdb") String idImdb, @Param("limit") int limit);
 
     /**
-     * Trouve des films avec les mêmes acteurs principaux
-     * Note: Cette requête sera fonctionnelle quand les relations HAS_PRINCIPAL
-     * seront disponibles
+     * Trouve des films avec les mêmes acteurs, triés par popularité
      */
     @Query("""
-                MATCH (m1:Movie {id_imdb: $idImdb})
-                MATCH (m2:Movie)
+                MATCH (actor:Person)-[:ACTED_IN]->(m1:Movie {id_imdb: $idImdb})
+                MATCH (actor)-[:ACTED_IN]->(m2:Movie)
                 WHERE m1.id_imdb <> m2.id_imdb
-                    AND m1.genres IS NOT NULL
-                    AND m2.genres IS NOT NULL
-                    AND any(g IN split(m1.genres, ',') WHERE m2.genres CONTAINS g)
-                RETURN DISTINCT m2
+                OPTIONAL MATCH (m2)-[:HAS_RATING]->(r:Rating)
+                WITH DISTINCT m2, COUNT(DISTINCT actor) as commonActors, r,
+                     CASE
+                         WHEN r.average_rating IS NOT NULL AND r.num_votes IS NOT NULL
+                         THEN toFloat(r.average_rating) * toFloat(r.num_votes)
+                         ELSE 0.0
+                     END as popularityScore
+                ORDER BY popularityScore DESC, commonActors DESC
                 LIMIT $limit
+                RETURN m2
             """)
     List<MovieNode> findMoviesBySameActors(@Param("idImdb") String idImdb, @Param("limit") int limit);
 
@@ -172,4 +182,17 @@ public interface MovieNodeRepository extends Neo4jRepository<MovieNode, Long> {
                 RETURN p.nconst as nconst
             """)
     List<String> findDirectorNconstsByMovieIdImdb(@Param("idImdb") String idImdb);
+
+    /**
+     * Récupère les nconst des principals (acteurs) d'un film avec leurs
+     * informations complètes
+     */
+    @Query("""
+                MATCH (p:Person)-[:ACTED_IN]->(m:Movie {id_imdb: $idImdb})
+                RETURN p.nconst as nconst,
+                       p.primary_name as primaryName,
+                       p.birth_year as birthYear,
+                       p.death_year as deathYear
+            """)
+    List<PersonProjection> findPrincipalsByMovieIdImdb(@Param("idImdb") String idImdb);
 }
