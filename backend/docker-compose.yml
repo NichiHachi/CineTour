@@ -32,6 +32,8 @@ services:
       - IMDB_DOWNLOAD_PATH=/cinetour_backend/imdb_cache
       - TMDB_API_TOKEN=${TMDB_API_TOKEN:-}
       - JAVA_OPTS=-Xms2g -Xmx8g
+    env_file:
+      - .env
   mysql:
     image: mysql:8.0
     container_name: cinetour-mysql
@@ -64,6 +66,8 @@ services:
       NEO4J_dbms_memory_pagecache_size: 512M
       NEO4J_dbms_memory_heap_initial__size: 512M
       NEO4J_dbms_memory_heap_max__size: 1G
+    env_file:
+      - .env
     volumes:
       - neo4j-data:/data
       - neo4j-logs:/logs
