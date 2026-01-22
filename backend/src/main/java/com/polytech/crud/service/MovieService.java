@@ -39,7 +39,7 @@ public class MovieService {
         return repository.findById(id).orElse(null);
     }
 
-    @Transactional
+    @Transactional("transactionManager")
     public Movie getMovieByImdbId(String idImdb) {
         Movie movie = repository.findByIdImdb(idImdb);
         if (movie == null) {
@@ -53,7 +53,7 @@ public class MovieService {
      * Incrémente le compteur de recherche de façon asynchrone.
      */
     @Async
-    @Transactional
+    @Transactional("transactionManager")
     public void incrementMovieCountAsync(int movieId) {
         Movie movie = repository.findById(movieId).orElse(null);
         if (movie != null) {
@@ -63,7 +63,7 @@ public class MovieService {
         }
     }
 
-    @Transactional
+    @Transactional("transactionManager")
     public List<Movie> getMoviesByTitle(String title) {
         List<Movie> movies = repository.findByTitle(title);
         // Incrémenter les compteurs de façon asynchrone

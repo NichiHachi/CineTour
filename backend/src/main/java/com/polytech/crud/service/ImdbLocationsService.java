@@ -177,9 +177,10 @@ public class ImdbLocationsService {
     }
 
     /**
-     * Imports filming locations for a movie from IMDb and saves them to the database.
+     * Imports filming locations for a movie from IMDb and saves them to the
+     * database.
      */
-    @Transactional
+    @Transactional("transactionManager")
     public void importLocations(String movieIdImdb) throws Exception {
         Movie movie = movieRepository.findByIdImdb(movieIdImdb);
         if (movie == null) {
@@ -252,10 +253,10 @@ public class ImdbLocationsService {
         location.setGeocodingFailed(false);
 
         logger.info("Geocoded: {} -> ({}, {}) [{}]",
-            location.getLocationString(),
-            result.getLatitude(),
-            result.getLongitude(),
-            result.getCountryCode());
+                location.getLocationString(),
+                result.getLatitude(),
+                result.getLongitude(),
+                result.getCountryCode());
 
         return true;
     }
@@ -266,7 +267,8 @@ public class ImdbLocationsService {
     private void geocodeLocationsWithRateLimit(List<Location> locations) {
         int updatedCount = 0;
         for (Location location : locations) {
-            if (location.getLatitude() == null && location.getLongitude() == null && !Boolean.TRUE.equals(location.getGeocodingFailed())) {
+            if (location.getLatitude() == null && location.getLongitude() == null
+                    && !Boolean.TRUE.equals(location.getGeocodingFailed())) {
                 if (geocodeLocation(location)) {
                     updatedCount++;
                 }
@@ -299,7 +301,7 @@ public class ImdbLocationsService {
      * Get locations by IMDb ID, geocoding on demand if needed.
      * Increments the location search count for the movie.
      */
-    @Transactional
+    @Transactional("transactionManager")
     public List<Location> getLocationsByImdbId(String movieIdImdb) {
         Movie movie = movieRepository.findByIdImdb(movieIdImdb);
         if (movie == null) {
@@ -313,20 +315,21 @@ public class ImdbLocationsService {
     }
 
     @Async
-    @Transactional
+    @Transactional("transactionManager")
     public void incrementLocationCountAsync(String movieIdImdb) {
         Movie movie = movieRepository.findByIdImdb(movieIdImdb);
         if (movie != null) {
             movie.setLocationSearchCount(movie.getLocationSearchCount() + 1);
             movieRepository.save(movie);
-            logger.debug("Incremented location search count for movie {} to {}", movie.getIdImdb(), movie.getLocationSearchCount());
+            logger.debug("Incremented location search count for movie {} to {}", movie.getIdImdb(),
+                    movie.getLocationSearchCount());
         }
     }
 
     /**
      * Get locations by movie database ID.
      */
-    @Transactional(readOnly = true)
+    @Transactional(value = "transactionManager", readOnly = true)
     public List<Location> getLocationsById(Long movieId) {
         Movie movie = movieRepository.findById(movieId.intValue())
                 .orElse(null);
@@ -342,9 +345,8 @@ public class ImdbLocationsService {
     /**
      * Get all locations from the database.
      */
-    @Transactional(readOnly = true)
+    @Transactional(value = "transactionManager", readOnly = true)
     public List<Location> getAllLocations() {
         return locationRepository.findAll();
     }
 }
-

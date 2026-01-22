@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import jakarta.persistence.EntityManagerFactory;
 
@@ -13,16 +14,17 @@ import jakarta.persistence.EntityManagerFactory;
 @EnableJpaRepositories(basePackages = {
         "com.polytech.crud.repository",
         "com.polytech.crud.neo4j.sync.repository"
-}, transactionManagerRef = "jpaTransactionManager")
+}, transactionManagerRef = "transactionManager")
+@EnableTransactionManagement
 public class JpaConfig {
 
     /**
      * Bean TransactionManager pour JPA/MySQL
      * Marqué comme @Primary car c'est le gestionnaire de transactions par défaut
      */
-    @Bean("jpaTransactionManager")
+    @Bean("transactionManager")
     @Primary
-    public PlatformTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory) {
+    public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 }
