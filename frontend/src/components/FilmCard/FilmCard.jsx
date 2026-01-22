@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./FilmCard.css";
 import Glow from "../../components/Glow/Glow";
 import formatTime from "../../utils/formatTime";
@@ -12,17 +13,22 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
   const [poster, setPoster] = useState();
   const [noPoster, setNoPoster] = useState(false);
 
-  const handleCopyImdbId = () => {
+  const navigate = useNavigate();
+
+  const handleClickImdbId = async () => {
     if (movie.idImdb) {
       navigator.clipboard.writeText(movie.idImdb);
       setCopied(true);
+      if (movie.idImdb) {
+        navigate(`/movie/${movie.idImdb}`);
+      }
       setTimeout(() => setCopied(false), 1200);
     }
   };
 
   useEffect(() => {
     const fetchPosterByImdbId = async (imdbId) => {
-      const response = await getPosterByImdbId(movie.idImdb);
+      const response = await getPosterByImdbId(imdbId);
       if (response) {
         setPoster(response);
       } else {
@@ -30,7 +36,7 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
       }
     };
 
-    fetchPosterByImdbId(movie.idImdb);
+    fetchPosterByImdbId(movie?.idImdb);
   }, [movie]);
 
   const isLoading = !movie;
@@ -65,7 +71,7 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
                 <div className="movie-title">{movie.title}</div>
                 <button
                   className={`movie-imdbid ${copied ? "copied" : ""}`}
-                  onClick={handleCopyImdbId}
+                  onClick={handleClickImdbId}
                 >
                   {movie.idImdb}
                 </button>
