@@ -62,9 +62,9 @@ public class MovieRecommendationService {
     /**
      * Recommandations basées sur les directeurs communs
      */
-    public List<MovieNode> getRecommendationsByDirectors(String idImdb, int limit) {
-        log.info("Recherche de recommandations par directeurs pour le film: {}", idImdb);
-        List<MovieNode> movies = movieNodeRepository.findMoviesBySameDirectors(idImdb, limit);
+    public List<MovieNode> getRecommendationsByDirectors(String idImdb, double minRating, int limit) {
+        log.info("Recherche de recommandations par directeurs pour le film: {} (rating min: {})", idImdb, minRating);
+        List<MovieNode> movies = movieNodeRepository.findMoviesBySameDirectors(idImdb, minRating, limit);
         return enrichMoviesWithDetails(movies);
     }
 
@@ -175,16 +175,20 @@ public class MovieRecommendationService {
 
                     movie.setPrincipals(principals);
 
-                    Map<String, Object> result = new HashMap<>();
-                    result.put("movie", movie);
-                    result.put("rating", createDefaultRating(movie));
-
                     // Calculer le score de similarité en Java
                     int score = calculateSimilarityScore(referenceMovie, movie);
-                    result.put("similarityScore", score);
 
                     // Calculer le score de popularité (note * nombre de votes)
                     double popularityScore = calculatePopularityScore(movie, score);
+
+                    // Nettoyer les directors et principals avant de renvoyer au front
+                    movie.setDirectors(new java.util.HashSet<>());
+                    movie.setPrincipals(new java.util.HashSet<>());
+
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("movie", movie);
+                    result.put("rating", createDefaultRating(movie));
+                    result.put("similarityScore", score);
                     result.put("popularityScore", popularityScore);
 
                     return result;

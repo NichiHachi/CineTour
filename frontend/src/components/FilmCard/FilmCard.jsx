@@ -36,7 +36,11 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
       }
     };
 
-    fetchPosterByImdbId(movie?.idImdb);
+    if (movie?.idImdb) {
+      fetchPosterByImdbId(movie.idImdb);
+    } else {
+      setNoPoster(true);
+    }
   }, [movie]);
 
   const isLoading = !movie;
@@ -100,7 +104,7 @@ const FilmCard = ({ movie, onSelect, coordinates, className = "" }) => {
               ? Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="skeleton skeleton-genre" />
                 ))
-              : movie.genres === null
+              : movie.genres === null || movie.genres === undefined
                 ? ""
                 : movie.genres.split(",").map((genre) => (
                     <Glow className="genre" key={genre}>

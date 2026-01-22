@@ -53,18 +53,20 @@ public interface MovieNodeRepository extends Neo4jRepository<MovieNode, Long> {
                 MATCH (p:Person)-[:DIRECTED]->(m1:Movie {id_imdb: $idImdb})
                 MATCH (p)-[:DIRECTED]->(m2:Movie)
                 WHERE m1.id_imdb <> m2.id_imdb
-                OPTIONAL MATCH (m2)-[:HAS_RATING]->(r:Rating)
-                WITH DISTINCT m2, r,
+                    AND (m2.average_rating IS NULL OR m2.average_rating >= $minRating)
+                WITH DISTINCT m2,
                      CASE
-                         WHEN r.average_rating IS NOT NULL AND r.num_votes IS NOT NULL
-                         THEN toFloat(r.average_rating) * toFloat(r.num_votes)
+                         WHEN m2.average_rating IS NOT NULL AND m2.num_votes IS NOT NULL
+                         THEN toFloat(m2.average_rating) * log10(toFloat(m2.num_votes) + 1)
                          ELSE 0.0
                      END as popularityScore
-                ORDER BY popularityScore DESC, m2.title ASC
+                ORDER BY popularityScore DESC
                 LIMIT $limit
                 RETURN m2
             """)
-    List<MovieNode> findMoviesBySameDirectors(@Param("idImdb") String idImdb, @Param("limit") int limit);
+    List<MovieNode> findMoviesBySameDirectors(@Param("idImdb") String idImdb,
+            @Param("minRating") double minRating,
+            @Param("limit") int limit);
 
     /**
      * Trouve des films avec les mêmes acteurs, triés par popularité
@@ -96,8 +98,16 @@ public interface MovieNodeRepository extends Neo4jRepository<MovieNode, Long> {
                     AND m1.genres IS NOT NULL
                     AND m2.genres IS NOT NULL
                     AND any(g IN split(m1.genres, ',') WHERE m2.genres CONTAINS g)
-                RETURN DISTINCT m2
+                    AND (m2.average_rating IS NULL OR m2.average_rating >= $minRating)
+                WITH m2,
+                     CASE
+                         WHEN m2.average_rating IS NOT NULL AND m2.num_votes IS NOT NULL
+                         THEN toFloat(m2.average_rating) * log10(toFloat(m2.num_votes) + 1)
+                         ELSE 0.0
+                     END as popularityScore
+                ORDER BY popularityScore DESC
                 LIMIT $limit
+                RETURN DISTINCT m2
             """)
     List<MovieNode> findMoviesBySameGenre(@Param("idImdb") String idImdb,
             @Param("minRating") double minRating,
@@ -166,8 +176,16 @@ public interface MovieNodeRepository extends Neo4jRepository<MovieNode, Long> {
                     AND m1.genres IS NOT NULL
                     AND m2.genres IS NOT NULL
                     AND any(g IN split(m1.genres, ',') WHERE m2.genres CONTAINS g)
-                RETURN DISTINCT m2
+                    AND (m2.average_rating IS NULL OR m2.average_rating >= $minRating)
+                WITH DISTINCT m2,
+                     CASE
+                         WHEN m2.average_rating IS NOT NULL AND m2.num_votes IS NOT NULL
+                         THEN toFloat(m2.average_rating) * log10(toFloat(m2.num_votes) + 1)
+                         ELSE 0.0
+                     END as popularityScore
+                ORDER BY popularityScore DESC
                 LIMIT $limit
+                RETURN DISTINCT m2
             """)
     List<MovieNode> findMoviesBySameEraAndGenre(@Param("idImdb") String idImdb,
             @Param("yearRange") int yearRange,

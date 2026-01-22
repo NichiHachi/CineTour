@@ -1,16 +1,27 @@
 package com.polytech.crud.neo4j.service;
 
-import com.polytech.crud.neo4j.entity.LocationNode;
-import com.polytech.crud.neo4j.repository.LocationNodeRepository;
-import com.polytech.crud.neo4j.repository.LocationNodeRepository.LocationWithDistanceProjection;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import com.polytech.crud.neo4j.entity.LocationNode;
+import com.polytech.crud.neo4j.repository.LocationNodeRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Profile("!import")
@@ -35,8 +46,10 @@ public class LocationGraphService {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof GridCell)) return false;
+            if (this == o)
+                return true;
+            if (!(o instanceof GridCell))
+                return false;
             GridCell gridCell = (GridCell) o;
             return x == gridCell.x && y == gridCell.y;
         }
@@ -81,7 +94,7 @@ public class LocationGraphService {
 
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                 Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -128,9 +141,8 @@ public class LocationGraphService {
             for (int j = i + 1; j < n; j++) {
                 LocationNode loc2 = locations.get(j);
                 double dist = calculateDistance(
-                    loc1.getLatitude(), loc1.getLongitude(),
-                    loc2.getLatitude(), loc2.getLongitude()
-                );
+                        loc1.getLatitude(), loc1.getLongitude(),
+                        loc2.getLatitude(), loc2.getLongitude());
                 distMatrix[i][j] = dist;
                 distMatrix[j][i] = dist;
             }
@@ -198,15 +210,15 @@ public class LocationGraphService {
             for (IndexedLocation loc2 : candidates) {
                 int j = loc2.index;
 
-                if (j <= i) continue;
+                if (j <= i)
+                    continue;
 
                 if (areRelativeNeighbors(i, j, distMatrix, locations)) {
                     double distance = distMatrix[i][j] * 1000.0;
                     edges.add(new RNGEdge(
-                        loc1.location.getId(),
-                        loc2.location.getId(),
-                        distance
-                    ));
+                            loc1.location.getId(),
+                            loc2.location.getId(),
+                            distance));
                 }
             }
         }
@@ -216,7 +228,8 @@ public class LocationGraphService {
 
     @Transactional
     private void batchCreateRelationships(List<RNGEdge> edges) {
-        if (edges.isEmpty()) return;
+        if (edges.isEmpty())
+            return;
 
         for (int i = 0; i < edges.size(); i += MAX_BATCH_SIZE) {
             int endIdx = Math.min(i + MAX_BATCH_SIZE, edges.size());
@@ -224,10 +237,9 @@ public class LocationGraphService {
 
             for (RNGEdge edge : batch) {
                 locationNodeRepository.createNearRelationship(
-                    edge.fromId,
-                    edge.toId,
-                    edge.distance
-                );
+                        edge.fromId,
+                        edge.toId,
+                        edge.distance);
             }
         }
     }
@@ -286,9 +298,8 @@ public class LocationGraphService {
             final int startIdx = start;
             final int endIdx = Math.min(start + chunkSize, n);
 
-            Future<List<RNGEdge>> future = executor.submit(() ->
-                processBatch(locations, startIdx, endIdx, distMatrix, spatialIndex)
-            );
+            Future<List<RNGEdge>> future = executor
+                    .submit(() -> processBatch(locations, startIdx, endIdx, distMatrix, spatialIndex));
             futures.add(future);
         }
 
@@ -318,8 +329,7 @@ public class LocationGraphService {
         return locationNodeRepository.findNeighbors(locationId).stream()
                 .map(projection -> new LocationWithDistance(
                         projection.getNeighbor(),
-                        projection.getDistance()
-                ))
+                        projection.getDistance()))
                 .collect(Collectors.toList());
     }
 
@@ -333,9 +343,12 @@ public class LocationGraphService {
         int maxDepth = 10;
 
         while (foundMovies.size() < minMovies && depth <= maxDepth) {
+            List<String> locationIdStrings = locationIds.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.toList());
+
             List<String> movies = locationNodeRepository.findNearbyMoviesByBFS(
-                locationIds, excludeImdbId, depth
-            );
+                    locationIdStrings, excludeImdbId, depth);
             foundMovies.addAll(movies);
             depth++;
         }
@@ -348,27 +361,26 @@ public class LocationGraphService {
         LocationNode newLocation = locationNodeRepository.findById(locationId)
                 .orElseThrow(() -> new RuntimeException("Location not found"));
 
-        if (newLocation.getLatitude() == null || newLocation.getLongitude() == null 
-            || Boolean.TRUE.equals(newLocation.getGeocodingFailed())) {
+        if (newLocation.getLatitude() == null || newLocation.getLongitude() == null
+                || Boolean.TRUE.equals(newLocation.getGeocodingFailed())) {
             return 0;
         }
 
         double searchRadius = GRID_CELL_SIZE_KM * 1.5;
         List<LocationNode> candidates = locationNodeRepository.findNearby(
-            newLocation.getLatitude(),
-            newLocation.getLongitude(),
-            searchRadius
-        );
+                newLocation.getLatitude(),
+                newLocation.getLongitude(),
+                searchRadius);
 
         List<RNGEdge> edges = new ArrayList<>();
 
         for (LocationNode candidate : candidates) {
-            if (candidate.getId().equals(locationId)) continue;
+            if (candidate.getId().equals(locationId))
+                continue;
 
             double distPQ = calculateDistance(
-                newLocation.getLatitude(), newLocation.getLongitude(),
-                candidate.getLatitude(), candidate.getLongitude()
-            );
+                    newLocation.getLatitude(), newLocation.getLongitude(),
+                    candidate.getLatitude(), candidate.getLongitude());
 
             boolean isRNGNeighbor = true;
 
@@ -378,14 +390,12 @@ public class LocationGraphService {
                 }
 
                 double distPR = calculateDistance(
-                    newLocation.getLatitude(), newLocation.getLongitude(),
-                    other.getLatitude(), other.getLongitude()
-                );
+                        newLocation.getLatitude(), newLocation.getLongitude(),
+                        other.getLatitude(), other.getLongitude());
 
                 double distQR = calculateDistance(
-                    candidate.getLatitude(), candidate.getLongitude(),
-                    other.getLatitude(), other.getLongitude()
-                );
+                        candidate.getLatitude(), candidate.getLongitude(),
+                        other.getLatitude(), other.getLongitude());
 
                 if (Math.max(distPR, distQR) < distPQ) {
                     isRNGNeighbor = false;

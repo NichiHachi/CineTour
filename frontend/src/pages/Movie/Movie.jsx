@@ -9,6 +9,7 @@ import FilmCard from "../../components/FilmCard/FilmCard";
 import formatTime from "../../utils/formatTime";
 import getPosterByImdbId from "../../utils/getPosterByImdbId";
 import getMovieByImdbId from "../../utils/getMovieByImdbId";
+import { getNearestMovies } from "../../utils/nearbyMovies";
 
 import ThreeGlobe from "../../components/ThreeGlobe/ThreeGlobe";
 
@@ -20,6 +21,12 @@ const Movie = () => {
   const [noPoster, setNoPoster] = useState(false);
   const [movie, setMovie] = useState(null);
   const [coordinates, setCoordinates] = useState([]);
+  const [recommandationMovies, setRecommandationMovies] = useState([]);
+  const [genreRecommendations, setGenreRecommendations] = useState([]);
+  const [nearbyRecommendations, setNearbyRecommendations] = useState([]);
+  const [actorRecommendations, setActorRecommendations] = useState([]);
+  const [directorRecommendations, setDirectorRecommendations] = useState([]);
+  const [eraRecommendations, setEraRecommendations] = useState([]);
 
   const { imdbId } = useParams();
   const navigate = useNavigate();
@@ -31,6 +38,20 @@ const Movie = () => {
       setTimeout(() => setCopied(false), 1200);
     }
   };
+
+  // Reset all states when imdbId changes
+  useEffect(() => {
+    setMovie(null);
+    setPoster(null);
+    setNoPoster(false);
+    setCoordinates([]);
+    setGenreRecommendations([]);
+    setNearbyRecommendations([]);
+    setRecommandationMovies([]);
+    setActorRecommendations([]);
+    setDirectorRecommendations([]);
+    setEraRecommendations([]);
+  }, [imdbId]);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -59,6 +80,7 @@ const Movie = () => {
         const coords = locations
           .filter((loc) => loc?.latitude && loc?.longitude)
           .map((loc) => ({
+            id: loc.id,
             latitude: Number(loc.latitude),
             longitude: Number(loc.longitude),
             locationString: String(loc.locationString),
@@ -71,6 +93,119 @@ const Movie = () => {
     };
 
     fetchCoordinates();
+  }, [movie]);
+
+  // Fetch genre-based recommendations
+  useEffect(() => {
+    if (!movie) return;
+
+    const fetchGenreRecommendations = async () => {
+      try {
+        const response = await axios.get(
+          API_ENDPOINTS.relatedMoviesByGenre(movie.idImdb, 6, 3),
+        );
+        setGenreRecommendations(response.data || []);
+      } catch (error) {
+        console.error("Error fetching genre recommendations:", error);
+        setGenreRecommendations([]);
+      }
+    };
+
+    fetchGenreRecommendations();
+  }, [movie]);
+
+  //Fetch global recommendations
+  useEffect(() => {
+    if (!movie) return;
+
+    const fetchRecommandationMovies = async () => {
+      try {
+        const response = await axios.get(
+          API_ENDPOINTS.relatedMovies(movie.idImdb, 6, 3),
+        );
+        // Extract the movie objects from the response
+        const movies = (response.data || []).map((item) => item.movie);
+        setRecommandationMovies(movies);
+      } catch (error) {
+        console.error("Error fetching recommendations:", error);
+        setRecommandationMovies([]);
+      }
+    };
+    fetchRecommandationMovies();
+  }, [movie]);
+
+  // Fetch nearby recommendations
+  useEffect(() => {
+    if (!movie || coordinates.length === 0) return;
+
+    const fetchNearbyRecommendations = async () => {
+      try {
+        const movies = await getNearestMovies(coordinates, movie.idImdb, 3);
+        setNearbyRecommendations(movies || []);
+      } catch (error) {
+        console.error("Error fetching nearby recommendations:", error);
+        setNearbyRecommendations([]);
+      }
+    };
+
+    fetchNearbyRecommendations();
+  }, [movie, coordinates]);
+
+  // Fetch actor-based recommendations
+  useEffect(() => {
+    if (!movie) return;
+
+    const fetchActorRecommendations = async () => {
+      try {
+        const response = await axios.get(
+          API_ENDPOINTS.relatedMoviesByActors(movie.idImdb, 3),
+        );
+        setActorRecommendations(response.data || []);
+      } catch (error) {
+        console.error("Error fetching actor recommendations:", error);
+        setActorRecommendations([]);
+      }
+    };
+
+    fetchActorRecommendations();
+  }, [movie]);
+
+  // Fetch director-based recommendations
+  useEffect(() => {
+    if (!movie) return;
+
+    const fetchDirectorRecommendations = async () => {
+      try {
+        const response = await axios.get(
+          API_ENDPOINTS.relatedMoviesByDirectors(movie.idImdb, 3),
+        );
+        setDirectorRecommendations(response.data || []);
+      } catch (error) {
+        console.error("Error fetching director recommendations:", error);
+        setDirectorRecommendations([]);
+      }
+    };
+
+    fetchDirectorRecommendations();
+  }, [movie]);
+
+  // Fetch era-based recommendations
+  useEffect(() => {
+    if (!movie) return;
+
+    const fetchEraRecommendations = async () => {
+      try {
+        const response = await axios.get(
+          API_ENDPOINTS.relatedMoviesByEra(movie.idImdb, 5, 6, 3),
+        );
+        setEraRecommendations(response.data || []);
+      } catch (error) {
+        console.error("Error fetching era recommendations:", error);
+        setEraRecommendations([]);
+      }
+    };
+
+    fetchEraRecommendations();
   }, [movie]);
 
   const isLoading = !movie;
@@ -197,17 +332,65 @@ const Movie = () => {
 
           <div className="movie-page-recommandation">
             <h2>Recommandation</h2>
+            <h3>Globales :</h3>
+            <div className="movie-page-recommandation-list">
+              {recommandationMovies.length === 0 ? (
+                <p>Aucun film trouvé</p>
+              ) : (
+                recommandationMovies
+                  .slice(0, 3)
+                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+              )}
+            </div>
             <h3>A proximité :</h3>
             <div className="movie-page-recommandation-list">
-              <FilmCard />
-              <FilmCard />
-              <FilmCard />
+              {nearbyRecommendations.length === 0 ? (
+                <p>Aucun film à proximité</p>
+              ) : (
+                nearbyRecommendations
+                  .slice(0, 3)
+                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+              )}
             </div>
             <h3>Dans le même genre :</h3>
             <div className="movie-page-recommandation-list">
-              <FilmCard />
-              <FilmCard />
-              <FilmCard />
+              {genreRecommendations.length === 0 ? (
+                <p>Aucun film trouvé</p>
+              ) : (
+                genreRecommendations
+                  .slice(0, 3)
+                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+              )}
+            </div>
+            <h3>Avec les mêmes acteurs :</h3>
+            <div className="movie-page-recommandation-list">
+              {actorRecommendations.length === 0 ? (
+                <p>Aucun film trouvé</p>
+              ) : (
+                actorRecommendations
+                  .slice(0, 3)
+                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+              )}
+            </div>
+            <h3>Du même réalisateur :</h3>
+            <div className="movie-page-recommandation-list">
+              {directorRecommendations.length === 0 ? (
+                <p>Aucun film trouvé</p>
+              ) : (
+                directorRecommendations
+                  .slice(0, 3)
+                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+              )}
+            </div>
+            <h3>De la même époque :</h3>
+            <div className="movie-page-recommandation-list">
+              {eraRecommendations.length === 0 ? (
+                <p>Aucun film trouvé</p>
+              ) : (
+                eraRecommendations
+                  .slice(0, 3)
+                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+              )}
             </div>
           </div>
         </div>

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.polytech.utils.Console;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -32,8 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.polytech.crud.entity.Location;
 import com.polytech.crud.entity.Movie;
+import com.polytech.crud.neo4j.service.LocationGraphService;
 import com.polytech.crud.repository.LocationRepository;
 import com.polytech.crud.repository.MovieRepository;
+import com.polytech.utils.Console;
 
 @Service
 public class ImdbLocationsService {
@@ -47,6 +48,9 @@ public class ImdbLocationsService {
 
     @Autowired
     private GeocodingService geocodingService;
+
+    @Autowired(required = false)
+    private LocationGraphService locationGraphService;
 
     @Value("${selenium.remote.url}")
     private String seleniumRemoteUrl;
@@ -78,7 +82,7 @@ public class ImdbLocationsService {
             driver.get(url);
 
             // Wait for content to load
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
 
             // Check if there are no locations
             try {
@@ -206,6 +210,18 @@ public class ImdbLocationsService {
 
             locationRepository.saveAll(locations);
             logger.info("Successfully imported {} locations for movie {}", locations.size(), movieIdImdb);
+
+            // Synchroniser avec Neo4j et construire le graphe RNG si le service est
+            // disponible
+            if (locationGraphService != null) {
+                try {
+                    logger.info("Synchronizing locations to Neo4j and rebuilding RNG graph...");
+                    int edgesAdded = locationGraphService.buildRelativeNeighborhoodGraph();
+                    logger.info("RNG graph rebuilt with {} edges", edgesAdded);
+                } catch (Exception e) {
+                    logger.warn("Failed to rebuild RNG graph: {}", e.getMessage());
+                }
+            }
         } catch (Exception e) {
             logger.error("Failed to import locations for movie {}: {}", movieIdImdb, e.getMessage());
             throw e;

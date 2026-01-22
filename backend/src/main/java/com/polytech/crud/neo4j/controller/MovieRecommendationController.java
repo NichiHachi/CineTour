@@ -3,6 +3,7 @@ package com.polytech.crud.neo4j.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +16,6 @@ import com.polytech.crud.neo4j.entity.MovieNode;
 import com.polytech.crud.neo4j.service.MovieRecommendationService;
 
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.context.annotation.Profile;
 
 @RestController
 @Profile("!import")
@@ -110,9 +109,10 @@ public class MovieRecommendationController {
     @GetMapping("/relatedMoviesByDirectors/{imdbId}")
     public ResponseEntity<List<MovieNode>> getRecommendationsByDirectors(
             @PathVariable String imdbId,
+            @RequestParam(defaultValue = "6.0") double minRating,
             @RequestParam(defaultValue = "10") int limit) {
 
-        List<MovieNode> movies = recommendationService.getRecommendationsByDirectors(imdbId, limit);
+        List<MovieNode> movies = recommendationService.getRecommendationsByDirectors(imdbId, minRating, limit);
         return ResponseEntity.ok(movies);
     }
 
