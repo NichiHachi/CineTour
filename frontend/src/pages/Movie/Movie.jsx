@@ -373,63 +373,99 @@ const Movie = () => {
             <h2>Recommandation</h2>
             <h3>Globales :</h3>
             <div className="movie-page-recommandation-list">
-              {recommandationMovies.length === 0 ? (
-                <p>Aucun film trouvé</p>
-              ) : (
-                recommandationMovies
-                  .slice(0, 3)
-                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
-              )}
+              <div className="movie-page-recommandation-scroll">
+                {recommandationMovies.length === 0 ? (
+                  <>
+                    <FilmCard />
+                    <FilmCard />
+                    <FilmCard />
+                  </>
+                ) : (
+                  recommandationMovies
+                    .slice(0, 3)
+                    .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+                )}
+              </div>
             </div>
             <h3>A proximité :</h3>
             <div className="movie-page-recommandation-list">
-              {nearbyRecommendations.length === 0 ? (
-                <p>Aucun film à proximité</p>
-              ) : (
-                nearbyRecommendations
-                  .slice(0, 3)
-                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
-              )}
+              <div className="movie-page-recommandation-scroll">
+                {nearbyRecommendations.length === 0 ? (
+                  <>
+                    <FilmCard />
+                    <FilmCard />
+                    <FilmCard />
+                  </>
+                ) : (
+                  nearbyRecommendations
+                    .slice(0, 3)
+                    .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+                )}
+              </div>
             </div>
             <h3>Dans le même genre :</h3>
             <div className="movie-page-recommandation-list">
-              {genreRecommendations.length === 0 ? (
-                <p>Aucun film trouvé</p>
-              ) : (
-                genreRecommendations
-                  .slice(0, 3)
-                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
-              )}
+              <div className="movie-page-recommandation-scroll">
+                {genreRecommendations.length === 0 ? (
+                  <>
+                    <FilmCard />
+                    <FilmCard />
+                    <FilmCard />
+                  </>
+                ) : (
+                  genreRecommendations
+                    .slice(0, 3)
+                    .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+                )}
+              </div>
             </div>
             <h3>Avec les mêmes acteurs :</h3>
             <div className="movie-page-recommandation-list">
-              {actorRecommendations.length === 0 ? (
-                <p>Aucun film trouvé</p>
-              ) : (
-                actorRecommendations
-                  .slice(0, 3)
-                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
-              )}
+              <div className="movie-page-recommandation-scroll">
+                {actorRecommendations.length === 0 ? (
+                  <>
+                    <FilmCard />
+                    <FilmCard />
+                    <FilmCard />
+                  </>
+                ) : (
+                  actorRecommendations
+                    .slice(0, 3)
+                    .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+                )}
+              </div>
             </div>
             <h3>Du même réalisateur :</h3>
             <div className="movie-page-recommandation-list">
-              {directorRecommendations.length === 0 ? (
-                <p>Aucun film trouvé</p>
-              ) : (
-                directorRecommendations
-                  .slice(0, 3)
-                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
-              )}
+              <div className="movie-page-recommandation-scroll">
+                {directorRecommendations.length === 0 ? (
+                  <>
+                    <FilmCard />
+                    <FilmCard />
+                    <FilmCard />
+                  </>
+                ) : (
+                  directorRecommendations
+                    .slice(0, 3)
+                    .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+                )}
+              </div>
             </div>
             <h3>De la même époque :</h3>
             <div className="movie-page-recommandation-list">
-              {eraRecommendations.length === 0 ? (
-                <p>Aucun film trouvé</p>
-              ) : (
-                eraRecommendations
-                  .slice(0, 3)
-                  .map((film) => <FilmCard key={film.idImdb} movie={film} />)
-              )}
+              <div className="movie-page-recommandation-scroll">
+                {eraRecommendations.length === 0 ? (
+                  <>
+                    <FilmCard />
+                    <FilmCard />
+                    <FilmCard />
+                  </>
+                ) : (
+                  eraRecommendations
+                    .slice(0, 3)
+                    .map((film) => <FilmCard key={film.idImdb} movie={film} />)
+                )}
+              </div>
             </div>
           </div>
         </div>
