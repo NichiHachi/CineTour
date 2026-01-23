@@ -177,6 +177,16 @@ public class ImdbLocationsService {
             }
         }
 
+        if (locations.isEmpty()) {
+            logger.info("FALLBACK: No locations scraped for {} → marking checked", movieIdImdb);
+            Movie movie = movieRepository.findByIdImdb(movieIdImdb);
+            if (movie != null && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
+                movie.setLocationsChecked(true);
+                movieRepository.save(movie);
+                logger.info("SUCCESS: locations_checked set to true for {}", movieIdImdb);
+            }
+        }
+
         return locations;
     }
 
