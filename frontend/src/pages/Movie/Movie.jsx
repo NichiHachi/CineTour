@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import "./Movie.css";
@@ -12,6 +12,7 @@ import getMovieByImdbId from "../../utils/getMovieByImdbId";
 import { getNearestMovies } from "../../utils/nearbyMovies";
 
 import ThreeGlobe from "../../components/ThreeGlobe/ThreeGlobe";
+import RevealText from "../../components/TextEffects/RevealText/RevealText";
 
 import API_ENDPOINTS from "../../resources/api-links";
 
@@ -30,6 +31,18 @@ const Movie = () => {
 
   const { imdbId } = useParams();
   const navigate = useNavigate();
+
+  const bgRef = useRef(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!bgRef.current) return;
+      bgRef.current.style.transform = `translate(-40%, ${window.scrollY * 0.3}px)`;
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleClickImdbId = () => {
     if (movie?.idImdb) {
@@ -208,6 +221,24 @@ const Movie = () => {
     fetchEraRecommendations();
   }, [movie]);
 
+  let components = [];
+  if (!movie || coordinates.length === 0) {
+    for (let i = 0; i < 8; i++) {
+      components.push(
+        <Glow key={i} className="movie-location">
+          <div className="movie-location-content">
+            <div className="movie-location-title">
+              <div className="skeleton skeleton-description-long" />
+            </div>
+            <div className="movie-location-coords">
+              <div className="skeleton skeleton-description-short" />
+            </div>
+          </div>
+        </Glow>,
+      );
+    }
+  }
+
   const isLoading = !movie;
 
   return (
@@ -215,46 +246,44 @@ const Movie = () => {
       <Navbar searchBar="true" />
 
       <div className="movie-page-section">
-        <div className="movie-page-background">
-          {isLoading || !movie.backdropPath ? (
-            <div className="skeleton skeleton-background" />
-          ) : (
-            <img
-              className="movie-page-background-img"
-              src={movie.backdropPath}
-              alt={`Background of ${movie.title}`}
-            />
-          )}
-          <div className="movie-page-background-gradient" />
-        </div>
-
         <div className="movie-page-main">
           <div className="movie-page-header">
+            <div ref={bgRef} className="movie-page-background">
+              {isLoading || !movie.backdropPath ? (
+                <div className="skeleton skeleton-background" />
+              ) : (
+                <img
+                  className="movie-page-background-img"
+                  src={movie.backdropPath}
+                  alt={`Background of ${movie.title}`}
+                />
+              )}
+              <div className="movie-page-background-gradient" />
+            </div>
+
             <Glow className="movie-page-image">
               {isLoading ? (
-                <div className="skeleton skeleton-image" />
+                <div className="skeleton skeleton-poster" />
               ) : poster ? (
                 <img src={poster} alt={`Poster of ${movie.title}`} />
               ) : noPoster ? (
-                <div className="blank" />
+                <div className="blank-poster" />
               ) : (
-                <div className="skeleton skeleton-image" />
+                <div className="skeleton skeleton-poster" />
               )}
             </Glow>
 
             <div className="movie-page-info">
               <div className="movie-page-title-section">
                 {isLoading ? (
-                  <div className="skeleton skeleton-title" />
+                  <div className="skeleton skeleton-movie-title" />
                 ) : (
                   <>
-                    <div className="movie-page-title">{movie.title}</div>
-                    <button
-                      className={`movie-imdbid ${copied ? "copied" : ""}`}
-                      onClick={handleClickImdbId}
-                    >
-                      {movie.idImdb}
-                    </button>
+                    <div className="movie-page-title">
+                      <RevealText delay={0.8} speed={0.03}>
+                        {movie.title}
+                      </RevealText>
+                    </div>
                   </>
                 )}
               </div>
@@ -288,45 +317,55 @@ const Movie = () => {
                       </Glow>
                     ))}
               </div>
+            </div>
+          </div>
 
-              <div className="movie-page-overview">
+          <div className="movie-page-section">
+            <Glow className="movie-page-overview">
+              <div className="movie-page-overview-content">
                 {isLoading ? (
-                  <div className="skeleton skeleton-description" />
+                  <>
+                    <div className="skeleton skeleton-description-long" />
+                    <div className="skeleton skeleton-description-short" />
+                    <div className="skeleton skeleton-description-long" />
+                    <div className="skeleton skeleton-description-short" />
+                  </>
                 ) : (
                   movie.overview
                 )}
               </div>
-            </div>
+            </Glow>
           </div>
 
-          <div className="movie-page-geo">
-            <Glow className="movie-page-globe-container">
-              <div className="movie-page-globe">
-                <ThreeGlobe points={coordinates} />
+          <div className="movie-page-section">
+            <h1>Lieux de tournage</h1>
+            <div className="movie-page-globe-parent">
+              <Glow className="movie-page-globe-container">
+                <div className="movie-page-globe">
+                  <ThreeGlobe points={coordinates} />
+                </div>
+              </Glow>
+              <div className="movie-coordinates">
+                {!movie || coordinates.length === 0
+                  ? components
+                  : coordinates.map((coord, index) => (
+                      <>
+                        <Glow key={index} className="movie-location">
+                          <div className="movie-location-content">
+                            <div className="movie-location-title">
+                              {coord.locationString}
+                            </div>
+                            <div className="movie-location-coords">
+                              {coord.latitude}, {coord.longitude}
+                            </div>
+                            <div className="movie-location-description">
+                              {coord.description}
+                            </div>
+                          </div>
+                        </Glow>
+                      </>
+                    ))}
               </div>
-            </Glow>
-            <div className="movie-coordinates">
-              {coordinates === null ? (
-                <div className="skeleton skeleton-coordinates" />
-              ) : coordinates.length === 0 ? (
-                <div className="coordinates">Aucun lieu</div>
-              ) : (
-                coordinates.map((coord, index) => (
-                  <Glow key={index} className="movie-location">
-                    <div className="movie-location-content">
-                      <div className="movie-location-title">
-                        {coord.locationString}
-                      </div>
-                      <div className="movie-location-coords">
-                        {coord.latitude}, {coord.longitude}
-                      </div>
-                      <div className="movie-location-description">
-                        {coord.description}
-                      </div>
-                    </div>
-                  </Glow>
-                ))
-              )}
             </div>
           </div>
 
