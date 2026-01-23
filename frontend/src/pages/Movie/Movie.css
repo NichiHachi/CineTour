@@ -154,7 +154,8 @@
     gap: 0.5rem;
 }
 
-.movie-page-geo {
+.movie-page-globe-parent {
+    margin-top: 2rem;
     display: flex;
     flex-direction: row;
     gap: 1rem;
@@ -259,6 +260,8 @@
     line-height: 1.4;
 }
 
+/* Skeleton */
+
 .skeleton-poster {
     width: 250px;
     height: 375px;
@@ -291,4 +294,68 @@
 .skeleton-movie-title {
     height: 3rem;
     width: 300px;
+}
+
+/* Recommandation */
+
+.movie-page-recommandation {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.movie-page-recommandation-list {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 2%,
+        black 98%,
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 2%,
+        black 98%,
+        transparent 100%
+    );
+}
+
+.movie-page-recommandation-scroll {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    padding: 1rem 0;
+}
+
+.movie-page-recommandation-scroll:hover {
+    animation-play-state: paused;
+}
+
+.movie-page-recommandation-list:hover .movie-page-recommandation-scroll {
+    overflow-x: auto;
+}
+
+.movie-page-recommandation-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.movie-page-recommandation-scroll::-webkit-scrollbar-track {
+    background: var(--color-bg-dark);
+    border-radius: var(--border-radius);
+}
+
+.movie-page-recommandation-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--border-radius);
+}
+
+.movie-page-recommandation-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-light);
 }

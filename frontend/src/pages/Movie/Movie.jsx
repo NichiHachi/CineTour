@@ -11,6 +11,7 @@ import getPosterByImdbId from "../../utils/getPosterByImdbId";
 import getMovieByImdbId from "../../utils/getMovieByImdbId";
 
 import ThreeGlobe from "../../components/ThreeGlobe/ThreeGlobe";
+import RevealText from "../../components/TextEffects/RevealText/RevealText";
 
 import API_ENDPOINTS from "../../resources/api-links";
 
@@ -143,13 +144,11 @@ const Movie = () => {
                   <div className="skeleton skeleton-movie-title" />
                 ) : (
                   <>
-                    <div className="movie-page-title">{movie.title}</div>
-                    <button
-                      className={`movie-imdbid ${copied ? "copied" : ""}`}
-                      onClick={handleClickImdbId}
-                    >
-                      {movie.idImdb}
-                    </button>
+                    <div className="movie-page-title">
+                      <RevealText delay={0.8} speed={0.03}>
+                        {movie.title}
+                      </RevealText>
+                    </div>
                   </>
                 )}
               </div>
@@ -186,63 +185,82 @@ const Movie = () => {
             </div>
           </div>
 
-          <Glow className="movie-page-overview">
-            <div className="movie-page-overview-content">
-              {isLoading ? (
-                <>
-                  <div className="skeleton skeleton-description-long" />
-                  <div className="skeleton skeleton-description-short" />
-                  <div className="skeleton skeleton-description-long" />
-                  <div className="skeleton skeleton-description-short" />
-                </>
-              ) : (
-                movie.overview
-              )}
-            </div>
-          </Glow>
-
-          <div className="movie-page-geo">
-            <Glow className="movie-page-globe-container">
-              <div className="movie-page-globe">
-                <ThreeGlobe points={coordinates} />
+          <div className="movie-page-section">
+            <Glow className="movie-page-overview">
+              <div className="movie-page-overview-content">
+                {isLoading ? (
+                  <>
+                    <div className="skeleton skeleton-description-long" />
+                    <div className="skeleton skeleton-description-short" />
+                    <div className="skeleton skeleton-description-long" />
+                    <div className="skeleton skeleton-description-short" />
+                  </>
+                ) : (
+                  movie.overview
+                )}
               </div>
             </Glow>
-            <div className="movie-coordinates">
-              {!movie || coordinates.length === 0
-                ? components
-                : coordinates.map((coord, index) => (
-                    <>
-                      <Glow key={index} className="movie-location">
-                        <div className="movie-location-content">
-                          <div className="movie-location-title">
-                            {coord.locationString}
+          </div>
+
+          <div className="movie-page-section">
+            <h1>Lieux de tournage</h1>
+            <div className="movie-page-globe-parent">
+              <Glow className="movie-page-globe-container">
+                <div className="movie-page-globe">
+                  <ThreeGlobe points={coordinates} />
+                </div>
+              </Glow>
+              <div className="movie-coordinates">
+                {!movie || coordinates.length === 0
+                  ? components
+                  : coordinates.map((coord, index) => (
+                      <>
+                        <Glow key={index} className="movie-location">
+                          <div className="movie-location-content">
+                            <div className="movie-location-title">
+                              {coord.locationString}
+                            </div>
+                            <div className="movie-location-coords">
+                              {coord.latitude}, {coord.longitude}
+                            </div>
+                            <div className="movie-location-description">
+                              {coord.description}
+                            </div>
                           </div>
-                          <div className="movie-location-coords">
-                            {coord.latitude}, {coord.longitude}
-                          </div>
-                          <div className="movie-location-description">
-                            {coord.description}
-                          </div>
-                        </div>
-                      </Glow>
-                    </>
-                  ))}
+                        </Glow>
+                      </>
+                    ))}
+              </div>
             </div>
           </div>
 
           <div className="movie-page-recommandation">
-            <h2>Recommandation</h2>
-            <h3>A proximité :</h3>
+            <h1>Recommandation</h1>
+            <h2>A proximité :</h2>
             <div className="movie-page-recommandation-list">
-              <FilmCard />
-              <FilmCard />
-              <FilmCard />
+              <div className="movie-page-recommandation-scroll">
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+              </div>
             </div>
-            <h3>Dans le même genre :</h3>
+            <h2>Dans le même genre :</h2>
             <div className="movie-page-recommandation-list">
-              <FilmCard />
-              <FilmCard />
-              <FilmCard />
+              <div className="movie-page-recommandation-scroll">
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+                <FilmCard />
+              </div>
             </div>
           </div>
         </div>
