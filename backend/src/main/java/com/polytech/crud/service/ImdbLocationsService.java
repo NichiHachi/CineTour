@@ -85,25 +85,21 @@ public class ImdbLocationsService {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
 
             // Check if there are no locations
-            try {
-                WebElement noLocationsMessage = driver.findElement(
-                        By.xpath("//p[contains(text(), \"It looks like we don't have any filming & production\")]"));
-                if (noLocationsMessage != null) {
-                    logger.info("No locations available for movie {}", movieIdImdb);
+            List<WebElement> noLocationsElements = driver.findElements(
+                    By.xpath("//p[contains(text(), \"It looks like we don't have any filming & production\")]"));
 
-                    Console.warnln("PAS LIEU TROUVE POUR " + movieIdImdb);
-                    Movie movie = movieRepository.findByIdImdb(movieIdImdb);
-                    if (movie != null && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
-                        movie.setLocationsChecked(true);
-                        movieRepository.save(movie);
-                    }
-                    Console.warnln("QUAND MEME SET LOCATION CHECKED TRUE FOR " + movieIdImdb);
+            if (!noLocationsElements.isEmpty()) {
+                logger.info("No locations available for movie {}", movieIdImdb);
 
-                    return locations;
+                Console.warnln("PAS LIEU TROUVE POUR " + movieIdImdb);
+                Movie movie = movieRepository.findByIdImdb(movieIdImdb);
+                if (movie != null && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
+                    movie.setLocationsChecked(true);
+                    movieRepository.save(movie);  // ✅ DÉJÀ PRÉSENT
                 }
-            } catch (NoSuchElementException e) {
-                logger.debug("No 'no locations' message found for movie {}. Continuing with location scraping.",
-                        movieIdImdb);
+                Console.warnln("QUAND MEME SET LOCATION CHECKED TRUE FOR " + movieIdImdb);
+
+                return locations;  // ✅ SORT SANS SCRAP
             }
 
             // Try to find and click "Show more" button if it exists
@@ -158,15 +154,19 @@ public class ImdbLocationsService {
                     location.setGeocodingFailed(false);
                     Console.warnln("SET LOCATION CHECKED TRUE FOR " + movieIdImdb);
                     location.setLocationChecked(true);
-                    Movie movie = movieRepository.findByIdImdb(movieIdImdb);
-                    if (movie != null && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
-                        movie.setLocationsChecked(true);
-                        movieRepository.save(movie);
-                    }
                     locations.add(location);
                     logger.info("Found location: {} with description: {}", locationString, description);
                 }
             });
+
+            if (!locations.isEmpty()) {
+                Movie movie = movieRepository.findByIdImdb(movieIdImdb);
+                if (movie != null && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
+                    movie.setLocationsChecked(true);
+                    movieRepository.save(movie);
+                }
+                logger.info("Set locations_checked=true for movie {} ({} locations found)", movieIdImdb, locations.size());
+            }
 
         } catch (Exception e) {
             logger.error("Failed to scrape locations for movie {}: {}", movieIdImdb, e.getMessage(), e);
