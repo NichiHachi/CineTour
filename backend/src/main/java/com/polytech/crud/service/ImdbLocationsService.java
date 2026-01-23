@@ -84,22 +84,22 @@ public class ImdbLocationsService {
             // Wait for content to load
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
 
-            // Check if there are no locations
+
+            // Check if there are no locations (XPath robuste)
             List<WebElement> noLocationsElements = driver.findElements(
-                    By.xpath("//p[contains(text(), \"It looks like we don't have any filming & production\")]"));
+                    By.xpath("//p[contains(., \"It looks like we don't have any filming & production\")]"));
+
+            logger.info("Found {} no-locations elements for {}", noLocationsElements.size(), movieIdImdb);
 
             if (!noLocationsElements.isEmpty()) {
                 logger.info("No locations available for movie {}", movieIdImdb);
 
-                Console.warnln("PAS LIEU TROUVE POUR " + movieIdImdb);
                 Movie movie = movieRepository.findByIdImdb(movieIdImdb);
                 if (movie != null && !Boolean.TRUE.equals(movie.getLocationsChecked())) {
                     movie.setLocationsChecked(true);
-                    movieRepository.save(movie);  // ✅ DÉJÀ PRÉSENT
+                    movieRepository.save(movie);
                 }
-                Console.warnln("QUAND MEME SET LOCATION CHECKED TRUE FOR " + movieIdImdb);
-
-                return locations;  // ✅ SORT SANS SCRAP
+                return new ArrayList<>();  // Vide mais checked
             }
 
             // Try to find and click "Show more" button if it exists
